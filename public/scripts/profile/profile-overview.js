@@ -82,14 +82,44 @@
      * @param {HTMLElement} container - Container element
      */
     function renderInterests(interests, container) {
-        if (!Array.isArray(interests) || interests.length === 0) {
+        if (!container) {
+            console.warn('Interests container not found');
+            return;
+        }
+
+        console.log('Rendering interests:', interests); // Debug log
+
+        if (!interests) {
+            console.warn('No interests data provided');
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
             return;
         }
 
-        container.innerHTML = "<ul>" + 
-            interests.map(i => `<li>${i.name}</li>`).join("") + 
-            "</ul>";
+        if (!Array.isArray(interests)) {
+            console.warn('Interests is not an array:', interests);
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
+            return;
+        }
+
+        if (interests.length === 0) {
+            console.log('Interests array is empty');
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
+            return;
+        }
+
+        try {
+            const interestsList = interests.map(interest => {
+                // Handle both object and string formats
+                const interestName = typeof interest === 'object' ? interest.name : interest;
+                return `<li>${interestName}</li>`;
+            }).join('');
+
+            container.innerHTML = `<ul>${interestsList}</ul>`;
+            container.classList.remove("shimmer");
+        } catch (error) {
+            console.error('Error rendering interests:', error);
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
+        }
     }
 
     /**
@@ -167,6 +197,7 @@
             }
 
             const { data } = await response.json();
+            console.log('Received user data:', data); // Debug log
 
             // Update basic profile information
             updateElement("avatar", data.avatar_url || CONFIG.DEFAULT_AVATAR, 'src');
@@ -176,7 +207,13 @@
             updateElement("ownership", data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP);
 
             // Render complex components
-            renderInterests(data.interests, document.getElementById("interests"));
+            const interestsContainer = document.getElementById("interests");
+            if (interestsContainer) {
+                renderInterests(data.interests, interestsContainer);
+            } else {
+                console.warn('Interests container not found in DOM');
+            }
+
             renderRegions(data.regions, document.querySelector(".regions__list"));
             renderHousingForms(
                 data.housing_form_type?.housing_forms || [],
