@@ -226,9 +226,7 @@ const imageUrl =
 
     init();
 })();
-</script>
 
-<script>
 let map;
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -432,9 +430,8 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     init();
 });
-</script>
 
-<script>
+
 document.addEventListener("DOMContentLoaded", function() {
     const tabs = document.querySelectorAll(".community__tab-link");
 
