@@ -13,12 +13,31 @@
             NO_REGIONS: 'Geen regio\'s gevonden.',
             NO_HOUSING_TYPE: 'Onbekend',
             NO_OWNERSHIP: 'Niet opgegeven',
+            NO_REGION_AREA: 'Geen regio gebied opgegeven',
             LOAD_ERROR: 'Kon gebruiker niet laden.'
+        },
+        SELECTORS: {
+            AVATAR: '#avatar',
+            NAME: '#name',
+            BIO: '#bio',
+            HOUSING_TYPE: '#housingTypeName',
+            OWNERSHIP: '#ownership',
+            INTERESTS: '#interests',
+            REGIONS_LIST: '.regions__list',
+            REGION_AREA: '#regionArea',
+            HOUSING_FORMS: '.housingForms__list',
+            USER_PROFILE: '#user-profile'
         }
     };
 
-    // User ID - Should be dynamically set
-    const USER_ID = "9ea31097-018a-4f09-afcb-d5eb34ae81f9";
+    /**
+     * Gets user ID from URL query parameters
+     * @returns {string|null} User ID or null if not found
+     */
+    function getUserIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
 
     /**
      * Fetches API token using Memberstack
@@ -65,15 +84,17 @@
      * @param {string} elementId - ID of the element to update
      * @param {string} content - Content to set
      * @param {string} [property='textContent'] - Property to update
+     * @returns {boolean} Whether the update was successful
      */
     function updateElement(elementId, content, property = 'textContent') {
         const element = document.getElementById(elementId);
         if (!element) {
             console.warn(`Element not found: ${elementId}`);
-            return;
+            return false;
         }
         element[property] = content;
         element.classList.remove("shimmer");
+        return true;
     }
 
     /**
@@ -87,29 +108,13 @@
             return;
         }
 
-        console.log('Rendering interests:', interests); // Debug log
-
-        if (!interests) {
-            console.warn('No interests data provided');
-            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
-            return;
-        }
-
-        if (!Array.isArray(interests)) {
-            console.warn('Interests is not an array:', interests);
-            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
-            return;
-        }
-
-        if (interests.length === 0) {
-            console.log('Interests array is empty');
+        if (!interests || !Array.isArray(interests) || interests.length === 0) {
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
             return;
         }
 
         try {
             const interestsList = interests.map(interest => {
-                // Handle both object and string formats
                 const interestName = typeof interest === 'object' ? interest.name : interest;
                 return `<li>${interestName}</li>`;
             }).join('');
@@ -128,59 +133,81 @@
      * @param {HTMLElement} container - Container element
      */
     function renderRegions(regions, container) {
-        container.innerHTML = "";
-        
-        if (!Array.isArray(regions) || regions.length === 0) {
+        if (!container) {
+            console.warn('Regions container not found');
+            return;
+        }
+
+        if (!regions || !Array.isArray(regions) || regions.length === 0) {
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGIONS;
             return;
         }
 
-        regions.forEach(region => {
-            const el = document.createElement("div");
-            el.classList.add("region-item");
-            el.innerHTML = `<p>${region.name}</p>`;
-            container.appendChild(el);
-        });
+        try {
+            container.innerHTML = regions.map(region => 
+                `<div class="region-item"><p>${region.name}</p></div>`
+            ).join('');
+            container.classList.remove("shimmer");
+        } catch (error) {
+            console.error('Error rendering regions:', error);
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGIONS;
+        }
     }
 
     /**
-     * Renders housing forms and groups
+     * Renders region area
+     * @param {Object} regionArea - Region area object
+     * @param {HTMLElement} container - Container element
+     */
+    function renderRegionArea(regionArea, container) {
+        if (!container) {
+            console.warn('Region area container not found');
+            return;
+        }
+
+        if (!regionArea || !regionArea.name) {
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGION_AREA;
+            return;
+        }
+
+        try {
+            container.textContent = regionArea.name;
+            container.classList.remove("shimmer");
+        } catch (error) {
+            console.error('Error rendering region area:', error);
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGION_AREA;
+        }
+    }
+
+    /**
+     * Renders housing forms
      * @param {Array} housingForms - Array of housing form objects
      * @param {HTMLElement} container - Container element
      */
     function renderHousingForms(housingForms, container) {
-        container.innerHTML = "";
-        
-        if (!Array.isArray(housingForms) || housingForms.length === 0) {
+        if (!container) {
+            console.warn('Housing forms container not found');
+            return;
+        }
+
+        if (!housingForms || !Array.isArray(housingForms) || housingForms.length === 0) {
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
             return;
         }
 
-        housingForms.forEach(form => {
-            const wrapper = document.createElement("div");
-            wrapper.classList.add("housing-form");
-            wrapper.innerHTML = `<h3>${form.title}</h3>`;
-
-            if (Array.isArray(form.groups) && form.groups.length > 0) {
-                const groupList = document.createElement("div");
-                groupList.classList.add("group-list");
-
-                form.groups.forEach(group => {
-                    const groupItem = document.createElement("div");
-                    groupItem.classList.add("group-item");
-                    groupItem.innerHTML = `
-                        <strong>${group.title}</strong><br />
-                        <small>${group.subtitle || ""}</small>
-                        <p>${group.intro || ""}</p>
-                    `;
-                    groupList.appendChild(groupItem);
-                });
-
-                wrapper.appendChild(groupList);
-            }
-
-            container.appendChild(wrapper);
-        });
+        try {
+            container.innerHTML = housingForms.map(form => `
+                <div class="housing-form">
+                    <h3>${form.title}</h3>
+                    ${form.subtitle ? `<p class="subtitle">${form.subtitle}</p>` : ''}
+                    ${form.intro ? `<div class="intro">${form.intro}</div>` : ''}
+                </div>
+            `).join('');
+            container.classList.remove("shimmer");
+        } catch (error) {
+            console.error('Error rendering housing forms:', error);
+            container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
+        }
     }
 
     /**
@@ -188,41 +215,60 @@
      * @param {string|null} apiToken - API token for authentication
      */
     async function fetchUserDetails(apiToken = null) {
+        const userId = getUserIdFromUrl();
+        if (!userId) {
+            console.error('No user ID found in URL');
+            const userProfile = document.querySelector(CONFIG.SELECTORS.USER_PROFILE);
+            if (userProfile) {
+                userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
+            }
+            return;
+        }
+
         try {
             const headers = apiToken ? { Authorization: `Bearer ${apiToken}` } : {};
-            const response = await fetch(`${CONFIG.API_BASE_URL}/users/${USER_ID}`, { headers });
+            const response = await fetch(`${CONFIG.API_BASE_URL}/users/${userId}`, { headers });
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
             const { data } = await response.json();
-            console.log('Received user data:', data); // Debug log
 
             // Update basic profile information
-            updateElement("avatar", data.avatar_url || CONFIG.DEFAULT_AVATAR, 'src');
-            updateElement("name", data.name || `${data.first_name} ${data.last_name}`);
-            updateElement("bio", data.bio || CONFIG.DEFAULT_MESSAGES.NO_BIO);
-            updateElement("housingTypeName", data.housing_form_type?.name || CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE);
-            updateElement("ownership", data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP);
+            updateElement(CONFIG.SELECTORS.AVATAR, data.avatar_url || CONFIG.DEFAULT_AVATAR, 'src');
+            updateElement(CONFIG.SELECTORS.NAME, data.name || `${data.first_name} ${data.last_name}`);
+            updateElement(CONFIG.SELECTORS.BIO, data.bio || CONFIG.DEFAULT_MESSAGES.NO_BIO);
+            updateElement(CONFIG.SELECTORS.HOUSING_TYPE, data.housing_form_type?.name || CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE);
+            updateElement(CONFIG.SELECTORS.OWNERSHIP, data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP);
 
             // Render complex components
-            const interestsContainer = document.getElementById("interests");
+            const interestsContainer = document.querySelector(CONFIG.SELECTORS.INTERESTS);
             if (interestsContainer) {
                 renderInterests(data.interests, interestsContainer);
-            } else {
-                console.warn('Interests container not found in DOM');
             }
 
-            renderRegions(data.regions, document.querySelector(".regions__list"));
-            renderHousingForms(
-                data.housing_form_type?.housing_forms || [],
-                document.querySelector(".housingForms__list")
-            );
+            const regionsContainer = document.querySelector(CONFIG.SELECTORS.REGIONS_LIST);
+            if (regionsContainer) {
+                renderRegions(data.regions, regionsContainer);
+            }
+
+            const regionAreaContainer = document.querySelector(CONFIG.SELECTORS.REGION_AREA);
+            if (regionAreaContainer) {
+                renderRegionArea(data.region_area, regionAreaContainer);
+            }
+
+            const housingFormsContainer = document.querySelector(CONFIG.SELECTORS.HOUSING_FORMS);
+            if (housingFormsContainer) {
+                renderHousingForms(
+                    data.housing_form_type?.housing_forms || [],
+                    housingFormsContainer
+                );
+            }
 
         } catch (error) {
             console.error("Error loading user:", error);
-            const userProfile = document.getElementById("user-profile");
+            const userProfile = document.querySelector(CONFIG.SELECTORS.USER_PROFILE);
             if (userProfile) {
                 userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
