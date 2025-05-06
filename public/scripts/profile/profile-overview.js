@@ -287,6 +287,10 @@
         }
     }
 
-    // Start the application
-    init();
+    // Wait for DOM to be fully loaded before initializing
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();
