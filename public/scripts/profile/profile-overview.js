@@ -16,7 +16,8 @@
             NO_HOUSING_TYPE: 'Onbekend',
             NO_OWNERSHIP: 'Niet opgegeven',
             NO_REGION_AREA: 'Geen regio gebied opgegeven',
-            LOAD_ERROR: 'Kon gebruiker niet laden.'
+            LOAD_ERROR: 'Kon gebruiker niet laden.',
+            NO_MEMBERSTACK_ID: 'Geen memberstack ID'
         },
         SELECTORS: {
             AVATAR: '.profile-avatar',
@@ -28,7 +29,8 @@
             REGIONS_LIST: '.regions__list',
             REGION_AREA: '.profile-region-area',
             HOUSING_FORMS: '.housingForms__list',
-            USER_PROFILE: '#user-profile'
+            USER_PROFILE: '#user-profile',
+            MEMBERSTACK_ID: '.profile-memberstack-id'
         },
         RETRY_DELAY: 500,
         INIT_DELAY: 1000
@@ -282,7 +284,8 @@
                 updateElement(CONFIG.SELECTORS.NAME, data.name || `${data.first_name} ${data.last_name}`),
                 updateElement(CONFIG.SELECTORS.BIO, data.bio || CONFIG.DEFAULT_MESSAGES.NO_BIO),
                 updateElement(CONFIG.SELECTORS.HOUSING_TYPE, data.housing_form_type?.name || CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE),
-                updateElement(CONFIG.SELECTORS.OWNERSHIP, data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP)
+                updateElement(CONFIG.SELECTORS.OWNERSHIP, data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP),
+                updateElement(CONFIG.SELECTORS.MEMBERSTACK_ID, data.memberstack_id || CONFIG.DEFAULT_MESSAGES.NO_MEMBERSTACK_ID)
             ]);
 
             // Render complex components
