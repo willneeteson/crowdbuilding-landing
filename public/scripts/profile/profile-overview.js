@@ -6,7 +6,7 @@
     // Configuration
     const CONFIG = {
         API_BASE_URL: 'https://api.crowdbuilding.com/api/v1',
-        DEFAULT_AVATAR: 'https://via.placeholder.com/150',
+        DEFAULT_AVATAR: 'https://cdn.prod.website-files.com/66dffceb975388322f140196/6810dfceaa06e55034a48587_cb_placeholder-avatar.svg',
         DEFAULT_MESSAGES: {
             NO_BIO: 'Geen bio beschikbaar.',
             NO_INTERESTS: 'Geen interesses',
@@ -25,7 +25,7 @@
             INTERESTS: '#interests',
             REGIONS_LIST: '.regions__list',
             REGION_AREA: '#regionArea',
-            HOUSING_FORMS: '.housingForms__list',
+            HOUSING_FORMS: '#housingForms .housingForms__list',
             USER_PROFILE: '#user-profile'
         }
     };
