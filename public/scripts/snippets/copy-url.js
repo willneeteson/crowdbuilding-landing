@@ -20,10 +20,13 @@
                 border-radius: 4px;
                 font-size: 14px;
                 pointer-events: none;
-                z-index: 9999;
+                z-index: 999999;
                 opacity: 0;
                 transition: opacity 0.2s ease-in-out;
                 transform: translateX(-50%);
+                white-space: nowrap;
+                top: 0;
+                left: 0;
             }
             .copy-tooltip.visible {
                 opacity: 1;
@@ -57,8 +60,11 @@
         const rect = element.getBoundingClientRect();
         
         // Position tooltip at top center of element
-        tooltip.style.left = `${rect.left + (rect.width / 2)}px`;
-        tooltip.style.top = `${rect.top - 40}px`; // 40px above the element
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        
+        tooltip.style.left = `${rect.left + (rect.width / 2) + scrollLeft}px`;
+        tooltip.style.top = `${rect.top + scrollTop - 40}px`; // 40px above the element
 
         // Show tooltip
         tooltip.classList.add('visible');
