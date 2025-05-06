@@ -30,10 +30,12 @@
             REGION_AREA: '.profile-region-area',
             HOUSING_FORMS: '.housingForms__list',
             USER_PROFILE: '#user-profile',
-            MEMBERSTACK_ID: '.profile-memberstack-id'
+            MEMBERSTACK_ID: '.profile-memberstack-id',
+            CHAT_LINK: '.profile__chat-btn'
         },
         RETRY_DELAY: 500,
-        INIT_DELAY: 1000
+        INIT_DELAY: 1000,
+        CHAT_BASE_URL: 'https://comms.crowdbuilding.com/direct/create?userId=@'
     };
 
     // Cache DOM elements
@@ -254,6 +256,33 @@
     }
 
     /**
+     * Creates a chat link from memberstack_id
+     * @param {string} memberstackId - The memberstack ID
+     * @returns {string} The formatted chat link
+     */
+    function createChatLink(memberstackId) {
+        if (!memberstackId) return '';
+        return `${CONFIG.CHAT_BASE_URL}${memberstackId}:chat.crowdbuilding.com`;
+    }
+
+    /**
+     * Updates chat link element
+     * @param {string} memberstackId - The memberstack ID
+     */
+    function updateChatLink(memberstackId) {
+        const chatLinkElement = domCache.get(CONFIG.SELECTORS.CHAT_LINK);
+        if (!chatLinkElement) return;
+
+        const chatLink = createChatLink(memberstackId);
+        if (chatLink) {
+            chatLinkElement.href = chatLink;
+            chatLinkElement.style.display = 'block';
+        } else {
+            chatLinkElement.style.display = 'none';
+        }
+    }
+
+    /**
      * Fetches and displays user details
      * @param {string|null} apiToken - API token for authentication
      */
@@ -287,6 +316,11 @@
                 updateElement(CONFIG.SELECTORS.OWNERSHIP, data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP),
                 updateElement(CONFIG.SELECTORS.MEMBERSTACK_ID, data.memberstack_id || CONFIG.DEFAULT_MESSAGES.NO_MEMBERSTACK_ID)
             ]);
+
+            // Update chat link if memberstack_id is available
+            if (data.memberstack_id) {
+                updateChatLink(data.memberstack_id);
+            }
 
             // Render complex components
             const interestsContainer = domCache.get(CONFIG.SELECTORS.INTERESTS);
