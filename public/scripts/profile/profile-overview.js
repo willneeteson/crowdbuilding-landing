@@ -19,15 +19,15 @@
             LOAD_ERROR: 'Kon gebruiker niet laden.'
         },
         SELECTORS: {
-            AVATAR: '#avatar',
-            NAME: '#name',
-            BIO: '#bio',
-            HOUSING_TYPE: '#housingTypeName',
-            OWNERSHIP: '#ownership',
-            INTERESTS: '#interests',
+            AVATAR: '.profile-avatar',
+            NAME: '.profile-name',
+            BIO: '.profile-bio',
+            HOUSING_TYPE: '.profile-housing-type',
+            OWNERSHIP: '.profile-ownership',
+            INTERESTS: '.profile-interests',
             REGIONS_LIST: '.regions__list',
-            REGION_AREA: '#regionArea',
-            HOUSING_FORMS: '#housingForms .housingForms__list',
+            REGION_AREA: '.profile-region-area',
+            HOUSING_FORMS: '.housingForms__list',
             USER_PROFILE: '#user-profile'
         }
     };
@@ -83,19 +83,19 @@
 
     /**
      * Updates a DOM element with content and removes shimmer effect
-     * @param {string} elementId - ID of the element to update
+     * @param {string} selector - Class selector of the element to update
      * @param {string} content - Content to set
      * @param {string} [property='textContent'] - Property to update
      * @returns {boolean} Whether the update was successful
      */
-    function updateElement(elementId, content, property = 'textContent') {
-        console.log(`Attempting to update element: ${elementId}`);
+    function updateElement(selector, content, property = 'textContent') {
+        console.log(`Attempting to update element: ${selector}`);
         
         // Function to find element in a document
         function findElementInDoc(doc) {
-            const element = doc.getElementById(elementId);
+            const element = doc.querySelector(selector);
             if (element) {
-                console.log(`Found element ${elementId} in document`);
+                console.log(`Found element ${selector} in document`);
                 return element;
             }
             return null;
@@ -106,14 +106,14 @@
         
         // If not found in main document, try to find it in any iframes
         if (!element) {
-            console.log(`Element ${elementId} not found in main document, checking iframes...`);
+            console.log(`Element ${selector} not found in main document, checking iframes...`);
             const iframes = document.getElementsByTagName('iframe');
             for (let iframe of iframes) {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
                     element = findElementInDoc(iframeDoc);
                     if (element) {
-                        console.log(`Found element ${elementId} in iframe`);
+                        console.log(`Found element ${selector} in iframe`);
                         break;
                     }
                 } catch (e) {
@@ -123,17 +123,17 @@
         }
 
         if (!element) {
-            console.warn(`Element not found: ${elementId}`);
-            // Log all elements with IDs for debugging
-            const allElements = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
-            console.log('Available elements with IDs:', allElements);
+            console.warn(`Element not found: ${selector}`);
+            // Log all elements with classes for debugging
+            const allElements = Array.from(document.querySelectorAll('[class]')).map(el => el.className);
+            console.log('Available elements with classes:', allElements);
             
             // Try one more time after a short delay
             setTimeout(() => {
-                console.log(`Retrying to find element: ${elementId}`);
-                const retryElement = document.getElementById(elementId);
+                console.log(`Retrying to find element: ${selector}`);
+                const retryElement = document.querySelector(selector);
                 if (retryElement) {
-                    console.log(`Found element ${elementId} on retry`);
+                    console.log(`Found element ${selector} on retry`);
                     updateElementContent(retryElement, content, property);
                 }
             }, 500);
@@ -147,7 +147,7 @@
     function updateElementContent(element, content, property) {
         try {
             // Special handling for avatar
-            if (element.id === CONFIG.SELECTORS.AVATAR) {
+            if (element.classList.contains('profile-avatar')) {
                 console.log('Updating avatar with:', content);
                 
                 // Create a new image to preload
@@ -171,7 +171,7 @@
             element.classList.remove("shimmer");
             return true;
         } catch (error) {
-            console.error(`Error updating element ${element.id}:`, error);
+            console.error(`Error updating element ${element.className}:`, error);
             return false;
         }
     }
@@ -373,12 +373,12 @@
             CONFIG.SELECTORS.OWNERSHIP
         ];
         
-        keyElements.forEach(id => {
-            const element = document.getElementById(id);
-            console.log(`Element ${id} exists:`, !!element);
+        keyElements.forEach(selector => {
+            const element = document.querySelector(selector);
+            console.log(`Element ${selector} exists:`, !!element);
             if (element) {
-                console.log(`Element ${id} classes:`, element.className);
-                if (id === CONFIG.SELECTORS.AVATAR) {
+                console.log(`Element ${selector} classes:`, element.className);
+                if (selector === CONFIG.SELECTORS.AVATAR) {
                     console.log(`Avatar current src:`, element.src);
                     console.log(`Avatar loading attribute:`, element.loading);
                 }
