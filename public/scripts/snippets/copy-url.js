@@ -14,16 +14,18 @@
         TOOLTIP_STYLES: `
             .copy-tooltip {
                 position: absolute;
-                background: #000;
+                background: #090F3F;
                 color: white;
-                padding: 8px 16px;
-                border-radius: 4px;
+                padding: 4px 8px;
+                border-radius: 16px;
                 font-size: 14px;
+                font-weight: 700;
                 pointer-events: none;
                 z-index: 999999;
                 opacity: 0;
                 transition: opacity 0.2s ease-in-out;
                 white-space: nowrap;
+                transform: translateX(-50%);
             }
             .copy-tooltip.visible {
                 opacity: 1;
