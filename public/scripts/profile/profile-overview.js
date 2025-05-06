@@ -3,6 +3,8 @@
  * Handles user profile data fetching and display
  */
 (function () {
+    console.log('Profile script starting...');
+    
     // Configuration
     const CONFIG = {
         API_BASE_URL: 'https://api.crowdbuilding.com/api/v1',
@@ -87,11 +89,32 @@
      * @returns {boolean} Whether the update was successful
      */
     function updateElement(elementId, content, property = 'textContent') {
-        const element = document.getElementById(elementId);
+        console.log(`Attempting to update element: ${elementId}`);
+        // Try to find the element in the main document
+        let element = document.getElementById(elementId);
+        
+        // If not found in main document, try to find it in any iframes
+        if (!element) {
+            const iframes = document.getElementsByTagName('iframe');
+            for (let iframe of iframes) {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    element = iframeDoc.getElementById(elementId);
+                    if (element) break;
+                } catch (e) {
+                    console.warn('Could not access iframe content:', e);
+                }
+            }
+        }
+
         if (!element) {
             console.warn(`Element not found: ${elementId}`);
+            // Log all elements with IDs for debugging
+            const allElements = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
+            console.log('Available elements with IDs:', allElements);
             return false;
         }
+
         element[property] = content;
         element.classList.remove("shimmer");
         return true;
@@ -279,6 +302,10 @@
      * Initialize the profile page
      */
     async function init() {
+        console.log('Initializing profile page...');
+        console.log('Document ready state:', document.readyState);
+        console.log('User profile element exists:', !!document.querySelector(CONFIG.SELECTORS.USER_PROFILE));
+        
         try {
             const apiToken = await getApiToken();
             await fetchUserDetails(apiToken);
@@ -289,8 +316,11 @@
 
     // Wait for DOM to be fully loaded before initializing
     if (document.readyState === 'loading') {
+        console.log('Document still loading, waiting for DOMContentLoaded...');
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        init();
+        console.log('Document already loaded, initializing immediately...');
+        // Add a small delay to ensure all scripts are loaded
+        setTimeout(init, 100);
     }
 })();
