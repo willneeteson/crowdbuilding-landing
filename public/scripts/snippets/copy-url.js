@@ -10,14 +10,14 @@
     const CONFIG = {
         TOOLTIP_DURATION: 2000, // Duration to show tooltip in milliseconds
         TOOLTIP_CLASS: 'copy-tooltip',
-        TOOLTIP_TEXT: 'Copied!',
+        TOOLTIP_TEXT: 'Gekopieerd',
         TOOLTIP_STYLES: `
             .copy-tooltip {
                 position: fixed;
-                background: rgba(0, 0, 0, 0.8);
+                background: #090F3F;
                 color: white;
-                padding: 8px 16px;
-                border-radius: 4px;
+                padding: 4px 8px;
+                border-radius: 16px;
                 font-size: 14px;
                 pointer-events: none;
                 z-index: 9999;
