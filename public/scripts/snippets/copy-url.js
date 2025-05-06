@@ -10,19 +10,20 @@
     const CONFIG = {
         TOOLTIP_DURATION: 2000, // Duration to show tooltip in milliseconds
         TOOLTIP_CLASS: 'copy-tooltip',
-        TOOLTIP_TEXT: 'Gekopieerd',
+        TOOLTIP_TEXT: 'Copied!',
         TOOLTIP_STYLES: `
             .copy-tooltip {
                 position: fixed;
-                background: #090F3F;
+                background: rgba(0, 0, 0, 0.8);
                 color: white;
-                padding: 4px 8px;
-                border-radius: 16px;
+                padding: 8px 16px;
+                border-radius: 4px;
                 font-size: 14px;
                 pointer-events: none;
                 z-index: 9999;
                 opacity: 0;
                 transition: opacity 0.2s ease-in-out;
+                transform: translateX(-50%);
             }
             .copy-tooltip.visible {
                 opacity: 1;
@@ -31,11 +32,10 @@
     };
 
     /**
-     * Creates and shows a tooltip at the specified position
-     * @param {number} x - X coordinate
-     * @param {number} y - Y coordinate
+     * Creates and shows a tooltip at the top center of the element
+     * @param {HTMLElement} element - The element to position the tooltip above
      */
-    function showTooltip(x, y) {
+    function showTooltip(element) {
         // Create tooltip element if it doesn't exist
         let tooltip = document.querySelector(`.${CONFIG.TOOLTIP_CLASS}`);
         if (!tooltip) {
@@ -53,9 +53,12 @@
             document.body.appendChild(tooltip);
         }
 
-        // Position tooltip
-        tooltip.style.left = `${x}px`;
-        tooltip.style.top = `${y - 40}px`; // Position above the click point
+        // Get element position
+        const rect = element.getBoundingClientRect();
+        
+        // Position tooltip at top center of element
+        tooltip.style.left = `${rect.left + (rect.width / 2)}px`;
+        tooltip.style.top = `${rect.top - 40}px`; // 40px above the element
 
         // Show tooltip
         tooltip.classList.add('visible');
@@ -75,8 +78,8 @@
             const url = window.location.href;
             await navigator.clipboard.writeText(url);
             
-            // Show tooltip at click position
-            showTooltip(event.clientX, event.clientY);
+            // Show tooltip at top center of the clicked element
+            showTooltip(event.currentTarget);
         } catch (err) {
             console.error('Failed to copy URL:', err);
         }
