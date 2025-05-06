@@ -115,6 +115,16 @@
             return false;
         }
 
+        // Special handling for avatar
+        if (elementId === CONFIG.SELECTORS.AVATAR) {
+            console.log('Updating avatar with:', content);
+            element.src = content;
+            element.classList.remove("shimmer-shimmer--circle");
+            // Force image reload
+            element.loading = "eager";
+            return true;
+        }
+
         element[property] = content;
         element.classList.remove("shimmer");
         return true;
