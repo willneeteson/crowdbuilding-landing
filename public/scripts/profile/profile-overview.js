@@ -149,10 +149,21 @@
             // Special handling for avatar
             if (element.id === CONFIG.SELECTORS.AVATAR) {
                 console.log('Updating avatar with:', content);
-                element.src = content;
-                element.classList.remove("shimmer-shimmer--circle");
-                // Force image reload
-                element.loading = "eager";
+                
+                // Create a new image to preload
+                const img = new Image();
+                img.onload = () => {
+                    console.log('Avatar image loaded successfully');
+                    element.src = content;
+                    element.classList.remove("shimmer-shimmer--circle");
+                    element.loading = "eager"; // Change to eager loading
+                };
+                img.onerror = () => {
+                    console.error('Failed to load avatar image, using default');
+                    element.src = CONFIG.DEFAULT_AVATAR;
+                    element.classList.remove("shimmer-shimmer--circle");
+                };
+                img.src = content;
                 return true;
             }
 
@@ -367,6 +378,10 @@
             console.log(`Element ${id} exists:`, !!element);
             if (element) {
                 console.log(`Element ${id} classes:`, element.className);
+                if (id === CONFIG.SELECTORS.AVATAR) {
+                    console.log(`Avatar current src:`, element.src);
+                    console.log(`Avatar loading attribute:`, element.loading);
+                }
             }
         });
         
