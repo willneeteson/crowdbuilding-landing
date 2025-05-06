@@ -90,17 +90,32 @@
      */
     function updateElement(elementId, content, property = 'textContent') {
         console.log(`Attempting to update element: ${elementId}`);
-        // Try to find the element in the main document
-        let element = document.getElementById(elementId);
+        
+        // Function to find element in a document
+        function findElementInDoc(doc) {
+            const element = doc.getElementById(elementId);
+            if (element) {
+                console.log(`Found element ${elementId} in document`);
+                return element;
+            }
+            return null;
+        }
+
+        // Try to find the element in the main document first
+        let element = findElementInDoc(document);
         
         // If not found in main document, try to find it in any iframes
         if (!element) {
+            console.log(`Element ${elementId} not found in main document, checking iframes...`);
             const iframes = document.getElementsByTagName('iframe');
             for (let iframe of iframes) {
                 try {
                     const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                    element = iframeDoc.getElementById(elementId);
-                    if (element) break;
+                    element = findElementInDoc(iframeDoc);
+                    if (element) {
+                        console.log(`Found element ${elementId} in iframe`);
+                        break;
+                    }
                 } catch (e) {
                     console.warn('Could not access iframe content:', e);
                 }
@@ -112,22 +127,42 @@
             // Log all elements with IDs for debugging
             const allElements = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
             console.log('Available elements with IDs:', allElements);
+            
+            // Try one more time after a short delay
+            setTimeout(() => {
+                console.log(`Retrying to find element: ${elementId}`);
+                const retryElement = document.getElementById(elementId);
+                if (retryElement) {
+                    console.log(`Found element ${elementId} on retry`);
+                    updateElementContent(retryElement, content, property);
+                }
+            }, 500);
+            
             return false;
         }
 
-        // Special handling for avatar
-        if (elementId === CONFIG.SELECTORS.AVATAR) {
-            console.log('Updating avatar with:', content);
-            element.src = content;
-            element.classList.remove("shimmer-shimmer--circle");
-            // Force image reload
-            element.loading = "eager";
-            return true;
-        }
+        return updateElementContent(element, content, property);
+    }
 
-        element[property] = content;
-        element.classList.remove("shimmer");
-        return true;
+    function updateElementContent(element, content, property) {
+        try {
+            // Special handling for avatar
+            if (element.id === CONFIG.SELECTORS.AVATAR) {
+                console.log('Updating avatar with:', content);
+                element.src = content;
+                element.classList.remove("shimmer-shimmer--circle");
+                // Force image reload
+                element.loading = "eager";
+                return true;
+            }
+
+            element[property] = content;
+            element.classList.remove("shimmer");
+            return true;
+        } catch (error) {
+            console.error(`Error updating element ${element.id}:`, error);
+            return false;
+        }
     }
 
     /**
@@ -314,7 +349,26 @@
     async function init() {
         console.log('Initializing profile page...');
         console.log('Document ready state:', document.readyState);
-        console.log('User profile element exists:', !!document.querySelector(CONFIG.SELECTORS.USER_PROFILE));
+        
+        // Wait for a short delay to ensure DOM is fully ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Log the state of key elements
+        const keyElements = [
+            CONFIG.SELECTORS.AVATAR,
+            CONFIG.SELECTORS.NAME,
+            CONFIG.SELECTORS.BIO,
+            CONFIG.SELECTORS.HOUSING_TYPE,
+            CONFIG.SELECTORS.OWNERSHIP
+        ];
+        
+        keyElements.forEach(id => {
+            const element = document.getElementById(id);
+            console.log(`Element ${id} exists:`, !!element);
+            if (element) {
+                console.log(`Element ${id} classes:`, element.className);
+            }
+        });
         
         try {
             const apiToken = await getApiToken();
@@ -330,7 +384,7 @@
         document.addEventListener('DOMContentLoaded', init);
     } else {
         console.log('Document already loaded, initializing immediately...');
-        // Add a small delay to ensure all scripts are loaded
-        setTimeout(init, 100);
+        // Add a longer delay to ensure all scripts and elements are loaded
+        setTimeout(init, 1000);
     }
 })();
