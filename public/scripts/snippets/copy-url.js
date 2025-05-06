@@ -13,8 +13,8 @@
         TOOLTIP_TEXT: 'Copied!',
         TOOLTIP_STYLES: `
             .copy-tooltip {
-                position: fixed;
-                background: rgba(0, 0, 0, 0.8);
+                position: absolute;
+                background: #000;
                 color: white;
                 padding: 8px 16px;
                 border-radius: 4px;
@@ -23,10 +23,7 @@
                 z-index: 999999;
                 opacity: 0;
                 transition: opacity 0.2s ease-in-out;
-                transform: translateX(-50%);
                 white-space: nowrap;
-                top: 0;
-                left: 0;
             }
             .copy-tooltip.visible {
                 opacity: 1;
@@ -39,9 +36,12 @@
      * @param {HTMLElement} element - The element to position the tooltip above
      */
     function showTooltip(element) {
+        console.log('Showing tooltip for element:', element);
+        
         // Create tooltip element if it doesn't exist
         let tooltip = document.querySelector(`.${CONFIG.TOOLTIP_CLASS}`);
         if (!tooltip) {
+            console.log('Creating new tooltip element');
             // Add styles if not already added
             if (!document.querySelector(`#${CONFIG.TOOLTIP_CLASS}-styles`)) {
                 const styleSheet = document.createElement('style');
@@ -58,20 +58,25 @@
 
         // Get element position
         const rect = element.getBoundingClientRect();
+        console.log('Element position:', rect);
         
         // Position tooltip at top center of element
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        const tooltipLeft = rect.left + (rect.width / 2);
+        const tooltipTop = rect.top - 40;
         
-        tooltip.style.left = `${rect.left + (rect.width / 2) + scrollLeft}px`;
-        tooltip.style.top = `${rect.top + scrollTop - 40}px`; // 40px above the element
+        console.log('Tooltip position:', { left: tooltipLeft, top: tooltipTop });
+        
+        tooltip.style.left = `${tooltipLeft}px`;
+        tooltip.style.top = `${tooltipTop}px`;
 
         // Show tooltip
         tooltip.classList.add('visible');
+        console.log('Tooltip should be visible now');
 
         // Hide tooltip after duration
         setTimeout(() => {
             tooltip.classList.remove('visible');
+            console.log('Tooltip hidden');
         }, CONFIG.TOOLTIP_DURATION);
     }
 
@@ -80,12 +85,14 @@
      * @param {Event} event - Click event
      */
     async function copyUrlToClipboard(event) {
+        console.log('Copy button clicked');
         try {
             const url = window.location.href;
             await navigator.clipboard.writeText(url);
+            console.log('URL copied to clipboard:', url);
             
             // Show tooltip at top center of the clicked element
-            showTooltip(event.currentTarget);
+            showTooltip(this);
         } catch (err) {
             console.error('Failed to copy URL:', err);
         }
@@ -96,6 +103,7 @@
      * @param {string|HTMLElement} trigger - Selector or element that triggers the copy
      */
     function initCopyUrl(trigger) {
+        console.log('Initializing copy URL with trigger:', trigger);
         const element = typeof trigger === 'string' ? document.querySelector(trigger) : trigger;
         
         if (!element) {
@@ -103,6 +111,7 @@
             return;
         }
 
+        console.log('Found trigger element:', element);
         element.addEventListener('click', copyUrlToClipboard);
     }
 
