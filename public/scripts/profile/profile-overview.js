@@ -318,6 +318,7 @@
             }
 
             const { data } = await response.json();
+            console.log('User data:', data); // Debug log
 
             // Update basic profile information
             await Promise.all([
@@ -352,8 +353,10 @@
 
             const housingFormsContainer = domCache.get(CONFIG.SELECTORS.HOUSING_FORMS);
             if (housingFormsContainer) {
+                console.log('Housing form type:', data.housing_form_type); // Debug log
+                console.log('Housing forms:', data.housing_forms); // Debug log
                 renderHousingForms(
-                    data.housing_form_type?.housing_forms || [],
+                    data.housing_forms || [], // Changed from data.housing_form_type?.housing_forms
                     housingFormsContainer
                 );
             }
