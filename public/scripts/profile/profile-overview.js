@@ -239,21 +239,24 @@
                 return;
             }
 
-            const housingFormsList = housingForms
+            container.innerHTML = housingForms
                 .map(form => {
-                    if (!form?.name) {
-                        console.warn('Housing form missing name:', form);
+                    if (!form?.title) {
+                        console.warn('Housing form missing title:', form);
                         return '';
                     }
-                    return `<li>${form.name}</li>`;
+                    return `
+                        <div class="housing-form">
+                            <h3>${form.title}</h3>
+                        </div>
+                    `;
                 })
                 .filter(Boolean)
                 .join('');
 
-            if (!housingFormsList) {
+            if (!container.innerHTML.trim()) {
                 container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
             } else {
-                container.innerHTML = `<ul>${housingFormsList}</ul>`;
                 container.classList.remove("shimmer");
             }
         } catch (error) {
