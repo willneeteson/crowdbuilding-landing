@@ -31,7 +31,8 @@
             HOUSING_FORMS: '.housingForms__list',
             USER_PROFILE: '#user-profile',
             MEMBERSTACK_ID: '.profile-memberstack-id',
-            CHAT_LINK: '.profile__chat-btn'
+            CHAT_LINK: '.profile__chat-btn',
+            CURRENT_USER: '#currentUser'
         },
         RETRY_DELAY: 500,
         INIT_DELAY: 1000,
@@ -97,6 +98,25 @@
             return data.token;
         } catch (error) {
             console.error("Error fetching token:", error);
+            return null;
+        }
+    }
+
+    /**
+     * Gets current user's memberstack ID
+     * @returns {Promise<string|null>} Memberstack ID or null if not available
+     */
+    async function getCurrentMemberstackId() {
+        if (typeof $memberstackDom === "undefined") {
+            return null;
+        }
+
+        try {
+            await $memberstackDom.onReady;
+            const member = await $memberstackDom.getCurrentMember();
+            return member?.id || null;
+        } catch (error) {
+            console.error("Error getting current memberstack ID:", error);
             return null;
         }
     }
@@ -314,6 +334,13 @@
 
             const { data } = await response.json();
             console.log('User data:', data); // Debug log
+
+            // Check if this is the current user's profile
+            const currentMemberstackId = await getCurrentMemberstackId();
+            const currentUserDiv = domCache.get(CONFIG.SELECTORS.CURRENT_USER);
+            if (currentUserDiv) {
+                currentUserDiv.style.display = currentMemberstackId === data.memberstack_id ? 'block' : 'none';
+            }
 
             // Update basic profile information
             await Promise.all([
