@@ -245,7 +245,7 @@
                         console.warn('Housing form missing title or id:', form);
                         return '';
                     }
-                    return `<li><a href="/woonvorm/${form.id}">${form.title}</a></li>`;
+                    return `<li><a href="/woonvormen/${form.id}">${form.title}</a></li>`;
                 })
                 .filter(Boolean)
                 .join('');
