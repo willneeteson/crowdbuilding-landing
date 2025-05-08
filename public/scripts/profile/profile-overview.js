@@ -47,10 +47,51 @@
             }
             return this.elements.get(selector);
         },
+        getAll: function(selectors) {
+            return selectors.reduce((acc, selector) => {
+                acc[selector] = this.get(selector);
+                return acc;
+            }, {});
+        },
         clear: function() {
             this.elements.clear();
         }
     };
+
+    // Batch DOM element selection
+    const elements = {
+        profile: null,
+        avatar: null,
+        name: null,
+        bio: null,
+        housingType: null,
+        ownership: null,
+        interests: null,
+        regionsList: null,
+        regionArea: null,
+        housingForms: null,
+        memberstackId: null,
+        chatLink: null
+    };
+
+    function initializeElements() {
+        const selectors = {
+            profile: CONFIG.SELECTORS.USER_PROFILE,
+            avatar: CONFIG.SELECTORS.AVATAR,
+            name: CONFIG.SELECTORS.NAME,
+            bio: CONFIG.SELECTORS.BIO,
+            housingType: CONFIG.SELECTORS.HOUSING_TYPE,
+            ownership: CONFIG.SELECTORS.OWNERSHIP,
+            interests: CONFIG.SELECTORS.INTERESTS,
+            regionsList: CONFIG.SELECTORS.REGIONS_LIST,
+            regionArea: CONFIG.SELECTORS.REGION_AREA,
+            housingForms: CONFIG.SELECTORS.HOUSING_FORMS,
+            memberstackId: CONFIG.SELECTORS.MEMBERSTACK_ID,
+            chatLink: CONFIG.SELECTORS.CHAT_LINK
+        };
+
+        Object.assign(elements, domCache.getAll(Object.values(selectors)));
+    }
 
     /**
      * Gets user ID from URL query parameters
@@ -240,15 +281,27 @@
             }
 
             container.innerHTML = housingForms
-                .map(form => `
-                    <div class="housing-form">
-                        <h3>${form.title}</h3>
-                        ${form.subtitle ? `<p class="subtitle">${form.subtitle}</p>` : ''}
-                        ${form.intro ? `<div class="intro">${form.intro}</div>` : ''}
-                    </div>
-                `)
+                .map(form => {
+                    if (!form?.title) {
+                        console.warn('Housing form missing title:', form);
+                        return '';
+                    }
+                    return `
+                        <div class="housing-form">
+                            <h3>${form.title}</h3>
+                            ${form.subtitle ? `<p class="subtitle">${form.subtitle}</p>` : ''}
+                            ${form.intro ? `<div class="intro">${form.intro}</div>` : ''}
+                        </div>
+                    `;
+                })
+                .filter(Boolean)
                 .join('');
-            container.classList.remove("shimmer");
+
+            if (!container.innerHTML.trim()) {
+                container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
+            } else {
+                container.classList.remove("shimmer");
+            }
         } catch (error) {
             console.error('Error rendering housing forms:', error);
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
@@ -290,9 +343,8 @@
         const userId = getUserIdFromUrl();
         if (!userId) {
             console.error('No user ID found in URL');
-            const userProfile = domCache.get(CONFIG.SELECTORS.USER_PROFILE);
-            if (userProfile) {
-                userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
+            if (elements.profile) {
+                elements.profile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
             return;
         }
@@ -306,15 +358,44 @@
             }
 
             const { data } = await response.json();
+            if (!data) {
+                throw new Error('No data received from API');
+            }
 
-            // Update basic profile information
+            // Process all updates in parallel
             await Promise.all([
+                // Basic profile information
                 updateElement(CONFIG.SELECTORS.AVATAR, data.avatar_url || CONFIG.DEFAULT_AVATAR, 'src'),
                 updateElement(CONFIG.SELECTORS.NAME, data.name || `${data.first_name} ${data.last_name}`),
                 updateElement(CONFIG.SELECTORS.BIO, data.bio || CONFIG.DEFAULT_MESSAGES.NO_BIO),
                 updateElement(CONFIG.SELECTORS.HOUSING_TYPE, data.housing_form_type?.name || CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE),
                 updateElement(CONFIG.SELECTORS.OWNERSHIP, data.ownership_situation?.name || CONFIG.DEFAULT_MESSAGES.NO_OWNERSHIP),
-                updateElement(CONFIG.SELECTORS.MEMBERSTACK_ID, data.memberstack_id || CONFIG.DEFAULT_MESSAGES.NO_MEMBERSTACK_ID)
+                updateElement(CONFIG.SELECTORS.MEMBERSTACK_ID, data.memberstack_id || CONFIG.DEFAULT_MESSAGES.NO_MEMBERSTACK_ID),
+                
+                // Complex components
+                Promise.resolve().then(() => {
+                    if (elements.interests) {
+                        renderInterests(data.interests, elements.interests);
+                    }
+                }),
+                Promise.resolve().then(() => {
+                    if (elements.regionsList) {
+                        renderRegions(data.regions, elements.regionsList);
+                    }
+                }),
+                Promise.resolve().then(() => {
+                    if (elements.regionArea) {
+                        renderRegionArea(data.region_area, elements.regionArea);
+                    }
+                }),
+                Promise.resolve().then(() => {
+                    if (elements.housingForms) {
+                        renderHousingForms(
+                            data.housing_form_type?.housing_forms || [],
+                            elements.housingForms
+                        );
+                    }
+                })
             ]);
 
             // Update chat link if memberstack_id is available
@@ -322,35 +403,10 @@
                 updateChatLink(data.memberstack_id);
             }
 
-            // Render complex components
-            const interestsContainer = domCache.get(CONFIG.SELECTORS.INTERESTS);
-            if (interestsContainer) {
-                renderInterests(data.interests, interestsContainer);
-            }
-
-            const regionsContainer = domCache.get(CONFIG.SELECTORS.REGIONS_LIST);
-            if (regionsContainer) {
-                renderRegions(data.regions, regionsContainer);
-            }
-
-            const regionAreaContainer = domCache.get(CONFIG.SELECTORS.REGION_AREA);
-            if (regionAreaContainer) {
-                renderRegionArea(data.region_area, regionAreaContainer);
-            }
-
-            const housingFormsContainer = domCache.get(CONFIG.SELECTORS.HOUSING_FORMS);
-            if (housingFormsContainer) {
-                renderHousingForms(
-                    data.housing_form_type?.housing_forms || [],
-                    housingFormsContainer
-                );
-            }
-
         } catch (error) {
             console.error("Error loading user:", error);
-            const userProfile = domCache.get(CONFIG.SELECTORS.USER_PROFILE);
-            if (userProfile) {
-                userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
+            if (elements.profile) {
+                elements.profile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
         }
     }
@@ -361,21 +417,29 @@
     async function init() {
         console.log('Initializing profile page...');
         
+        // Initialize DOM elements
+        initializeElements();
+        
         // Wait for DOM to be fully ready
-        await new Promise(resolve => setTimeout(resolve, CONFIG.INIT_DELAY));
+        if (document.readyState === 'loading') {
+            await new Promise(resolve => {
+                document.addEventListener('DOMContentLoaded', resolve, { once: true });
+            });
+        }
         
         try {
             const apiToken = await getApiToken();
             await fetchUserDetails(apiToken);
         } catch (error) {
             console.error("Initialization error:", error);
+            if (elements.profile) {
+                elements.profile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
+            }
         }
     }
 
-    // Wait for DOM to be fully loaded before initializing
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        setTimeout(init, CONFIG.INIT_DELAY);
-    }
+    // Start initialization
+    init().catch(error => {
+        console.error('Fatal initialization error:', error);
+    });
 })();
