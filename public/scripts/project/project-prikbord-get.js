@@ -100,6 +100,47 @@ function attachCommentToggles() {
   });
 }
 
+function attachDeleteButtons() {
+  document.querySelectorAll('.post-delete-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const postId = button.getAttribute('data-post-id');
+      if (confirm('Are you sure you want to delete this post?')) {
+        deletePost(postId);
+      }
+    });
+  });
+}
+
+async function deletePost(postId) {
+  const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
+  const token = await getApiTokenFromMemberstack();
+
+  if (!token) {
+    alert('You are not signed in.');
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts/${postId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (response.ok) {
+      const postElement = document.querySelector(`.post-item [data-post-id="${postId}"]`)?.closest('.post-item');
+      if (postElement) postElement.remove();
+    } else {
+      console.error('Failed to delete post:', response.status);
+      alert('Could not delete the post.');
+    }
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    alert('Something went wrong.');
+  }
+}
+
 function renderPosts(posts) {
   const container = document.getElementById('groupPosts');
   container.innerHTML = '';
