@@ -39,6 +39,8 @@ function formatDate(dateString) {
   return date.toLocaleDateString('nl-NL', {
     day: 'numeric',
     month: 'long',
-    year: 'numeric'
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   });
 } 
