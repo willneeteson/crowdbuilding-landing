@@ -3,23 +3,32 @@ let currentUserId = null;
 // Get current user ID from Memberstack
 async function getCurrentUserId() {
   return new Promise((resolve) => {
-    if (typeof $memberstackDom !== 'undefined') {
-      $memberstackDom.onReady.then(() => {
-        $memberstackDom.getCurrentMember().then(member => {
-          if (member) {
-            currentUserId = member.id;
-            console.log('Current user ID set to:', currentUserId);
-            resolve(currentUserId);
-          } else {
-            console.log('No member found in Memberstack');
-            resolve(null);
-          }
-        });
-      });
-    } else {
+    if (typeof $memberstackDom === 'undefined') {
       console.log('Memberstack not available');
       resolve(null);
+      return;
     }
+
+    // Wait for Memberstack to be ready
+    $memberstackDom.onReady.then(async () => {
+      try {
+        const member = await $memberstackDom.getCurrentMember();
+        if (member) {
+          currentUserId = member.id;
+          console.log('Current user ID set to:', currentUserId);
+          resolve(currentUserId);
+        } else {
+          console.log('No member found in Memberstack');
+          resolve(null);
+        }
+      } catch (error) {
+        console.error('Error getting member:', error);
+        resolve(null);
+      }
+    }).catch(error => {
+      console.error('Error waiting for Memberstack:', error);
+      resolve(null);
+    });
   });
 }
 
@@ -236,23 +245,26 @@ function formatDate(dateString) {
 
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {
-  // Wait for Memberstack to be ready
-  if (typeof $memberstackDom !== 'undefined') {
-    await $memberstackDom.onReady;
-  }
-  
-  // Get current user ID
-  const userId = await getCurrentUserId();
-  console.log('Initialized with user ID:', userId);
-  
-  // Only fetch posts if we have a user
-  if (userId) {
-    fetchGroupPosts('tiny-house-alkmaar');
-  } else {
-    console.log('User not logged in, not fetching posts');
+  try {
+    // Get current user ID
+    const userId = await getCurrentUserId();
+    console.log('Initialized with user ID:', userId);
+    
+    // Only fetch posts if we have a user
+    if (userId) {
+      fetchGroupPosts('tiny-house-alkmaar');
+    } else {
+      console.log('User not logged in, not fetching posts');
+      const container = document.getElementById('groupPosts');
+      if (container) {
+        container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
+      }
+    }
+  } catch (error) {
+    console.error('Error during initialization:', error);
     const container = document.getElementById('groupPosts');
     if (container) {
-      container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
+      container.innerHTML = '<div class="post-item">Error loading posts. Please try again later.</div>';
     }
   }
 });
