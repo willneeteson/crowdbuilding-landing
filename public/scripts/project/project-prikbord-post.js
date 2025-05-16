@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
           new Compressor(imageFile, {
             quality: 0.8,
             mimeType: 'image/webp',
+            maxWidth: 800,
+            maxHeight: 800,
+            resize: 'contain',
             success(result) {
               resolve(result);
             },
