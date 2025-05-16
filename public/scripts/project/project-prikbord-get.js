@@ -37,21 +37,12 @@ async function getApiToken() {
 }
 
 async function getCurrentUserId() {
-    const token = await getApiToken();
-    if (token) {
-        try {
-            const response = await fetch("https://api.crowdbuilding.com/api/v1/me", {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                currentUserId = data.id;
-                return currentUserId;
-            }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
+    if (typeof $memberstackDom !== "undefined") {
+        await $memberstackDom.onReady;
+        const member = await $memberstackDom.getCurrentMember();
+        if (member && member.id) {
+            currentUserId = member.id;
+            return currentUserId;
         }
     }
     return null;
