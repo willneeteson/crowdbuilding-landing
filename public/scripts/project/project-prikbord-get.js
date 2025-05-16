@@ -124,11 +124,14 @@ function renderPosts(posts) {
         const modalHtml = `
             <div id="postModal" class="post-modal-overlay">
                 <div class="post-modal">
-                    <button class="post-modal-close">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
-                        </svg>
-                    </button>
+                    <div class="post-modal-header">
+                        <div class="post-modal-title"></div>
+                        <button class="post-modal-close">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div class="post-modal-content"></div>
                 </div>
             </div>
@@ -338,6 +341,11 @@ function attachPostClickHandlers() {
             const postId = post.getAttribute('data-post-id');
             const modal = document.getElementById('postModal');
             const modalContent = modal.querySelector('.post-modal-content');
+            const modalTitle = modal.querySelector('.post-modal-title');
+            
+            // Get author name from the post
+            const authorName = post.querySelector('.post-author').textContent;
+            modalTitle.textContent = `${authorName}'s bericht`;
             
             // Clone the post content
             const postContent = post.cloneNode(true);
@@ -350,11 +358,11 @@ function attachPostClickHandlers() {
             
             // Add comment form
             const commentForm = createCommentForm(postId);
-            postContent.appendChild(commentForm);
             
             // Update modal content
             modalContent.innerHTML = '';
             modalContent.appendChild(postContent);
+            modalContent.appendChild(commentForm);
             
             // Show modal
             modal.classList.add('show');

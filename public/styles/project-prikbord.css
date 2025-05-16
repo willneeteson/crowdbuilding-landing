@@ -148,19 +148,32 @@
     width: 90%;
     max-width: 600px;
     max-height: 90vh;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
     position: relative;
     transform: translateY(20px);
     transition: transform 0.3s ease;
 }
 
-.post-modal-overlay.show .post-modal {
-    transform: translateY(0);
+.post-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    background: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.post-modal-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #333;
 }
 
 .post-modal-close {
     position: absolute;
-    top: 1rem;
     right: 1rem;
     background: none;
     border: none;
@@ -171,7 +184,6 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
-    z-index: 1;
 }
 
 .post-modal-close:hover {
@@ -179,7 +191,11 @@
 }
 
 .post-modal-content {
-    padding: 2rem;
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
 }
 
 .post-modal .post-item {
@@ -190,9 +206,8 @@
 }
 
 .post-modal .post-comments-list {
-    display: block !important;
-    margin-top: 2rem;
-    padding-top: 2rem;
+    margin: 1.5rem 0;
+    padding-top: 1.5rem;
     border-top: 1px solid #eee;
 }
 
@@ -247,9 +262,14 @@
 
 /* Comment form styles */
 .comment-form {
-    margin-top: 2rem;
-    padding-top: 2rem;
+    margin-top: auto;
+    padding: 1.5rem;
+    background: white;
     border-top: 1px solid #eee;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .comment-form textarea {
@@ -288,11 +308,6 @@
 .comment-form button:disabled {
     background-color: #bdc3c7;
     cursor: not-allowed;
-}
-
-/* Add some spacing between comments and form */
-.post-modal .post-comments-list {
-    margin-bottom: 2rem;
 }
 
 /* Like button styles */
