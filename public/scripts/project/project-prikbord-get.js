@@ -482,6 +482,26 @@ function attachPostClickHandlers() {
             // Clone the post content
             const postContent = post.cloneNode(true);
             
+            // Make sure the like status is preserved in the modal
+            const originalLikeButton = post.querySelector('.post-like-button');
+            const modalLikeButton = postContent.querySelector('.post-like-button');
+            
+            if (originalLikeButton && modalLikeButton) {
+                // Copy liked status
+                const isLiked = originalLikeButton.classList.contains('liked');
+                if (isLiked) {
+                    modalLikeButton.classList.add('liked');
+                    modalLikeButton.setAttribute('data-liked', 'true');
+                    
+                    // Make sure heart is filled
+                    const heartIcon = modalLikeButton.querySelector('.heart-icon');
+                    if (heartIcon) {
+                        heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+                        heartIcon.alt = 'Liked';
+                    }
+                }
+            }
+            
             // Add comments section
             const commentsList = document.createElement('div');
             commentsList.className = 'post-comments-list';
@@ -502,6 +522,9 @@ function attachPostClickHandlers() {
             // Load comments
             const comments = await fetchCommentsForPost(postId);
             renderComments(comments, commentsList);
+            
+            // Ensure all like buttons in the modal work correctly
+            attachLikeHandlers();
         });
     });
 

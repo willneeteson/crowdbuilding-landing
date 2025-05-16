@@ -401,4 +401,31 @@
     display: flex;
     align-items: center;
     margin-top: 0.25rem;
+}
+
+/* Update post-like-button in modal to match main page */
+.post-modal .post-like-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.post-modal .post-like-button.liked {
+    color: #e74c3c !important;
+}
+
+.post-modal .post-like-button .heart-icon {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s;
+}
+
+.post-modal .post-like-button.liked .heart-icon {
+    color: #e74c3c;
 } 
