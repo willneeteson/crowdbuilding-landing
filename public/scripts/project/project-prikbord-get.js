@@ -212,6 +212,14 @@ function renderPosts(posts) {
             </div>
         `;
 
+        // Ensure the heart icon is properly filled if the post is liked
+        if (isLiked) {
+            const heartIcon = postElement.querySelector('.post-like-button svg path');
+            if (heartIcon) {
+                heartIcon.setAttribute('fill', 'currentColor');
+            }
+        }
+
         container.appendChild(postElement);
     });
 
