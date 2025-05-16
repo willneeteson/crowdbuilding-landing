@@ -203,18 +203,21 @@
     box-shadow: none;
     margin: 0;
     padding: 0;
+    border: none;
 }
 
 .post-modal .post-comments-list {
     margin: 1.5rem 0;
-    padding-top: 1.5rem;
-    border-top: 1px solid #eee;
+    padding: 0;
+    border: none;
 }
 
 .post-modal .comment-item {
     display: flex;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    padding: 0;
+    border: none;
 }
 
 .post-modal .comment-item:last-child {
@@ -223,6 +226,8 @@
 
 .post-modal .comment-content {
     flex: 1;
+    padding: 0;
+    border: none;
 }
 
 .post-modal .comment-content h5 {
