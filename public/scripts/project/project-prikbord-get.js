@@ -160,8 +160,8 @@ function renderPosts(posts) {
             : '';
 
         const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
-        const isLiked = post.likes.some(like => like.id === currentUserId);
-        console.log('Post', post.id, 'isLiked:', isLiked); // Debug log
+        const isLiked = post.likes && post.likes.some(like => like.id === currentUserId);
+        console.log('Post', post.id, 'isLiked:', isLiked, 'Likes:', post.likes); // Debug log
 
         const menuHtml = canDelete ? `
             <div class="post-menu">
@@ -491,13 +491,18 @@ function attachLikeHandlers() {
                 // Update like count
                 likeCount.textContent = updatedPost.likes_count;
                 
-                // Toggle liked state based on whether the current user is in the likes array
-                const isLiked = updatedPost.likes.some(like => like.id === currentUserId);
-                console.log('Is liked:', isLiked, 'Current user:', currentUserId); // Debug log
+                // Check if the current user is in the likes array
+                const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
+                console.log('Is liked:', isLiked, 'Current user:', currentUserId, 'Likes:', updatedPost.likes); // Debug log
                 
                 // Update button state
-                button.classList.toggle('liked', isLiked);
-                heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+                if (isLiked) {
+                    button.classList.add('liked');
+                    heartIcon.setAttribute('fill', 'currentColor');
+                } else {
+                    button.classList.remove('liked');
+                    heartIcon.setAttribute('fill', 'none');
+                }
                 
                 // Update like count and heart in modal if it's open
                 const modalPost = document.querySelector(`.post-modal .post-item[data-post-id="${postId}"]`);
@@ -507,7 +512,11 @@ function attachLikeHandlers() {
                     const modalHeartIcon = modalPost.querySelector('svg path');
                     
                     if (modalLikeButton) {
-                        modalLikeButton.classList.toggle('liked', isLiked);
+                        if (isLiked) {
+                            modalLikeButton.classList.add('liked');
+                        } else {
+                            modalLikeButton.classList.remove('liked');
+                        }
                     }
                     if (modalLikeCount) {
                         modalLikeCount.textContent = updatedPost.likes_count;
