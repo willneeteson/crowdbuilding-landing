@@ -85,13 +85,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-
-// Add formatDate function if not already defined
-function formatDate(dateString) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('nl-NL', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
-}
