@@ -117,35 +117,35 @@ async function toggleLike(postId) {
         console.log('Updated post:', JSON.stringify(updatedPost)); // Log the post data
         
         // Determine if the post is now liked
-        let isLiked;
+        let isLiked = false;
         
-        // First try to check the action from the API message (most reliable)
-        if (data.message) {
-            // Dutch messages will include "niet meer" if unliking
-            const unlikeTerms = ["niet meer", "unlike", "removed like", "removed your like"];
-            const likeTerms = ["vindt post", "like", "liked", "added like"];
-            
-            isLiked = !unlikeTerms.some(term => data.message.toLowerCase().includes(term)) &&
-                      likeTerms.some(term => data.message.toLowerCase().includes(term));
-                      
-            console.log(`Determined like status from message: ${isLiked}`);
-        }
-        // If message doesn't provide clear indication, check explicit is_liked property
-        else if (updatedPost.is_liked !== undefined) {
-            isLiked = updatedPost.is_liked;
-            console.log(`Determined like status from is_liked property: ${isLiked}`);
-        }
-        // Finally, fall back to checking likes array
-        else if (updatedPost.likes) {
+        // Check if the current user's ID is in the likes array
+        if (updatedPost.likes && Array.isArray(updatedPost.likes)) {
             isLiked = updatedPost.likes.some(like => {
-                return (
-                    like.id === currentUserId ||
-                    like.user_id === currentUserId ||
-                    like.created_by === currentUserId ||
-                    (like.user && like.user.id === currentUserId)
-                );
+                // The like object might have the user ID in different properties
+                const likeUserId = like.id || like.user_id || (like.created_by && like.created_by.id);
+                return likeUserId === currentUserId;
             });
             console.log(`Determined like status from likes array: ${isLiked}`);
+        }
+        
+        // Double-check with the message if available
+        if (data.message) {
+            const unlikeIndication = data.message.toLowerCase().includes('niet meer') || 
+                                     data.message.toLowerCase().includes('unlike') ||
+                                     data.message.toLowerCase().includes('removed');
+                                     
+            const likeIndication = data.message.toLowerCase().includes('vindt post') || 
+                                  data.message.toLowerCase().includes('liked') ||
+                                  data.message.toLowerCase().includes('added like');
+            
+            if (unlikeIndication) {
+                console.log('Message indicates post was UNliked');
+                isLiked = false;
+            } else if (likeIndication) {
+                console.log('Message indicates post was liked');
+                isLiked = true;
+            }
         }
         
         console.log(`Post ${postId} final like status: ${isLiked}, likes_count: ${updatedPost.likes_count}`);
@@ -207,22 +207,22 @@ function renderPosts(posts) {
         
         // Determine if this post is liked
         // First check the explicit property if available
-        let isLiked = post.is_liked;
+        let isLiked = false;
         
-        // If is_liked not provided, check the likes array
-        if (isLiked === undefined && post.likes && post.likes.length > 0) {
-            // Check different patterns of where the user ID might be stored
+        // Check if the current user's ID is in the likes array
+        if (post.likes && Array.isArray(post.likes)) {
             isLiked = post.likes.some(like => {
+                // The like object might have the user ID in different properties
                 return (
                     like.id === currentUserId ||
                     like.user_id === currentUserId ||
-                    like.created_by === currentUserId ||
+                    (like.created_by && like.created_by.id === currentUserId) ||
                     (like.user && like.user.id === currentUserId)
                 );
             });
         }
         
-        console.log('Post', post.id, 'isLiked:', isLiked, 'Likes:', post.likes); // Debug log
+        console.log('Post', post.id, 'isLiked:', isLiked, 'likes_count:', post.likes_count, 'Likes:', JSON.stringify(post.likes)); // Debug log
 
         const menuHtml = canDelete ? `
             <div class="post-menu">
@@ -740,29 +740,23 @@ async function checkPostLikeStatus(postId) {
         const data = await response.json();
         const post = data.data;
         
-        // Check if the post is liked by the current user
-        // First check if the API directly tells us (preferred)
-        if (post.is_liked !== undefined) {
-            console.log(`Post ${postId} like status check - isLiked: ${post.is_liked} (from API)`);
-            return post.is_liked;
-        }
+        console.log(`Post ${postId} details:`, JSON.stringify(post));
         
-        // Otherwise try to determine from the likes array
-        // Note: This might need adjustment based on the actual structure of the likes data
+        // Check if the post is liked by the current user
         let isLiked = false;
-        if (post.likes && post.likes.length > 0) {
-            // Try different properties that might hold the user ID
+        
+        // Check if the current user's ID is in the likes array
+        if (post.likes && Array.isArray(post.likes)) {
             isLiked = post.likes.some(like => {
-                return (
-                    like.id === currentUserId ||
-                    like.user_id === currentUserId ||
-                    like.created_by === currentUserId ||
-                    (like.user && like.user.id === currentUserId)
-                );
+                // The like object might have the user ID in different properties
+                const likeUserId = like.id || like.user_id || 
+                                  (like.created_by && like.created_by.id) || 
+                                  (like.user && like.user.id);
+                return likeUserId === currentUserId;
             });
         }
         
-        console.log(`Post ${postId} like status check - isLiked: ${isLiked} (from likes array)`);
+        console.log(`Post ${postId} like status check - isLiked: ${isLiked} (from likes array), likes_count: ${post.likes_count}`);
         return isLiked;
     } catch (error) {
         console.error(`Error checking post ${postId}:`, error);
