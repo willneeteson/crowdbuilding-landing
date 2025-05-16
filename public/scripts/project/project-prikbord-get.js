@@ -244,7 +244,7 @@ function renderPosts(posts) {
             </div>
         ` : '';
 
-        // Create the post element without the SVG to avoid issues with fill attribute
+        // Create the post element with image for heart instead of SVG
         postElement.innerHTML = `
             ${menuHtml}
             <div class="post-header">
@@ -259,12 +259,11 @@ function renderPosts(posts) {
                 ${postImages}
             </div>
             <div class="post-footer">
-                <button class="post-like-button ${isLiked ? 'liked' : ''}" data-post-id="${post.id}">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                            stroke="currentColor" stroke-width="2"
-                            fill="${isLiked ? 'currentColor' : 'none'}"/>
-                    </svg>
+                <button class="post-like-button ${isLiked ? 'liked' : ''}" data-post-id="${post.id}" data-liked="${isLiked ? 'true' : 'false'}">
+                    <img class="heart-icon" width="24" height="24" src="${isLiked ? 
+                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+' : 
+                        'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4='}" 
+                    alt="${isLiked ? 'Liked' : 'Not liked'}">
                     <span class="like-count">${post.likes_count}</span>
                 </button>
                 <div class="post-comments-count" data-post-id="${post.id}">
@@ -274,15 +273,6 @@ function renderPosts(posts) {
         `;
 
         container.appendChild(postElement);
-
-        // Explicitly set the fill attribute for the heart icon
-        if (isLiked) {
-            const heartIcon = postElement.querySelector('.post-like-button svg path');
-            if (heartIcon) {
-                console.log(`Setting heart fill for post ${post.id} to currentColor`);
-                heartIcon.setAttribute('fill', 'currentColor');
-            }
-        }
     });
 
     attachPostClickHandlers();
@@ -590,40 +580,61 @@ function updateLikeButtonState(postId, isLiked, likeCount) {
         // Update the like button class
         if (isLiked) {
             button.classList.add('liked');
-            button.setAttribute('data-liked', 'true'); // Add data attribute for easier debugging
+            button.setAttribute('data-liked', 'true');
         } else {
             button.classList.remove('liked');
             button.setAttribute('data-liked', 'false');
         }
         
-        // For maximum reliability, replace the entire SVG
-        replaceHeartSVG(button, isLiked);
-        
-        // Also try the regular approach as a fallback
-        const heartIcon = button.querySelector('svg path');
-        if (heartIcon) {
-            console.log(`Setting heart ${index} fill to ${isLiked ? '#e74c3c' : 'none'} for post ${postId}`);
-            
-            // Set through setAttribute and also through direct style for maximum compatibility
-            heartIcon.setAttribute('fill', isLiked ? '#e74c3c' : 'none');
-            heartIcon.style.fill = isLiked ? '#e74c3c' : 'none';
-            
-            // If liked, also update the stroke to match (for better visibility)
-            if (isLiked) {
-                heartIcon.setAttribute('stroke', '#e74c3c');
-                heartIcon.style.stroke = '#e74c3c';
-            } else {
-                heartIcon.setAttribute('stroke', 'currentColor');
-            }
-        }
+        // Replace SVG with an image element for better compatibility
+        replaceHeartWithImage(button, isLiked);
     });
     
     // Add an extra heart check to the document
     document.documentElement.setAttribute('data-post-' + postId + '-liked', isLiked ? 'true' : 'false');
-    
-    // Run a fix after a short delay to catch any issues
-    setTimeout(() => window.fixAllHearts(), 100);
 }
+
+// Replace the SVG with an image element instead
+function replaceHeartWithImage(button, isLiked) {
+    // First, try to find and remove any existing heart (SVG or image)
+    const existingHeart = button.querySelector('svg, img.heart-icon');
+    if (existingHeart) {
+        existingHeart.remove();
+    }
+    
+    // Create a new image element
+    const heartImg = document.createElement('img');
+    heartImg.className = 'heart-icon';
+    heartImg.width = 24;
+    heartImg.height = 24;
+    
+    // Set source based on liked state
+    if (isLiked) {
+        heartImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+        heartImg.alt = 'Liked';
+    } else {
+        heartImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=';
+        heartImg.alt = 'Not liked';
+    }
+    
+    // Insert the image at the beginning of the button
+    button.insertBefore(heartImg, button.firstChild);
+}
+
+// Add a global function to fix all hearts
+window.fixAllHearts = function() {
+    console.log('Manual heart fix triggered');
+    document.querySelectorAll('.post-like-button').forEach(button => {
+        const isLiked = button.classList.contains('liked');
+        replaceHeartWithImage(button, isLiked);
+    });
+};
+
+// Apply hearts fix on DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(window.fixAllHearts, 500);
+    setTimeout(window.fixAllHearts, 1500);
+});
 
 // Make these functions available globally for newly created posts
 window.attachLikeHandlers = attachLikeHandlers;
@@ -694,11 +705,10 @@ function fixAllHeartIcons() {
                     if (isLiked) {
                         console.log(`Post ${postId} is liked by current user, updating UI`);
                         likeButton.classList.add('liked');
-                        const heartIcon = likeButton.querySelector('svg path');
+                        const heartIcon = likeButton.querySelector('img.heart-icon');
                         if (heartIcon) {
-                            heartIcon.setAttribute('fill', 'currentColor');
-                            // Force a repaint to ensure the fill is applied
-                            heartIcon.getBoundingClientRect();
+                            heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+                            heartIcon.alt = 'Liked';
                         }
                     }
                 }).catch(error => {
@@ -708,15 +718,14 @@ function fixAllHeartIcons() {
             
             // Also update based on class
             const isLiked = likeButton.classList.contains('liked');
-            const heartIcon = likeButton.querySelector('svg path');
+            const heartIcon = likeButton.querySelector('img.heart-icon');
             
             console.log(`Post ${postId} - isLiked class: ${isLiked}, likeCount: ${likeCount}`);
             
             if (isLiked && heartIcon) {
                 console.log(`Fixing heart icon for post ${postId}`);
-                heartIcon.setAttribute('fill', 'currentColor');
-                // Force a repaint to ensure the fill is applied
-                heartIcon.getBoundingClientRect();
+                heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+                heartIcon.alt = 'Liked';
             }
         }
     });
@@ -796,78 +805,3 @@ function handleLikeButtonClick(event) {
         alert('Failed to update like status. Please try again.');
     });
 }
-
-// Add a global function to fix all hearts
-window.fixAllHearts = function() {
-    console.log('Manual heart fix triggered');
-    document.querySelectorAll('.post-like-button.liked').forEach(button => {
-        const path = button.querySelector('svg path');
-        if (path) {
-            path.setAttribute('fill', '#e74c3c');
-            path.style.fill = '#e74c3c';
-            path.setAttribute('stroke', '#e74c3c');
-            path.style.stroke = '#e74c3c';
-            console.log('Fixed heart on button', button.getAttribute('data-post-id'));
-        }
-    });
-    
-    // Also handle any lingering hearts that might not be fixed
-    document.querySelectorAll('.post-like-button').forEach(button => {
-        const isLiked = button.classList.contains('liked');
-        if (isLiked) {
-            // Replace the SVG with a correctly filled heart
-            replaceHeartSVG(button, true);
-        }
-    });
-};
-
-// Replace the SVG with a brand new SVG to avoid any style inheritance issues
-function replaceHeartSVG(button, isLiked) {
-    const existingSVG = button.querySelector('svg');
-    if (!existingSVG) return;
-    
-    const likeCount = button.querySelector('.like-count')?.textContent || '0';
-    
-    // Create a new SVG with the correct fill
-    const newSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    newSVG.setAttribute('width', '24');
-    newSVG.setAttribute('height', '24');
-    newSVG.setAttribute('viewBox', '0 0 24 24');
-    newSVG.setAttribute('fill', 'none');
-    
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
-    path.setAttribute('stroke-width', '2');
-    
-    if (isLiked) {
-        path.setAttribute('fill', '#e74c3c');
-        path.setAttribute('stroke', '#e74c3c');
-        path.style.fill = '#e74c3c';
-        path.style.stroke = '#e74c3c';
-    } else {
-        path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', 'currentColor');
-        path.style.fill = 'none';
-    }
-    
-    newSVG.appendChild(path);
-    
-    // Replace the old SVG
-    existingSVG.replaceWith(newSVG);
-    
-    // Make sure the like count is still there
-    const countSpan = button.querySelector('.like-count');
-    if (!countSpan) {
-        const newCountSpan = document.createElement('span');
-        newCountSpan.className = 'like-count';
-        newCountSpan.textContent = likeCount;
-        button.appendChild(newCountSpan);
-    }
-    
-    return newSVG;
-}
-
-// Run multiple heart fixes at different intervals to catch any delayed rendering
-setTimeout(window.fixAllHearts, 1000);
-setTimeout(window.fixAllHearts, 2000);
-setTimeout(window.fixAllHearts, 3000);

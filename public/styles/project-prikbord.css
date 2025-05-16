@@ -333,32 +333,14 @@
     color: #e74c3c !important;
 }
 
-/* Ensure liked hearts are always filled */
-.post-like-button.liked svg path {
-    fill: #e74c3c !important;
-    stroke: #e74c3c !important;
-}
-
-/* Ensure unliked hearts are always unfilled */
-.post-like-button:not(.liked) svg path {
-    fill: none !important;
-    stroke: currentColor !important;
-}
-
-/* Direct styling for the heart SVG to make it more reliable */
-.post-like-button svg {
+/* Heart icon styles */
+.heart-icon {
     width: 24px;
     height: 24px;
     transition: transform 0.2s;
 }
 
-/* Ensure the heart fill is visible when its parent has 'liked' class */
-button.liked svg path {
-    fill: #e74c3c !important;
-    stroke: #e74c3c !important;
-}
-
-.post-like-button:hover svg {
+.post-like-button:hover .heart-icon {
     transform: scale(1.1);
 }
 
