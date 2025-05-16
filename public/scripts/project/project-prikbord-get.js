@@ -90,6 +90,31 @@ function formatDate(dateString) {
     });
 }
 
+async function toggleLike(postId) {
+    const token = await window.auth.getApiToken();
+    if (!token) {
+        alert('You must be logged in to like posts.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error('Error toggling like:', error);
+        throw error;
+    }
+}
+
 function renderPosts(posts) {
     const container = document.getElementById('groupPosts');
     container.innerHTML = '';
@@ -131,11 +156,7 @@ function renderPosts(posts) {
             : '';
 
         const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
-        console.log('Can delete calculation:', {
-            fromPermissions: post.permissions?.can_delete,
-            fromCreatorMatch: post.created_by?.id === currentUserId,
-            finalResult: canDelete
-        });
+        const isLiked = post.likes.some(like => like.id === currentUserId);
 
         const menuHtml = canDelete ? `
             <div class="post-menu">
@@ -171,10 +192,15 @@ function renderPosts(posts) {
                 ${postImages}
             </div>
             <div class="post-footer">
-                <div class="post-likes">
-                    ${likeAvatars}
-                    <span>${post.likes_count} like${post.likes_count !== 1 ? 's' : ''}</span>
-                </div>
+                <button class="post-like-button ${isLiked ? 'liked' : ''}" data-post-id="${post.id}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                            fill="${isLiked ? 'currentColor' : 'none'}" 
+                            stroke="currentColor" 
+                            stroke-width="2"/>
+                    </svg>
+                    <span class="like-count">${post.likes_count}</span>
+                </button>
                 <div class="post-comments-count" data-post-id="${post.id}">
                     <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
                 </div>
@@ -186,6 +212,7 @@ function renderPosts(posts) {
 
     attachPostClickHandlers();
     attachMenuHandlers();
+    attachLikeHandlers();
 }
 
 function renderComments(comments, container) {
@@ -436,6 +463,41 @@ async function deletePost(postId) {
         postElement.innerHTML = originalContent;
         alert('Failed to delete post. Please try again.');
     }
+}
+
+function attachLikeHandlers() {
+    document.querySelectorAll('.post-like-button').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent modal from opening
+            const postId = button.getAttribute('data-post-id');
+            const likeCount = button.querySelector('.like-count');
+            const heartIcon = button.querySelector('svg path');
+            
+            try {
+                const updatedPost = await toggleLike(postId);
+                
+                // Update like count
+                likeCount.textContent = updatedPost.likes_count;
+                
+                // Toggle liked state
+                const isLiked = updatedPost.likes.some(like => like.id === currentUserId);
+                button.classList.toggle('liked', isLiked);
+                heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+                
+                // Update like count in modal if it's open
+                const modalPost = document.querySelector(`.post-modal .post-item[data-post-id="${postId}"]`);
+                if (modalPost) {
+                    const modalLikeCount = modalPost.querySelector('.like-count');
+                    if (modalLikeCount) {
+                        modalLikeCount.textContent = updatedPost.likes_count;
+                    }
+                }
+            } catch (error) {
+                console.error('Error toggling like:', error);
+                alert('Failed to update like. Please try again.');
+            }
+        });
+    });
 }
 
 // Initialise

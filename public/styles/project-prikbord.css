@@ -293,4 +293,50 @@
 /* Add some spacing between comments and form */
 .post-modal .post-comments-list {
     margin-bottom: 2rem;
+}
+
+/* Like button styles */
+.post-like-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.post-like-button:hover {
+    color: #e74c3c;
+}
+
+.post-like-button.liked {
+    color: #e74c3c;
+}
+
+.post-like-button svg {
+    width: 24px;
+    height: 24px;
+    transition: transform 0.2s;
+}
+
+.post-like-button:hover svg {
+    transform: scale(1.1);
+}
+
+.post-like-button .like-count {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Update post footer layout */
+.post-footer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 } 
