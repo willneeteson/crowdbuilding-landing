@@ -87,7 +87,7 @@ async function getCurrentUserId() {
 }
 
 async function fetchGroupPosts(groupSlug) {
-    const token = await getApiToken();
+    const token = await window.auth.getApiToken();
     const endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
 
     try {
@@ -108,7 +108,7 @@ async function fetchGroupPosts(groupSlug) {
 }
 
 async function fetchCommentsForPost(postId) {
-    const token = await getApiToken();
+    const token = await window.auth.getApiToken();
     const endpoint = `https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`;
 
     try {
@@ -274,46 +274,39 @@ function attachDeleteButtons() {
 }
 
 async function deletePost(postId) {
-  const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
-  const token = await getApiToken();
+    const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
+    const token = await window.auth.getApiToken();
 
-  if (!token) {
-    alert('You are not signed in.');
-    return;
-  }
+    if (!token) {
+        alert('You are not signed in.');
+        return;
+    }
 
-  try {
-    const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts/${postId}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    try {
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
 
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    console.log('Post deleted:', data);
-  } catch (error) {
-    console.error('Error deleting post:', error);
-  }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        console.log('Post deleted:', data);
+    } catch (error) {
+        console.error('Error deleting post:', error);
+    }
 }
 
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        // Wait for Memberstack to be ready
-        if (typeof $memberstackDom !== "undefined") {
-            console.log('Waiting for Memberstack to be ready...');
-            await $memberstackDom.onReady;
-            console.log('Memberstack is ready');
-        }
-
         // Get current user ID
-        const userId = await getCurrentUserId();
-        console.log('Initialized with user ID:', userId);
+        currentUserId = await window.auth.getCurrentMemberstackId();
+        console.log('Initialized with user ID:', currentUserId);
         
         // Only fetch posts if we have a user
-        if (userId) {
+        if (currentUserId) {
             fetchGroupPosts('tiny-house-alkmaar');
         } else {
             console.log('User not logged in, not fetching posts');
