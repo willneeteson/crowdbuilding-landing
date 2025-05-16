@@ -7,7 +7,12 @@ async function getCurrentUserId() {
     const member = await $memberstackDom.getCurrentMember();
     if (member) {
       currentUserId = member.id;
+      console.log('Current user ID set to:', currentUserId);
+    } else {
+      console.log('No member found in Memberstack');
     }
+  } else {
+    console.log('Memberstack not available');
   }
 }
 
@@ -142,6 +147,8 @@ function renderPosts(posts) {
   const container = document.getElementById('groupPosts');
   container.innerHTML = '';
 
+  console.log('Rendering posts, currentUserId:', currentUserId);
+
   posts.forEach(post => {
     const postElement = document.createElement('article');
     postElement.className = 'post-item';
@@ -158,7 +165,23 @@ function renderPosts(posts) {
         ).join('')
       : '';
 
+    // Debug information
+    console.log('Post data:', {
+      postId: post.id,
+      currentUserId,
+      postCreatedById: post.created_by?.id,
+      hasPermissions: !!post.permissions,
+      canDeleteFromPermissions: post.permissions?.can_delete,
+      postData: post // Log the entire post object
+    });
+
     const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
+    console.log('Can delete calculation:', {
+      fromPermissions: post.permissions?.can_delete,
+      fromCreatorMatch: post.created_by?.id === currentUserId,
+      finalResult: canDelete
+    });
+
     const deleteButton = canDelete
       ? `<button class="post-delete-button" data-post-id="${post.id}">Delete</button>`
       : '';
@@ -176,15 +199,15 @@ function renderPosts(posts) {
         ${postImages}
       </div>
       <div class="post-footer">
-  <div class="post-likes">
-    ${likeAvatars}
-    <span>${post.likes_count} like${post.likes_count !== 1 ? 's' : ''}</span>
-  </div>
-  <div class="post-comments-toggle" data-post-id="${post.id}">
-    <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
-  </div>
-  ${deleteButton}
-</div>
+        <div class="post-likes">
+          ${likeAvatars}
+          <span>${post.likes_count} like${post.likes_count !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="post-comments-toggle" data-post-id="${post.id}">
+          <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
+        </div>
+        ${deleteButton}
+      </div>
       <div class="post-comments-list" id="comments-${post.id}" style="display: none;"></div>
     `;
 
@@ -192,7 +215,7 @@ function renderPosts(posts) {
   });
 
   attachCommentToggles();
-  attachDeleteButtons(); // Important!
+  attachDeleteButtons();
 }
 
 function formatDate(dateString) {
