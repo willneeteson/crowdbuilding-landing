@@ -595,6 +595,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Wait a bit and then ensure all heart icons are properly filled
             setTimeout(fixAllHeartIcons, 1000);
+            
+            // Add direct document-level event listener for like buttons
+            addDirectLikeClickHandler();
         } else {
             console.log('User not logged in, not fetching posts');
             const container = document.getElementById('groupPosts');
@@ -619,16 +622,150 @@ function fixAllHeartIcons() {
         const likeButton = post.querySelector('.post-like-button');
         
         if (likeButton) {
-            // Check if this post is liked by the current user
+            const likeCountElement = likeButton.querySelector('.like-count');
+            const likeCount = likeCountElement ? parseInt(likeCountElement.textContent) || 0 : 0;
+            
+            // If there are likes, check if the current user has liked it
+            if (likeCount > 0) {
+                // We need to explicitly check if this post is liked by requesting its data
+                checkPostLikeStatus(postId).then(isLiked => {
+                    if (isLiked) {
+                        console.log(`Post ${postId} is liked by current user, updating UI`);
+                        likeButton.classList.add('liked');
+                        const heartIcon = likeButton.querySelector('svg path');
+                        if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
+                    }
+                }).catch(error => {
+                    console.error(`Error checking like status for post ${postId}:`, error);
+                });
+            }
+            
+            // Also update based on class
             const isLiked = likeButton.classList.contains('liked');
             const heartIcon = likeButton.querySelector('svg path');
             
-            console.log(`Post ${postId} - isLiked: ${isLiked}`);
+            console.log(`Post ${postId} - isLiked: ${isLiked}, likeCount: ${likeCount}`);
             
             if (isLiked && heartIcon) {
                 console.log(`Fixing heart icon for post ${postId}`);
                 heartIcon.setAttribute('fill', 'currentColor');
             }
+        }
+    });
+}
+
+// Function to check if a post is liked by the current user
+async function checkPostLikeStatus(postId) {
+    const token = await window.auth.getApiToken();
+    if (!token) return false;
+
+    try {
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        const post = data.data;
+        
+        // Check if the current user is in the likes array
+        const isLiked = post.likes && post.likes.some(like => like.id === currentUserId);
+        console.log(`Post ${postId} like status check - isLiked: ${isLiked}`);
+        
+        return isLiked;
+    } catch (error) {
+        console.error(`Error checking post ${postId}:`, error);
+        return false;
+    }
+}
+
+// Add a direct document-level click handler for all like buttons
+function addDirectLikeClickHandler() {
+    console.log('Adding direct document-level like button handler');
+    
+    // Remove any existing handler with the same name
+    document.removeEventListener('click', handleLikeButtonClick);
+    
+    // Add the click handler to the entire document
+    document.addEventListener('click', handleLikeButtonClick);
+}
+
+// Handler function for like button clicks
+function handleLikeButtonClick(event) {
+    // Find if the click was on a like button or its child elements
+    const likeButton = event.target.closest('.post-like-button');
+    if (!likeButton) return; // Not a like button click
+    
+    // Prevent event propagation
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const postId = likeButton.getAttribute('data-post-id');
+    if (!postId) return; // No post ID found
+    
+    console.log(`Direct handler: Like button clicked for post ${postId}`);
+    
+    // Toggle the visual state immediately before API call
+    const isCurrentlyLiked = likeButton.classList.contains('liked');
+    const heartIcon = likeButton.querySelector('svg path');
+    const likeCountElement = likeButton.querySelector('.like-count');
+    
+    // Update UI immediately (will be confirmed by API response later)
+    if (isCurrentlyLiked) {
+        // Unlike the post
+        likeButton.classList.remove('liked');
+        if (heartIcon) heartIcon.setAttribute('fill', 'none');
+        if (likeCountElement) {
+            const currentCount = parseInt(likeCountElement.textContent) || 0;
+            if (currentCount > 0) likeCountElement.textContent = currentCount - 1;
+        }
+    } else {
+        // Like the post
+        likeButton.classList.add('liked');
+        if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
+        if (likeCountElement) {
+            const currentCount = parseInt(likeCountElement.textContent) || 0;
+            likeCountElement.textContent = currentCount + 1;
+        }
+    }
+    
+    // Then call the API to confirm the change
+    toggleLike(postId).then(updatedPost => {
+        console.log('API response received for toggle like');
+        // Actual state from the server
+        const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
+        const actualLikeCount = updatedPost.likes_count;
+        
+        // Update all instances of this post with the accurate data
+        document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`).forEach(button => {
+            // Update visual state
+            if (isLiked) {
+                button.classList.add('liked');
+                const icon = button.querySelector('svg path');
+                if (icon) icon.setAttribute('fill', 'currentColor');
+            } else {
+                button.classList.remove('liked');
+                const icon = button.querySelector('svg path');
+                if (icon) icon.setAttribute('fill', 'none');
+            }
+            
+            // Update count
+            const countElement = button.querySelector('.like-count');
+            if (countElement) countElement.textContent = actualLikeCount;
+        });
+    }).catch(error => {
+        console.error('Error toggling like:', error);
+        // Revert the UI change on error
+        if (isCurrentlyLiked) {
+            likeButton.classList.add('liked');
+            if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
+        } else {
+            likeButton.classList.remove('liked');
+            if (heartIcon) heartIcon.setAttribute('fill', 'none');
         }
     });
 }
