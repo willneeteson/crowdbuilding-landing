@@ -110,43 +110,17 @@ async function toggleLike(postId) {
         const data = await response.json();
         console.log('Like toggle response:', data); // Debug log
         
-        // Force update UI directly after API call
+        // Get the updated post data
         const updatedPost = data.data;
-        const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
         
-        // Get all buttons for this post and update them
-        const buttons = document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`);
-        buttons.forEach(button => {
-            // Update button state
-            if (isLiked) {
-                button.classList.add('liked');
-            } else {
-                button.classList.remove('liked');
-            }
-            
-            // Update like count
-            const likeCount = button.querySelector('.like-count');
-            if (likeCount) {
-                likeCount.textContent = updatedPost.likes_count;
-            }
-            
-            // IMPORTANT: Explicitly update heart fill
-            const heartIcon = button.querySelector('svg path');
-            if (heartIcon) {
-                console.log(`Setting heart fill to ${isLiked ? 'currentColor' : 'none'} for post ${postId}`);
-                heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
-                
-                // Double check that the fill attribute is set
-                setTimeout(() => {
-                    const currentFill = heartIcon.getAttribute('fill');
-                    console.log(`Current fill for post ${postId}: ${currentFill}`);
-                    if (isLiked && currentFill !== 'currentColor') {
-                        console.log(`Forcing heart fill for post ${postId}`);
-                        heartIcon.setAttribute('fill', 'currentColor');
-                    }
-                }, 100);
-            }
-        });
+        // Check if the current user has liked the post - inspect message for confirmation
+        // The API typically returns a message indicating successful like action
+        const isLiked = data.message && data.message.includes('vindt post') && !data.message.includes('niet meer');
+        
+        console.log(`Post ${postId} like status updated - isLiked: ${isLiked}, likes_count: ${updatedPost.likes_count}`);
+        
+        // Update UI for all instances of this post's like button
+        updateLikeButtonState(postId, isLiked, updatedPost.likes_count);
         
         return updatedPost;
     } catch (error) {
@@ -199,7 +173,24 @@ function renderPosts(posts) {
             : '';
 
         const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
-        const isLiked = post.likes && post.likes.some(like => like.id === currentUserId);
+        
+        // Determine if this post is liked
+        // First check the explicit property if available
+        let isLiked = post.is_liked;
+        
+        // If is_liked not provided, check the likes array
+        if (isLiked === undefined && post.likes && post.likes.length > 0) {
+            // Check different patterns of where the user ID might be stored
+            isLiked = post.likes.some(like => {
+                return (
+                    like.id === currentUserId ||
+                    like.user_id === currentUserId ||
+                    like.created_by === currentUserId ||
+                    (like.user && like.user.id === currentUserId)
+                );
+            });
+        }
+        
         console.log('Post', post.id, 'isLiked:', isLiked, 'Likes:', post.likes); // Debug log
 
         const menuHtml = canDelete ? `
@@ -573,6 +564,9 @@ function updateLikeButtonState(postId, isLiked, likeCount) {
         const heartIcon = button.querySelector('svg path');
         if (heartIcon) {
             heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+            
+            // Force a repaint to ensure the fill is applied
+            heartIcon.getBoundingClientRect();
         }
     });
 }
@@ -633,7 +627,11 @@ function fixAllHeartIcons() {
                         console.log(`Post ${postId} is liked by current user, updating UI`);
                         likeButton.classList.add('liked');
                         const heartIcon = likeButton.querySelector('svg path');
-                        if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
+                        if (heartIcon) {
+                            heartIcon.setAttribute('fill', 'currentColor');
+                            // Force a repaint to ensure the fill is applied
+                            heartIcon.getBoundingClientRect();
+                        }
                     }
                 }).catch(error => {
                     console.error(`Error checking like status for post ${postId}:`, error);
@@ -644,11 +642,13 @@ function fixAllHeartIcons() {
             const isLiked = likeButton.classList.contains('liked');
             const heartIcon = likeButton.querySelector('svg path');
             
-            console.log(`Post ${postId} - isLiked: ${isLiked}, likeCount: ${likeCount}`);
+            console.log(`Post ${postId} - isLiked class: ${isLiked}, likeCount: ${likeCount}`);
             
             if (isLiked && heartIcon) {
                 console.log(`Fixing heart icon for post ${postId}`);
                 heartIcon.setAttribute('fill', 'currentColor');
+                // Force a repaint to ensure the fill is applied
+                heartIcon.getBoundingClientRect();
             }
         }
     });
@@ -672,10 +672,29 @@ async function checkPostLikeStatus(postId) {
         const data = await response.json();
         const post = data.data;
         
-        // Check if the current user is in the likes array
-        const isLiked = post.likes && post.likes.some(like => like.id === currentUserId);
-        console.log(`Post ${postId} like status check - isLiked: ${isLiked}`);
+        // Check if the post is liked by the current user
+        // First check if the API directly tells us (preferred)
+        if (post.is_liked !== undefined) {
+            console.log(`Post ${postId} like status check - isLiked: ${post.is_liked} (from API)`);
+            return post.is_liked;
+        }
         
+        // Otherwise try to determine from the likes array
+        // Note: This might need adjustment based on the actual structure of the likes data
+        let isLiked = false;
+        if (post.likes && post.likes.length > 0) {
+            // Try different properties that might hold the user ID
+            isLiked = post.likes.some(like => {
+                return (
+                    like.id === currentUserId ||
+                    like.user_id === currentUserId ||
+                    like.created_by === currentUserId ||
+                    (like.user && like.user.id === currentUserId)
+                );
+            });
+        }
+        
+        console.log(`Post ${postId} like status check - isLiked: ${isLiked} (from likes array)`);
         return isLiked;
     } catch (error) {
         console.error(`Error checking post ${postId}:`, error);
@@ -709,63 +728,9 @@ function handleLikeButtonClick(event) {
     
     console.log(`Direct handler: Like button clicked for post ${postId}`);
     
-    // Toggle the visual state immediately before API call
-    const isCurrentlyLiked = likeButton.classList.contains('liked');
-    const heartIcon = likeButton.querySelector('svg path');
-    const likeCountElement = likeButton.querySelector('.like-count');
-    
-    // Update UI immediately (will be confirmed by API response later)
-    if (isCurrentlyLiked) {
-        // Unlike the post
-        likeButton.classList.remove('liked');
-        if (heartIcon) heartIcon.setAttribute('fill', 'none');
-        if (likeCountElement) {
-            const currentCount = parseInt(likeCountElement.textContent) || 0;
-            if (currentCount > 0) likeCountElement.textContent = currentCount - 1;
-        }
-    } else {
-        // Like the post
-        likeButton.classList.add('liked');
-        if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
-        if (likeCountElement) {
-            const currentCount = parseInt(likeCountElement.textContent) || 0;
-            likeCountElement.textContent = currentCount + 1;
-        }
-    }
-    
-    // Then call the API to confirm the change
-    toggleLike(postId).then(updatedPost => {
-        console.log('API response received for toggle like');
-        // Actual state from the server
-        const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
-        const actualLikeCount = updatedPost.likes_count;
-        
-        // Update all instances of this post with the accurate data
-        document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`).forEach(button => {
-            // Update visual state
-            if (isLiked) {
-                button.classList.add('liked');
-                const icon = button.querySelector('svg path');
-                if (icon) icon.setAttribute('fill', 'currentColor');
-            } else {
-                button.classList.remove('liked');
-                const icon = button.querySelector('svg path');
-                if (icon) icon.setAttribute('fill', 'none');
-            }
-            
-            // Update count
-            const countElement = button.querySelector('.like-count');
-            if (countElement) countElement.textContent = actualLikeCount;
-        });
-    }).catch(error => {
-        console.error('Error toggling like:', error);
-        // Revert the UI change on error
-        if (isCurrentlyLiked) {
-            likeButton.classList.add('liked');
-            if (heartIcon) heartIcon.setAttribute('fill', 'currentColor');
-        } else {
-            likeButton.classList.remove('liked');
-            if (heartIcon) heartIcon.setAttribute('fill', 'none');
-        }
+    // Toggle the like status through the API
+    toggleLike(postId).catch(error => {
+        console.error(`Error toggling like for post ${postId}:`, error);
+        alert('Failed to update like status. Please try again.');
     });
 }

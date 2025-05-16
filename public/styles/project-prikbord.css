@@ -336,11 +336,13 @@
 /* Ensure liked hearts are always filled */
 .post-like-button.liked svg path {
     fill: currentColor !important;
+    stroke: currentColor !important;
 }
 
 /* Ensure unliked hearts are always unfilled */
 .post-like-button:not(.liked) svg path {
     fill: none !important;
+    stroke: currentColor !important;
 }
 
 .post-like-button svg {
