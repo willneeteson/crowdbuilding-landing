@@ -158,9 +158,9 @@ document.addEventListener('DOMContentLoaded', function() {
     hoverCard.classList.remove('show');
   }
   
-  // Attach hover events to user elements
+  // Attach hover events and click events to user elements
   function attachHoverEvents() {
-    console.log('Attaching user hover events');
+    console.log('Attaching user hover events and click functionality');
     
     // Target all post authors and comment authors
     const userElements = document.querySelectorAll('.post-author, .comment-item .comment-content h5');
@@ -181,12 +181,31 @@ document.addEventListener('DOMContentLoaded', function() {
       // Remove existing event listeners if any (to prevent duplicates)
       element.removeEventListener('mouseenter', element._debouncedShowCard);
       element.removeEventListener('mouseleave', hideHoverCard);
+      element.removeEventListener('click', element._handleUserClick);
       
       // Save reference to the debounced function for later removal
       element._debouncedShowCard = debouncedShowCard;
       
+      // Add click handler to navigate to user profile
+      const handleUserClick = (e) => {
+        const userId = findUserId(element);
+        if (userId) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Navigate to user profile page
+          window.location.href = `/user?id=${userId}`;
+        }
+      };
+      
+      // Save reference to click handler
+      element._handleUserClick = handleUserClick;
+      
       element.addEventListener('mouseenter', debouncedShowCard);
       element.addEventListener('mouseleave', hideHoverCard);
+      element.addEventListener('click', handleUserClick);
+      
+      // Make it clear this is clickable
+      element.style.cursor = 'pointer';
     });
     
     // Also attach to avatar images
@@ -208,12 +227,31 @@ document.addEventListener('DOMContentLoaded', function() {
       // Remove existing event listeners if any (to prevent duplicates)
       element.removeEventListener('mouseenter', element._debouncedShowCard);
       element.removeEventListener('mouseleave', hideHoverCard);
+      element.removeEventListener('click', element._handleUserClick);
       
       // Save reference to the debounced function for later removal
       element._debouncedShowCard = debouncedShowCard;
       
+      // Add click handler to navigate to user profile
+      const handleUserClick = (e) => {
+        const userId = findUserId(element);
+        if (userId) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Navigate to user profile page
+          window.location.href = `/user?id=${userId}`;
+        }
+      };
+      
+      // Save reference to click handler
+      element._handleUserClick = handleUserClick;
+      
       element.addEventListener('mouseenter', debouncedShowCard);
       element.addEventListener('mouseleave', hideHoverCard);
+      element.addEventListener('click', handleUserClick);
+      
+      // Make it clear this is clickable
+      element.style.cursor = 'pointer';
     });
   }
   

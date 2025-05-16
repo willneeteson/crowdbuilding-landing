@@ -503,4 +503,23 @@
 .user-hover-trigger {
   position: relative;
   cursor: pointer;
+}
+
+.post-author, .comment-item .comment-content h5 {
+  transition: text-decoration 0.2s ease;
+  text-decoration: none;
+}
+
+.post-author:hover, .comment-item .comment-content h5:hover {
+  text-decoration: underline;
+}
+
+.post-avatar, .comment-avatar {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.post-avatar:hover, .comment-avatar:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
 } 
