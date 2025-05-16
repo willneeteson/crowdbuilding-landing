@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (imageFile) {
       try {
         // Compress and convert image to WebP
-        const compressedFile = await new Promise((resolve, reject) => {
+        const compressedBlob = await new Promise((resolve, reject) => {
           new Compressor(imageFile, {
             quality: 0.8,
             mimeType: 'image/webp',
@@ -50,6 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
               reject(err);
             },
           });
+        });
+
+        // Convert blob to File object
+        const compressedFile = new File([compressedBlob], imageFile.name.replace(/\.[^/.]+$/, '.webp'), {
+          type: 'image/webp',
+          lastModified: new Date().getTime()
         });
 
         formData.append('images[]', compressedFile);
