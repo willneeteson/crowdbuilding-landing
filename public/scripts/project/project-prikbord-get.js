@@ -74,7 +74,7 @@ async function getCurrentMemberstackId() {
 
 async function getCurrentUserId() {
     console.log('Getting current user ID...');
-    const memberstackId = await getCurrentMemberstackId();
+    const memberstackId = await window.auth.getCurrentMemberstackId();
     console.log('Retrieved memberstack ID:', memberstackId);
     
     if (memberstackId) {
@@ -216,61 +216,61 @@ function renderPosts(posts) {
 }
 
 function renderComments(comments, container) {
-  container.innerHTML = '';
+    container.innerHTML = '';
 
-  if (comments.length === 0) {
-    container.innerHTML = `<div class="comment-item empty">No comments yet.</div>`;
-    return;
-  }
+    if (comments.length === 0) {
+        container.innerHTML = `<div class="comment-item empty">No comments yet.</div>`;
+        return;
+    }
 
-  comments.forEach(comment => {
-    const commentElement = document.createElement('div');
-    commentElement.className = 'comment-item';
+    comments.forEach(comment => {
+        const commentElement = document.createElement('div');
+        commentElement.className = 'comment-item';
 
-    commentElement.innerHTML = `
-      <img class="post-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}">
-      <div class="comment-content">
-        <h5>${comment.created_by.name}</h5>
-        <p>${comment.body}</p>
-        <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
-      </div>
-    `;
+        commentElement.innerHTML = `
+            <img class="post-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}">
+            <div class="comment-content">
+                <h5>${comment.created_by.name}</h5>
+                <p>${comment.body}</p>
+                <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
+            </div>
+        `;
 
-    container.appendChild(commentElement);
-  });
+        container.appendChild(commentElement);
+    });
 }
 
 function attachCommentToggles() {
-  document.querySelectorAll('.post-comments-toggle').forEach(toggle => {
-    toggle.addEventListener('click', async () => {
-      const postId = toggle.getAttribute('data-post-id');
-      const commentsList = document.getElementById(`comments-${postId}`);
-      const isVisible = commentsList.style.display === 'block';
+    document.querySelectorAll('.post-comments-toggle').forEach(toggle => {
+        toggle.addEventListener('click', async () => {
+            const postId = toggle.getAttribute('data-post-id');
+            const commentsList = document.getElementById(`comments-${postId}`);
+            const isVisible = commentsList.style.display === 'block';
 
-      if (isVisible) {
-        commentsList.style.display = 'none';
-      } else {
-        commentsList.style.display = 'block';
+            if (isVisible) {
+                commentsList.style.display = 'none';
+            } else {
+                commentsList.style.display = 'block';
 
-        if (!commentsList.hasAttribute('data-loaded')) {
-          const comments = await fetchCommentsForPost(postId);
-          renderComments(comments, commentsList);
-          commentsList.setAttribute('data-loaded', 'true');
-        }
-      }
+                if (!commentsList.hasAttribute('data-loaded')) {
+                    const comments = await fetchCommentsForPost(postId);
+                    renderComments(comments, commentsList);
+                    commentsList.setAttribute('data-loaded', 'true');
+                }
+            }
+        });
     });
-  });
 }
 
 function attachDeleteButtons() {
-  document.querySelectorAll('.post-delete-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const postId = button.getAttribute('data-post-id');
-      if (confirm('Are you sure you want to delete this post?')) {
-        deletePost(postId);
-      }
+    document.querySelectorAll('.post-delete-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const postId = button.getAttribute('data-post-id');
+            if (confirm('Are you sure you want to delete this post?')) {
+                deletePost(postId);
+            }
+        });
     });
-  });
 }
 
 async function deletePost(postId) {
