@@ -485,53 +485,23 @@ async function deletePost(postId) {
 
 function attachLikeHandlers() {
     document.querySelectorAll('.post-like-button').forEach(button => {
-        button.addEventListener('click', async (e) => {
+        // Remove any existing event listeners to avoid duplicates
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async (e) => {
             e.stopPropagation(); // Prevent modal from opening
-            const postId = button.getAttribute('data-post-id');
-            const likeCount = button.querySelector('.like-count');
-            const heartIcon = button.querySelector('svg path');
-            const isCurrentlyLiked = button.classList.contains('liked');
+            const postId = newButton.getAttribute('data-post-id');
             
             try {
                 const updatedPost = await toggleLike(postId);
-                console.log('Updated post data:', updatedPost); // Debug log
-                
-                // Update like count
-                likeCount.textContent = updatedPost.likes_count;
                 
                 // Check if the current user is in the likes array
                 const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
-                console.log('Is liked:', isLiked, 'Current user:', currentUserId, 'Likes:', updatedPost.likes); // Debug log
+                console.log('Post', postId, 'isLiked:', isLiked, 'currentUserId:', currentUserId);
                 
-                // Update button state
-                if (isLiked) {
-                    button.classList.add('liked');
-                    heartIcon.setAttribute('fill', 'currentColor');
-                } else {
-                    button.classList.remove('liked');
-                    heartIcon.setAttribute('fill', 'none');
-                }
-                
-                // Update like count and heart in modal if it's open
-                const modalPost = document.querySelector(`.post-modal .post-item[data-post-id="${postId}"]`);
-                if (modalPost) {
-                    const modalLikeButton = modalPost.querySelector('.post-like-button');
-                    const modalLikeCount = modalPost.querySelector('.like-count');
-                    const modalHeartIcon = modalPost.querySelector('svg path');
-                    
-                    if (modalLikeButton) {
-                        if (isLiked) {
-                            modalLikeButton.classList.add('liked');
-                            modalHeartIcon.setAttribute('fill', 'currentColor');
-                        } else {
-                            modalLikeButton.classList.remove('liked');
-                            modalHeartIcon.setAttribute('fill', 'none');
-                        }
-                    }
-                    if (modalLikeCount) {
-                        modalLikeCount.textContent = updatedPost.likes_count;
-                    }
-                }
+                // Update both the main post and modal post (if open)
+                updateLikeButtonState(postId, isLiked, updatedPost.likes_count);
             } catch (error) {
                 console.error('Error toggling like:', error);
                 alert('Failed to update like. Please try again.');
@@ -539,6 +509,38 @@ function attachLikeHandlers() {
         });
     });
 }
+
+// Helper function to update like button state in all instances
+function updateLikeButtonState(postId, isLiked, likeCount) {
+    // Update all buttons for this post (both in list and modal if open)
+    const buttons = document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`);
+    
+    buttons.forEach(button => {
+        // Update the like count
+        const countElement = button.querySelector('.like-count');
+        if (countElement) {
+            countElement.textContent = likeCount;
+        }
+        
+        // Update the like button class
+        if (isLiked) {
+            button.classList.add('liked');
+        } else {
+            button.classList.remove('liked');
+        }
+        
+        // Update the heart fill
+        const heartIcon = button.querySelector('svg path');
+        if (heartIcon) {
+            heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+        }
+    });
+}
+
+// Make these functions available globally for newly created posts
+window.attachLikeHandlers = attachLikeHandlers;
+window.attachPostClickHandlers = attachPostClickHandlers;
+window.attachMenuHandlers = attachMenuHandlers;
 
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {

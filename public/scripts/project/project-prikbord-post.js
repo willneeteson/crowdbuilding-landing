@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const postElement = document.createElement('article');
         postElement.className = 'post-item';
         postElement.style.opacity = '0';
+        postElement.setAttribute('data-post-id', data.data.id);
         
         const postImages = data.data.images?.length
           ? data.data.images.map(img =>
@@ -113,14 +114,19 @@ document.addEventListener('DOMContentLoaded', function() {
             ${postImages}
           </div>
           <div class="post-footer">
-            <div class="post-likes">
-              <span>0 likes</span>
-            </div>
-            <div class="post-comments-toggle" data-post-id="${data.data.id}">
+            <button class="post-like-button" data-post-id="${data.data.id}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  stroke-width="2"/>
+              </svg>
+              <span class="like-count">0</span>
+            </button>
+            <div class="post-comments-count" data-post-id="${data.data.id}">
               <span>0 comments</span>
             </div>
           </div>
-          <div class="post-comments-list" id="comments-${data.data.id}" style="display: none;"></div>
         `;
 
         container.insertBefore(postElement, container.firstChild);
@@ -130,6 +136,11 @@ document.addEventListener('DOMContentLoaded', function() {
           postElement.style.transition = 'opacity 0.3s ease-in';
           postElement.style.opacity = '1';
         });
+        
+        // Attach event handlers to the new post
+        window.attachPostClickHandlers?.();
+        window.attachMenuHandlers?.();
+        window.attachLikeHandlers?.();
       }
 
       // Clear form
