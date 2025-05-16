@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('submitPost')?.addEventListener('click', async () => {
-    const newPostBody = document.getElementById('newPostBody') as HTMLTextAreaElement;
-    const newPostImage = document.getElementById('newPostImage') as HTMLInputElement;
+    const newPostBody = document.getElementById('newPostBody');
+    const newPostImage = document.getElementById('newPostImage');
     
     if (!newPostBody || !newPostImage) return;
     
@@ -88,11 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ✅ Helper to get token via Memberstack exchange
 async function getApiTokenFromMemberstack() {
-  // @ts-ignore - Memberstack is loaded globally
   if (typeof $memberstackDom !== 'undefined') {
-    // @ts-ignore
     await $memberstackDom.onReady;
-    // @ts-ignore
     const memberstackToken = $memberstackDom.getMemberCookie();
 
     if (!memberstackToken) {
@@ -125,7 +122,7 @@ async function getApiTokenFromMemberstack() {
 }
 
 // Add formatDate function if not already defined
-function formatDate(dateString: string) {
+function formatDate(dateString) {
   const date = new Date(dateString);
   return date.toLocaleDateString('nl-NL', {
     day: 'numeric',

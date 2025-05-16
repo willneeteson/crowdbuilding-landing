@@ -2,11 +2,8 @@ let currentUserId = null;
 
 // Get current user ID from Memberstack
 async function getCurrentUserId() {
-  // @ts-ignore - Memberstack is loaded globally
   if (typeof $memberstackDom !== 'undefined') {
-    // @ts-ignore
     await $memberstackDom.onReady;
-    // @ts-ignore
     const member = await $memberstackDom.getCurrentMember();
     if (member) {
       currentUserId = member.id;
