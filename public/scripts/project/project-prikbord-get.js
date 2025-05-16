@@ -98,6 +98,8 @@ async function toggleLike(postId) {
     }
 
     try {
+        console.log(`Sending like toggle request for post ${postId}`);
+        
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/like`, {
             method: 'POST',
             headers: {
@@ -108,16 +110,45 @@ async function toggleLike(postId) {
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
-        console.log('Like toggle response:', data); // Debug log
+        console.log('Like toggle full response:', JSON.stringify(data)); // Full response log
         
         // Get the updated post data
         const updatedPost = data.data;
+        console.log('Updated post:', JSON.stringify(updatedPost)); // Log the post data
         
-        // Check if the current user has liked the post - inspect message for confirmation
-        // The API typically returns a message indicating successful like action
-        const isLiked = data.message && data.message.includes('vindt post') && !data.message.includes('niet meer');
+        // Determine if the post is now liked
+        let isLiked;
         
-        console.log(`Post ${postId} like status updated - isLiked: ${isLiked}, likes_count: ${updatedPost.likes_count}`);
+        // First try to check the action from the API message (most reliable)
+        if (data.message) {
+            // Dutch messages will include "niet meer" if unliking
+            const unlikeTerms = ["niet meer", "unlike", "removed like", "removed your like"];
+            const likeTerms = ["vindt post", "like", "liked", "added like"];
+            
+            isLiked = !unlikeTerms.some(term => data.message.toLowerCase().includes(term)) &&
+                      likeTerms.some(term => data.message.toLowerCase().includes(term));
+                      
+            console.log(`Determined like status from message: ${isLiked}`);
+        }
+        // If message doesn't provide clear indication, check explicit is_liked property
+        else if (updatedPost.is_liked !== undefined) {
+            isLiked = updatedPost.is_liked;
+            console.log(`Determined like status from is_liked property: ${isLiked}`);
+        }
+        // Finally, fall back to checking likes array
+        else if (updatedPost.likes) {
+            isLiked = updatedPost.likes.some(like => {
+                return (
+                    like.id === currentUserId ||
+                    like.user_id === currentUserId ||
+                    like.created_by === currentUserId ||
+                    (like.user && like.user.id === currentUserId)
+                );
+            });
+            console.log(`Determined like status from likes array: ${isLiked}`);
+        }
+        
+        console.log(`Post ${postId} final like status: ${isLiked}, likes_count: ${updatedPost.likes_count}`);
         
         // Update UI for all instances of this post's like button
         updateLikeButtonState(postId, isLiked, updatedPost.likes_count);
@@ -543,10 +574,13 @@ function attachLikeHandlers() {
 
 // Helper function to update like button state in all instances
 function updateLikeButtonState(postId, isLiked, likeCount) {
+    console.log(`Updating button state for post ${postId}: isLiked=${isLiked}, likeCount=${likeCount}`);
+    
     // Update all buttons for this post (both in list and modal if open)
     const buttons = document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`);
+    console.log(`Found ${buttons.length} buttons to update`);
     
-    buttons.forEach(button => {
+    buttons.forEach((button, index) => {
         // Update the like count
         const countElement = button.querySelector('.like-count');
         if (countElement) {
@@ -560,15 +594,48 @@ function updateLikeButtonState(postId, isLiked, likeCount) {
             button.classList.remove('liked');
         }
         
-        // Update the heart fill
+        // Update the heart fill - find all possible paths to make sure we get the right one
         const heartIcon = button.querySelector('svg path');
         if (heartIcon) {
+            console.log(`Setting heart ${index} fill to ${isLiked ? 'currentColor' : 'none'} for post ${postId}`);
             heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+            
+            // If liked, also update the stroke to match (for better visibility)
+            if (isLiked) {
+                heartIcon.setAttribute('stroke', 'currentColor');
+            }
             
             // Force a repaint to ensure the fill is applied
             heartIcon.getBoundingClientRect();
+            
+            // Double-check after a very short delay (helps with rendering issues)
+            setTimeout(() => {
+                const currentFill = heartIcon.getAttribute('fill');
+                console.log(`Verifying heart ${index} fill for post ${postId}: current=${currentFill}, should be=${isLiked ? 'currentColor' : 'none'}`);
+                
+                if (isLiked && currentFill !== 'currentColor') {
+                    console.log(`Re-applying heart fill for post ${postId}`);
+                    heartIcon.setAttribute('fill', 'currentColor');
+                    heartIcon.setAttribute('stroke', 'currentColor');
+                    button.classList.add('liked'); // Re-apply class too
+                }
+            }, 50);
         }
     });
+    
+    // Also update any hearts in new or dynamically created elements
+    setTimeout(() => {
+        document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`).forEach(button => {
+            if (isLiked && !button.classList.contains('liked')) {
+                button.classList.add('liked');
+                const path = button.querySelector('svg path');
+                if (path && path.getAttribute('fill') !== 'currentColor') {
+                    path.setAttribute('fill', 'currentColor');
+                    path.setAttribute('stroke', 'currentColor');
+                }
+            }
+        });
+    }, 100);
 }
 
 // Make these functions available globally for newly created posts
