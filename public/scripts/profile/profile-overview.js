@@ -389,6 +389,87 @@
     }
 
     /**
+     * Prefetch and cache API token for faster response
+     */
+    function prefetchApiToken() {
+        // Check if auth module is available
+        if (typeof window.auth === 'undefined') {
+            console.warn('Auth module not loaded, skipping token prefetch');
+            return null;
+        }
+        
+        // Non-blocking token fetch
+        return window.auth.getApiToken().catch(() => {});
+    }
+
+    /**
+     * Gets API token - fallback implementation if auth module is not available
+     * @returns {Promise<string|null>} API token or null if not available
+     */
+    async function getApiTokenFallback() {
+        // First try to use auth module if available
+        if (typeof window.auth !== 'undefined') {
+            return window.auth.getApiToken();
+        }
+        
+        // Fallback implementation
+        if (typeof $memberstackDom === "undefined") {
+            return null;
+        }
+
+        try {
+            await $memberstackDom.onReady;
+            const memberstackToken = $memberstackDom.getMemberCookie();
+
+            if (!memberstackToken) {
+                return null;
+            }
+
+            const response = await fetchWithTimeout(`${CONFIG.API_BASE_URL}/sanctum/token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    memberstack_token: memberstackToken,
+                    device_name: "default_device_name",
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Token request failed: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.token;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets current user's memberstack ID - fallback implementation
+     * @returns {Promise<string|null>} Memberstack ID or null if not available
+     */
+    async function getCurrentMemberstackIdFallback() {
+        // First try to use auth module if available
+        if (typeof window.auth !== 'undefined') {
+            return window.auth.getCurrentMemberstackId();
+        }
+        
+        // Fallback implementation
+        if (typeof $memberstackDom === "undefined") {
+            return null;
+        }
+
+        try {
+            await $memberstackDom.onReady;
+            const member = await $memberstackDom.getCurrentMember();
+            return member?.id || null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /**
      * Displays user data in the DOM
      * @param {Object} data - User data
      */
@@ -407,7 +488,7 @@
             // Update complex components with requestAnimationFrame for smoother rendering
             window.requestAnimationFrame(() => {
                 // Check if this is the current user's profile (non-blocking)
-                window.auth.getCurrentMemberstackId().then(currentMemberstackId => {
+                getCurrentMemberstackIdFallback().then(currentMemberstackId => {
                     const currentUserDiv = cache.getElement(CONFIG.SELECTORS.CURRENT_USER);
                     if (currentUserDiv) {
                         currentUserDiv.style.display = currentMemberstackId === data.memberstack_id ? 'block' : 'none';
@@ -449,20 +530,12 @@
     }
 
     /**
-     * Prefetch and cache API token for faster response
-     */
-    function prefetchApiToken() {
-        // Non-blocking token fetch
-        window.auth.getApiToken().catch(() => {});
-    }
-
-    /**
      * Initialize the profile page
      */
     async function init() {
         try {
             // Prefetch API token in parallel
-            const apiTokenPromise = window.auth.getApiToken();
+            const apiTokenPromise = getApiTokenFallback();
             
             // Start preloading avatar image
             const avatarElement = cache.getElement(CONFIG.SELECTORS.AVATAR);
@@ -483,8 +556,10 @@
         }
     }
 
-    // Start API token prefetch as early as possible
-    prefetchApiToken();
+    // Only prefetch if auth module is available
+    if (typeof window.auth !== 'undefined') {
+        prefetchApiToken();
+    }
 
     // Wait for DOM to be fully loaded before initializing
     if (document.readyState === 'loading') {
