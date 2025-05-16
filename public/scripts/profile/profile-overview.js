@@ -63,65 +63,6 @@
     }
 
     /**
-     * Fetches API token using Memberstack
-     * @returns {Promise<string|null>} API token or null if not available
-     */
-    async function getApiToken() {
-        if (typeof $memberstackDom === "undefined") {
-            console.warn('Memberstack not available');
-            return null;
-        }
-
-        try {
-            await $memberstackDom.onReady;
-            const memberstackToken = $memberstackDom.getMemberCookie();
-
-            if (!memberstackToken) {
-                console.warn('No Memberstack token found');
-                return null;
-            }
-
-            const response = await fetch(`${CONFIG.API_BASE_URL}/sanctum/token`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    memberstack_token: memberstackToken,
-                    device_name: "default_device_name",
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error(`Token request failed: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.token;
-        } catch (error) {
-            console.error("Error fetching token:", error);
-            return null;
-        }
-    }
-
-    /**
-     * Gets current user's memberstack ID
-     * @returns {Promise<string|null>} Memberstack ID or null if not available
-     */
-    async function getCurrentMemberstackId() {
-        if (typeof $memberstackDom === "undefined") {
-            return null;
-        }
-
-        try {
-            await $memberstackDom.onReady;
-            const member = await $memberstackDom.getCurrentMember();
-            return member?.id || null;
-        } catch (error) {
-            console.error("Error getting current memberstack ID:", error);
-            return null;
-        }
-    }
-
-    /**
      * Updates a DOM element with content and removes shimmer effect
      * @param {string} selector - Class selector of the element to update
      * @param {string} content - Content to set
@@ -336,7 +277,7 @@
             console.log('User data:', data); // Debug log
 
             // Check if this is the current user's profile
-            const currentMemberstackId = await getCurrentMemberstackId();
+            const currentMemberstackId = await window.auth.getCurrentMemberstackId();
             const currentUserDiv = domCache.get(CONFIG.SELECTORS.CURRENT_USER);
             if (currentUserDiv) {
                 currentUserDiv.style.display = currentMemberstackId === data.memberstack_id ? 'block' : 'none';
@@ -402,7 +343,7 @@
         await new Promise(resolve => setTimeout(resolve, CONFIG.INIT_DELAY));
         
         try {
-            const apiToken = await getApiToken();
+            const apiToken = await window.auth.getApiToken();
             await fetchUserDetails(apiToken);
         } catch (error) {
             console.error("Initialization error:", error);
