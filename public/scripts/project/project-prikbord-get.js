@@ -112,16 +112,6 @@ function renderPosts(posts) {
             ).join('')
             : '';
 
-        // Debug information
-        console.log('Post data:', {
-            postId: post.id,
-            currentUserId,
-            postCreatedById: post.created_by?.id,
-            hasPermissions: !!post.permissions,
-            canDeleteFromPermissions: post.permissions?.can_delete,
-            postData: post // Log the entire post object
-        });
-
         const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
         console.log('Can delete calculation:', {
             fromPermissions: post.permissions?.can_delete,
@@ -129,11 +119,28 @@ function renderPosts(posts) {
             finalResult: canDelete
         });
 
-        const deleteButton = canDelete
-            ? `<button class="post-delete-button" data-post-id="${post.id}">Delete</button>`
-            : '';
+        const menuHtml = canDelete ? `
+            <div class="post-menu">
+                <button class="post-menu-button" data-post-id="${post.id}">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="6" r="2" fill="currentColor"/>
+                        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+                        <circle cx="12" cy="18" r="2" fill="currentColor"/>
+                    </svg>
+                </button>
+                <div class="post-menu-dropdown" data-post-id="${post.id}">
+                    <button class="post-menu-item delete" data-post-id="${post.id}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+                        </svg>
+                        Delete Post
+                    </button>
+                </div>
+            </div>
+        ` : '';
 
         postElement.innerHTML = `
+            ${menuHtml}
             <div class="post-header">
                 <img class="post-avatar" src="${post.created_by.avatar_url}" alt="${post.created_by.name}">
                 <div class="post-meta">
@@ -153,7 +160,6 @@ function renderPosts(posts) {
                 <div class="post-comments-toggle" data-post-id="${post.id}">
                     <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
                 </div>
-                ${deleteButton}
             </div>
             <div class="post-comments-list" id="comments-${post.id}" style="display: none;"></div>
         `;
@@ -162,7 +168,7 @@ function renderPosts(posts) {
     });
 
     attachCommentToggles();
-    attachDeleteButtons();
+    attachMenuHandlers();
 }
 
 function renderComments(comments, container) {
@@ -212,13 +218,38 @@ function attachCommentToggles() {
     });
 }
 
-function attachDeleteButtons() {
-    document.querySelectorAll('.post-delete-button').forEach(button => {
-        button.addEventListener('click', () => {
+function attachMenuHandlers() {
+    // Handle menu button clicks
+    document.querySelectorAll('.post-menu-button').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const postId = button.getAttribute('data-post-id');
+            const dropdown = document.querySelector(`.post-menu-dropdown[data-post-id="${postId}"]`);
+            
+            // Close all other dropdowns
+            document.querySelectorAll('.post-menu-dropdown.show').forEach(d => {
+                if (d !== dropdown) d.classList.remove('show');
+            });
+            
+            dropdown.classList.toggle('show');
+        });
+    });
+
+    // Handle delete button clicks
+    document.querySelectorAll('.post-menu-item.delete').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
             const postId = button.getAttribute('data-post-id');
             if (confirm('Are you sure you want to delete this post?')) {
                 deletePost(postId);
             }
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.post-menu-dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
         });
     });
 }
