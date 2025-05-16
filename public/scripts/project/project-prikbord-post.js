@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (!body) return alert('Please write something.');
 
-    const token = await getApiTokenFromMemberstack();
+    const token = await window.auth.getApiToken();
     if (!token) {
       alert('You are not signed in.');
       return;
@@ -85,41 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
-
-// ✅ Helper to get token via Memberstack exchange
-async function getApiTokenFromMemberstack() {
-  if (typeof $memberstackDom !== 'undefined') {
-    await $memberstackDom.onReady;
-    const memberstackToken = $memberstackDom.getMemberCookie();
-
-    if (!memberstackToken) {
-      console.warn('User not signed in to Memberstack.');
-      return null;
-    }
-
-    try {
-      const response = await fetch('https://api.crowdbuilding.com/api/v1/sanctum/token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          memberstack_token: memberstackToken,
-          device_name: navigator.userAgent
-        })
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.token;
-      } else {
-        console.error('Failed to exchange Memberstack token.');
-      }
-    } catch (error) {
-      console.error('Error fetching API token:', error.message);
-    }
-  }
-
-  return null;
-}
 
 // Add formatDate function if not already defined
 function formatDate(dateString) {
