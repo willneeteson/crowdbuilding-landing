@@ -1,4 +1,12 @@
 let currentUserId = null;
+let currentPage = 1;
+let postsPerPage = 25; // Increased from default 10
+let hasMorePosts = true;
+let currentGroupSlug = null;
+
+// Track the next cursor for pagination
+let nextCursor = null;
+let isLoadingMore = false;
 
 async function getCurrentUserId() {
     console.log('Getting current user ID...');
@@ -32,12 +40,29 @@ function showErrorState(container, message) {
     `;
 }
 
-async function fetchGroupPosts(groupSlug) {
+async function fetchGroupPosts(groupSlug, cursor = null) {
     const container = document.getElementById('groupPosts');
-    showLoadingState(container);
+    
+    // Only show loading state if this is the first load, not when loading more
+    if (!cursor) {
+        showLoadingState(container);
+    } else if (!isLoadingMore) {
+        // If we're loading more posts, show a loading indicator at the bottom
+        const loadingMore = document.getElementById('loadMoreLoading');
+        if (loadingMore) {
+            loadingMore.style.display = 'flex';
+        }
+    }
+    
+    isLoadingMore = !!cursor;
 
     const token = await window.auth.getApiToken();
-    const endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
+    let endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
+    
+    // Add the cursor parameter if provided (for pagination)
+    if (cursor) {
+        endpoint += `?cursor=${cursor}`;
+    }
 
     try {
         const response = await fetch(endpoint, {
@@ -50,11 +75,83 @@ async function fetchGroupPosts(groupSlug) {
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
-        renderPosts(data.data);
+        
+        // Store the next cursor from the API response
+        if (data.meta && data.meta.next_cursor) {
+            nextCursor = data.meta.next_cursor;
+        } else {
+            nextCursor = null;
+        }
+        
+        // If this is the first page, replace all posts
+        // If loading more, append the new posts
+        renderPosts(data.data, isLoadingMore);
+        
+        // Update the "Load More" button visibility
+        updateLoadMoreButton();
     } catch (error) {
         console.error('Error fetching group posts:', error);
-        showErrorState(container, 'Failed to load posts. Please try again.');
+        if (!isLoadingMore) {
+            showErrorState(container, 'Failed to load posts. Please try again.');
+        } else {
+            const loadMoreButton = document.getElementById('loadMoreButton');
+            if (loadMoreButton) {
+                loadMoreButton.innerText = 'Error loading more posts. Try again.';
+                loadMoreButton.disabled = false;
+            }
+        }
+    } finally {
+        // Hide the loading indicator
+        if (isLoadingMore) {
+            const loadingMore = document.getElementById('loadMoreLoading');
+            if (loadingMore) {
+                loadingMore.style.display = 'none';
+            }
+        }
+        isLoadingMore = false;
     }
+}
+
+// Create a "Load More" button after rendering posts
+function updateLoadMoreButton() {
+    // Remove existing button if it exists
+    const existingButton = document.getElementById('loadMoreContainer');
+    if (existingButton) {
+        existingButton.remove();
+    }
+    
+    // Only add the button if there are more posts to load
+    if (nextCursor) {
+        const container = document.getElementById('groupPosts');
+        const loadMoreContainer = document.createElement('div');
+        loadMoreContainer.id = 'loadMoreContainer';
+        loadMoreContainer.className = 'load-more-container';
+        loadMoreContainer.innerHTML = `
+            <div id="loadMoreLoading" class="loading-spinner" style="display: none;"></div>
+            <button id="loadMoreButton" class="load-more-button">Meer berichten laden</button>
+        `;
+        container.after(loadMoreContainer);
+        
+        // Add click event listener to the button
+        document.getElementById('loadMoreButton').addEventListener('click', loadMorePosts);
+    }
+}
+
+// Function to load more posts using the stored cursor
+function loadMorePosts() {
+    if (!nextCursor || isLoadingMore) return;
+    
+    const button = document.getElementById('loadMoreButton');
+    if (button) {
+        button.disabled = true;
+        button.innerText = 'Laden...';
+    }
+    
+    // Extract the group slug from the URL or use a default
+    const groupSlug = 'tiny-house-alkmaar'; // Use your actual way of getting the group slug
+    
+    // Fetch the next page of posts
+    fetchGroupPosts(groupSlug, nextCursor);
 }
 
 async function fetchCommentsForPost(postId) {
@@ -186,9 +283,12 @@ async function toggleLike(postId) {
     }
 }
 
-function renderPosts(posts) {
+function renderPosts(posts, append = false) {
     const container = document.getElementById('groupPosts');
-    container.innerHTML = '';
+    
+    if (!append) {
+        container.innerHTML = '';
+    }
 
     // Create modal container if it doesn't exist
     if (!document.getElementById('postModal')) {
@@ -864,6 +964,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fill: none !important;
                 stroke: currentColor !important;
             }
+            
+            /* CSS for load more container */
+            .load-more-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin: 1.5rem 0;
+                padding: 1rem;
+            }
+            
+            .load-more-button {
+                background-color: #f0f0f0;
+                color: #333;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: background-color 0.2s ease;
+            }
+            
+            .load-more-button:hover {
+                background-color: #e0e0e0;
+            }
+            
+            .load-more-button:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            
+            #loadMoreLoading {
+                margin-bottom: 1rem;
+            }
         `;
         document.head.appendChild(styleTag);
         
@@ -942,7 +1075,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Only fetch posts if we have a user
         if (currentUserId) {
-            fetchGroupPosts('tiny-house-alkmaar');
+            // Call fetchGroupPosts with null cursor to fetch first page
+            fetchGroupPosts('tiny-house-alkmaar', null);
             
             // Wait a bit and then ensure all heart icons are properly filled
             setTimeout(fixAllHeartIcons, 1000);
@@ -950,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Add direct document-level event listener for like buttons
             addDirectLikeClickHandler();
         } else {
-            console.log('User not logged in, not fetching posts');
+            console.warn('No user ID found, post fetching skipped');
             const container = document.getElementById('groupPosts');
             if (container) {
                 container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
