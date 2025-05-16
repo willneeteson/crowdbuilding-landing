@@ -93,7 +93,7 @@ function formatDate(dateString) {
 async function toggleLike(postId) {
     const token = await window.auth.getApiToken();
     if (!token) {
-        alert('You must be logged in to like posts.');
+        alert('Je moet ingelogd zijn om posts te liken.');
         return;
     }
 
@@ -273,8 +273,8 @@ function createCommentForm(postId) {
     const form = document.createElement('form');
     form.className = 'comment-form';
     form.innerHTML = `
-        <textarea placeholder="Write a comment..." required></textarea>
-        <button type="submit">Post Comment</button>
+        <textarea placeholder="Reageer..." required></textarea>
+        <button type="submit">Verstuur</button>
     `;
 
     form.addEventListener('submit', async (e) => {
@@ -288,7 +288,7 @@ function createCommentForm(postId) {
         // Disable form while submitting
         textarea.disabled = true;
         button.disabled = true;
-        button.textContent = 'Posting...';
+        button.textContent = 'Versturen...';
 
         try {
             const newComment = await submitComment(postId, commentText);
@@ -311,7 +311,7 @@ function createCommentForm(postId) {
             textarea.value = '';
             textarea.disabled = false;
             button.disabled = false;
-            button.textContent = 'Post Comment';
+            button.textContent = 'Verstuur';
 
             // Update comment count in the main post list
             const postElement = document.querySelector(`.post-item[data-post-id="${postId}"]`);
@@ -324,7 +324,7 @@ function createCommentForm(postId) {
             alert('Failed to post comment. Please try again.');
             textarea.disabled = false;
             button.disabled = false;
-            button.textContent = 'Post Comment';
+            button.textContent = 'Verstuur';
         }
     });
 
@@ -480,6 +480,7 @@ function attachLikeHandlers() {
             const postId = button.getAttribute('data-post-id');
             const likeCount = button.querySelector('.like-count');
             const heartIcon = button.querySelector('svg path');
+            const isCurrentlyLiked = button.classList.contains('liked');
             
             try {
                 const updatedPost = await toggleLike(postId);
@@ -496,8 +497,12 @@ function attachLikeHandlers() {
                 const modalPost = document.querySelector(`.post-modal .post-item[data-post-id="${postId}"]`);
                 if (modalPost) {
                     const modalLikeCount = modalPost.querySelector('.like-count');
+                    const modalHeartIcon = modalPost.querySelector('svg path');
                     if (modalLikeCount) {
                         modalLikeCount.textContent = updatedPost.likes_count;
+                    }
+                    if (modalHeartIcon) {
+                        modalHeartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
                     }
                 }
             } catch (error) {
