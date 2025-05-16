@@ -1,70 +1,103 @@
 let currentUserId = null;
+const deviceName = 'web-browser';
 
-async function isUserLoggedIn() {
-  if (typeof $memberstackDom !== 'undefined') {
-    await $memberstackDom.onReady;
-    const member = await $memberstackDom.getCurrentMember();
+async function getApiToken() {
+    // If Memberstack is available, attempt to get a token
+    if (typeof $memberstackDom !== "undefined") {
+        await $memberstackDom.onReady;
+        const memberstackToken = $memberstackDom.getMemberCookie();
 
-    if (member && member.id) {
-      console.log('User is logged in:', member.id);
-      return member;
-    } else {
-      console.log('User is NOT logged in');
-      return null;
+        if (!memberstackToken) {
+            console.warn("User not signed in.");
+            return null;
+        }
+
+        try {
+            const response = await fetch(
+                "https://api.crowdbuilding.com/api/v1/sanctum/token",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        memberstack_token: memberstackToken,
+                        device_name: deviceName,
+                    }),
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                return data.token;
+            }
+        } catch (error) {
+            console.error("Error fetching token:", error.message);
+        }
     }
-  } else {
-    console.error('Memberstack is not loaded');
     return null;
-  }
 }
 
-// Get current user ID from Memberstack
 async function getCurrentUserId() {
-  const member = await isUserLoggedIn();
-  if (member) {
-    currentUserId = member.id;
-    return currentUserId;
-  }
-  return null;
+    const token = await getApiToken();
+    if (token) {
+        try {
+            const response = await fetch("https://api.crowdbuilding.com/api/v1/me", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                currentUserId = data.id;
+                return currentUserId;
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    }
+    return null;
 }
 
 async function fetchGroupPosts(groupSlug) {
-  const endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
+    const token = await getApiToken();
+    const endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+        });
 
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    renderPosts(data.data);
-  } catch (error) {
-    console.error('Error fetching group posts:', error);
-  }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        renderPosts(data.data);
+    } catch (error) {
+        console.error('Error fetching group posts:', error);
+    }
 }
 
 async function fetchCommentsForPost(postId) {
-  const endpoint = `https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`;
+    const token = await getApiToken();
+    const endpoint = `https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`;
 
-  try {
-    const response = await fetch(endpoint, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            },
+        });
 
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data = await response.json();
-    return data.data || [];
-  } catch (error) {
-    console.error('Error fetching comments for post', postId, error);
-    return [];
-  }
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        return data.data || [];
+    } catch (error) {
+        console.error('Error fetching comments for post', postId, error);
+        return [];
+    }
 }
 
 function renderComments(comments, container) {
@@ -127,7 +160,7 @@ function attachDeleteButtons() {
 
 async function deletePost(postId) {
   const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
-  const token = await getApiTokenFromMemberstack();
+  const token = await getApiToken();
 
   if (!token) {
     alert('You are not signed in.');
@@ -241,26 +274,26 @@ function formatDate(dateString) {
 
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    // Get current user ID
-    const userId = await getCurrentUserId();
-    console.log('Initialized with user ID:', userId);
-    
-    // Only fetch posts if we have a user
-    if (userId) {
-      fetchGroupPosts('tiny-house-alkmaar');
-    } else {
-      console.log('User not logged in, not fetching posts');
-      const container = document.getElementById('groupPosts');
-      if (container) {
-        container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
-      }
+    try {
+        // Get current user ID
+        const userId = await getCurrentUserId();
+        console.log('Initialized with user ID:', userId);
+        
+        // Only fetch posts if we have a user
+        if (userId) {
+            fetchGroupPosts('tiny-house-alkmaar');
+        } else {
+            console.log('User not logged in, not fetching posts');
+            const container = document.getElementById('groupPosts');
+            if (container) {
+                container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
+            }
+        }
+    } catch (error) {
+        console.error('Error during initialization:', error);
+        const container = document.getElementById('groupPosts');
+        if (container) {
+            container.innerHTML = '<div class="post-item">Error loading posts. Please try again later.</div>';
+        }
     }
-  } catch (error) {
-    console.error('Error during initialization:', error);
-    const container = document.getElementById('groupPosts');
-    if (container) {
-      container.innerHTML = '<div class="post-item">Error loading posts. Please try again later.</div>';
-    }
-  }
 });
