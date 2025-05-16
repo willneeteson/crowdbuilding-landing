@@ -1,51 +1,31 @@
 let currentUserId = null;
 
+async function isUserLoggedIn() {
+  if (typeof $memberstackDom !== 'undefined') {
+    await $memberstackDom.onReady;
+    const member = await $memberstackDom.getCurrentMember();
+
+    if (member && member.id) {
+      console.log('User is logged in:', member.id);
+      return member;
+    } else {
+      console.log('User is NOT logged in');
+      return null;
+    }
+  } else {
+    console.error('Memberstack is not loaded');
+    return null;
+  }
+}
+
 // Get current user ID from Memberstack
 async function getCurrentUserId() {
-  return new Promise((resolve) => {
-    let attempts = 0;
-    const maxAttempts = 5;
-    const checkInterval = 1000; // 1 second
-
-    function checkMemberstack() {
-      attempts++;
-      console.log(`Checking Memberstack (attempt ${attempts}/${maxAttempts})`);
-
-      if (typeof $memberstackDom === 'undefined') {
-        console.log('Memberstack not available');
-        if (attempts < maxAttempts) {
-          setTimeout(checkMemberstack, checkInterval);
-        } else {
-          resolve(null);
-        }
-        return;
-      }
-
-      // Try to get the current member directly
-      $memberstackDom.getCurrentMember()
-        .then(member => {
-          if (member) {
-            currentUserId = member.id;
-            console.log('Current user ID set to:', currentUserId);
-            resolve(currentUserId);
-          } else {
-            console.log('No member found in Memberstack');
-            resolve(null);
-          }
-        })
-        .catch(error => {
-          console.error('Error getting member:', error);
-          if (attempts < maxAttempts) {
-            setTimeout(checkMemberstack, checkInterval);
-          } else {
-            resolve(null);
-          }
-        });
-    }
-
-    // Start checking
-    checkMemberstack();
-  });
+  const member = await isUserLoggedIn();
+  if (member) {
+    currentUserId = member.id;
+    return currentUserId;
+  }
+  return null;
 }
 
 async function fetchGroupPosts(groupSlug) {
