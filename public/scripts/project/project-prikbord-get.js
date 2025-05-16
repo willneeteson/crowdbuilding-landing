@@ -317,18 +317,44 @@ function renderComments(comments, container) {
     comments.forEach(comment => {
         const commentElement = document.createElement('div');
         commentElement.className = 'comment-item';
+        
+        // Determine if this comment is liked by the current user
+        let isLiked = false;
+        if (comment.likes && Array.isArray(comment.likes)) {
+            isLiked = comment.likes.some(like => {
+                const likeUserId = like.id || like.user_id || 
+                                  (like.created_by && like.created_by.id) || 
+                                  (like.user && like.user.id);
+                return likeUserId === currentUserId;
+            });
+        }
+        
+        // Get like count
+        const likesCount = comment.likes_count || 0;
 
         commentElement.innerHTML = `
             <img class="post-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}">
             <div class="comment-content">
                 <h5>${comment.created_by.name}</h5>
                 <p>${comment.body}</p>
-                <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
+                <div class="comment-footer">
+                    <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
+                    <button class="comment-like-button ${isLiked ? 'liked' : ''}" data-comment-id="${comment.id}" data-liked="${isLiked ? 'true' : 'false'}">
+                        <img class="heart-icon-small" width="16" height="16" src="${isLiked ? 
+                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+' : 
+                            'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4='}" 
+                            alt="${isLiked ? 'Liked' : 'Not liked'}">
+                        <span class="like-count-small">${likesCount}</span>
+                    </button>
+                </div>
             </div>
         `;
 
         container.appendChild(commentElement);
     });
+    
+    // Attach event handlers to comment like buttons
+    attachCommentLikeHandlers();
 }
 
 async function submitComment(postId, commentText) {
@@ -350,6 +376,15 @@ async function submitComment(postId, commentText) {
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
+        
+        // Add likes array and count if not present
+        if (!data.data.likes) {
+            data.data.likes = [];
+        }
+        if (data.data.likes_count === undefined) {
+            data.data.likes_count = 0;
+        }
+        
         return data.data;
     } catch (error) {
         console.error('Error submitting comment:', error);
@@ -390,10 +425,19 @@ function createCommentForm(postId) {
                 <div class="comment-content">
                     <h5>${newComment.created_by.name}</h5>
                     <p>${newComment.body}</p>
-                    <time datetime="${newComment.created_at}">${formatDate(newComment.created_at)}</time>
+                    <div class="comment-footer">
+                        <time datetime="${newComment.created_at}">${formatDate(newComment.created_at)}</time>
+                        <button class="comment-like-button" data-comment-id="${newComment.id}" data-liked="false">
+                            <img class="heart-icon-small" width="16" height="16" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=" alt="Not liked">
+                            <span class="like-count-small">0</span>
+                        </button>
+                    </div>
                 </div>
             `;
             commentsList.appendChild(commentElement);
+            
+            // Attach like handlers to the new comment
+            attachCommentLikeHandlers();
 
             // Clear and re-enable form
             textarea.value = '';
@@ -725,7 +769,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     post89Button.setAttribute('data-liked', 'false');
                     const img = post89Button.querySelector('img.heart-icon');
                     if (img) {
-                        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=';
+                        img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
                         img.alt = 'Not liked';
                     } else {
                         replaceHeartWithImage(post89Button, false);
@@ -781,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
 window.attachLikeHandlers = attachLikeHandlers;
 window.attachPostClickHandlers = attachPostClickHandlers;
 window.attachMenuHandlers = attachMenuHandlers;
+window.attachCommentLikeHandlers = attachCommentLikeHandlers;
 
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1017,9 +1062,11 @@ function addDirectLikeClickHandler() {
     
     // Remove any existing handler with the same name
     document.removeEventListener('click', handleLikeButtonClick);
+    document.removeEventListener('click', handleCommentLikeButtonClick);
     
     // Add the click handler to the entire document
     document.addEventListener('click', handleLikeButtonClick);
+    document.addEventListener('click', handleCommentLikeButtonClick);
 }
 
 // Handler function for like button clicks
@@ -1041,5 +1088,173 @@ function handleLikeButtonClick(event) {
     toggleLike(postId).catch(error => {
         console.error(`Error toggling like for post ${postId}:`, error);
         alert('Failed to update like status. Please try again.');
+    });
+}
+
+// Add a function to toggle likes for comments
+async function toggleCommentLike(commentId) {
+    const token = await window.auth.getApiToken();
+    if (!token) {
+        alert('You must be logged in to like comments.');
+        return;
+    }
+
+    try {
+        console.log(`Sending like toggle request for comment ${commentId}`);
+        
+        // Get the like button and check if it's currently marked as liked
+        const likeButton = document.querySelector(`.comment-like-button[data-comment-id="${commentId}"]`);
+        const wasLiked = likeButton && likeButton.classList.contains('liked');
+        console.log(`Comment button was liked before API call: ${wasLiked}`);
+        
+        // Get current like count before the API call
+        const countElement = likeButton?.querySelector('.like-count-small');
+        const previousCount = countElement ? parseInt(countElement.textContent || '0', 10) : 0;
+        console.log(`Previous comment like count: ${previousCount}`);
+        
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/comments/${commentId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        console.log('Comment like toggle response:', JSON.stringify(data));
+        
+        // Determine if the comment is now liked
+        let isLiked = false;
+        let likesCount = previousCount;
+        
+        // Try to get updated likes count from the response
+        if (data.data && data.data.likes_count !== undefined) {
+            likesCount = data.data.likes_count;
+        }
+        
+        // Check message to determine like status
+        if (data.message) {
+            if (data.message.toLowerCase().includes('unlike') || 
+                data.message.toLowerCase().includes('niet meer') || 
+                data.message.toLowerCase().includes('removed')) {
+                isLiked = false;
+            } else {
+                isLiked = true;
+            }
+        } else if (likesCount > previousCount) {
+            isLiked = true;
+        } else if (likesCount < previousCount) {
+            isLiked = false;
+        } else {
+            // If count didn't change, toggle the current state
+            isLiked = !wasLiked;
+        }
+        
+        // Update UI for all instances of this comment's like button
+        updateCommentLikeButtonState(commentId, isLiked, likesCount);
+        
+        return data.data;
+    } catch (error) {
+        console.error('Error toggling comment like:', error);
+        throw error;
+    }
+}
+
+// Helper function to update comment like button state
+function updateCommentLikeButtonState(commentId, isLiked, likeCount) {
+    console.log(`Updating comment like button state for comment ${commentId}: isLiked=${isLiked}, likeCount=${likeCount}`);
+    
+    // Update all buttons for this comment
+    const buttons = document.querySelectorAll(`.comment-like-button[data-comment-id="${commentId}"]`);
+    console.log(`Found ${buttons.length} comment like buttons to update`);
+    
+    buttons.forEach((button, index) => {
+        // Update the like count
+        const countElement = button.querySelector('.like-count-small');
+        if (countElement) {
+            countElement.textContent = likeCount;
+        }
+        
+        // Update the button class
+        if (isLiked) {
+            button.classList.add('liked');
+            button.setAttribute('data-liked', 'true');
+        } else {
+            button.classList.remove('liked');
+            button.setAttribute('data-liked', 'false');
+        }
+        
+        // Update the heart icon image
+        const heartIcon = button.querySelector('.heart-icon-small');
+        if (heartIcon) {
+            if (isLiked) {
+                heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+                heartIcon.alt = 'Liked';
+            } else {
+                heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0iY3VycmVudENvbG9yIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=';
+                heartIcon.alt = 'Not liked';
+            }
+        }
+    });
+}
+
+// Function to attach click handlers to comment like buttons
+function attachCommentLikeHandlers() {
+    console.log('Attaching comment like handlers');
+    document.querySelectorAll('.comment-like-button').forEach(button => {
+        // Remove any existing event listeners to avoid duplicates
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        // Check if the button already shows as liked and ensure the heart is filled
+        const isLiked = newButton.classList.contains('liked') || newButton.getAttribute('data-liked') === 'true';
+        if (isLiked) {
+            newButton.classList.add('liked');
+            const heartIcon = newButton.querySelector('.heart-icon-small');
+            if (heartIcon) {
+                heartIcon.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjEuMzVsLTEuNDUtMS4zMkM1LjQgMTUuMzYgMiAxMi4yOCAyIDguNSAyIDUuNDIgNC40MiAzIDcuNSAzYzEuNzQgMCAzLjQxLjgxIDQuNSAyLjA5QzEzLjA5IDMuODEgMTQuNzYgMyAxNi41IDMgMTkuNTggMyAyMiA1LjQyIDIyIDguNWMwIDMuNzgtMy40IDYuODYtOC41NSAxMS41NEwxMiAyMS4zNXoiIGZpbGw9IiNlNzRjM2MiIHN0cm9rZT0iI2U3NGMzYyIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9zdmc+';
+                heartIcon.alt = 'Liked';
+            }
+        }
+        
+        newButton.addEventListener('click', async (e) => {
+            e.stopPropagation(); // Prevent modal from opening
+            e.preventDefault();
+            
+            const commentId = newButton.getAttribute('data-comment-id');
+            if (!commentId) return;
+            
+            console.log(`Comment like button clicked for comment ${commentId}`);
+            
+            try {
+                await toggleCommentLike(commentId);
+            } catch (error) {
+                console.error('Error handling comment like:', error);
+                alert('Failed to update comment like. Please try again.');
+            }
+        });
+    });
+}
+
+// Handler function for comment like button clicks
+function handleCommentLikeButtonClick(event) {
+    // Find if the click was on a comment like button or its child elements
+    const likeButton = event.target.closest('.comment-like-button');
+    if (!likeButton) return; // Not a comment like button click
+    
+    // Prevent event propagation
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const commentId = likeButton.getAttribute('data-comment-id');
+    if (!commentId) return; // No comment ID found
+    
+    console.log(`Direct handler: Comment like button clicked for comment ${commentId}`);
+    
+    // Toggle the like status through the API
+    toggleCommentLike(commentId).catch(error => {
+        console.error(`Error toggling like for comment ${commentId}:`, error);
+        alert('Failed to update comment like status. Please try again.');
     });
 }
