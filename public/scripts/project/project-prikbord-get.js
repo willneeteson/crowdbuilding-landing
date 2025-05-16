@@ -108,6 +108,7 @@ async function toggleLike(postId) {
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
+        console.log('Like toggle response:', data); // Debug log
         return data.data;
     } catch (error) {
         console.error('Error toggling like:', error);
@@ -160,6 +161,7 @@ function renderPosts(posts) {
 
         const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
         const isLiked = post.likes.some(like => like.id === currentUserId);
+        console.log('Post', post.id, 'isLiked:', isLiked); // Debug log
 
         const menuHtml = canDelete ? `
             <div class="post-menu">
@@ -484,20 +486,29 @@ function attachLikeHandlers() {
             
             try {
                 const updatedPost = await toggleLike(postId);
+                console.log('Updated post data:', updatedPost); // Debug log
                 
                 // Update like count
                 likeCount.textContent = updatedPost.likes_count;
                 
-                // Toggle liked state
+                // Toggle liked state based on whether the current user is in the likes array
                 const isLiked = updatedPost.likes.some(like => like.id === currentUserId);
+                console.log('Is liked:', isLiked, 'Current user:', currentUserId); // Debug log
+                
+                // Update button state
                 button.classList.toggle('liked', isLiked);
                 heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
                 
-                // Update like count in modal if it's open
+                // Update like count and heart in modal if it's open
                 const modalPost = document.querySelector(`.post-modal .post-item[data-post-id="${postId}"]`);
                 if (modalPost) {
+                    const modalLikeButton = modalPost.querySelector('.post-like-button');
                     const modalLikeCount = modalPost.querySelector('.like-count');
                     const modalHeartIcon = modalPost.querySelector('svg path');
+                    
+                    if (modalLikeButton) {
+                        modalLikeButton.classList.toggle('liked', isLiked);
+                    }
                     if (modalLikeCount) {
                         modalLikeCount.textContent = updatedPost.likes_count;
                     }
