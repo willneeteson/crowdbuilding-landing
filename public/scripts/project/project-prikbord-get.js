@@ -129,6 +129,92 @@ async function fetchCommentsForPost(postId) {
     }
 }
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('nl-NL', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function renderPosts(posts) {
+    const container = document.getElementById('groupPosts');
+    container.innerHTML = '';
+
+    console.log('Rendering posts, currentUserId:', currentUserId);
+
+    posts.forEach(post => {
+        const postElement = document.createElement('article');
+        postElement.className = 'post-item';
+
+        const likeAvatars = post.likes.map(like =>
+            `<img class="like-avatar" src="${like.avatar_url}" alt="Like by user">`
+        ).join('');
+
+        const postImages = post.images?.length
+            ? post.images.map(img =>
+                `<div class="post-image">
+                    <img src="${img.original_url}" alt="${img.name || ''}">
+                </div>`
+            ).join('')
+            : '';
+
+        // Debug information
+        console.log('Post data:', {
+            postId: post.id,
+            currentUserId,
+            postCreatedById: post.created_by?.id,
+            hasPermissions: !!post.permissions,
+            canDeleteFromPermissions: post.permissions?.can_delete,
+            postData: post // Log the entire post object
+        });
+
+        const canDelete = post.permissions?.can_delete || post.created_by?.id === currentUserId;
+        console.log('Can delete calculation:', {
+            fromPermissions: post.permissions?.can_delete,
+            fromCreatorMatch: post.created_by?.id === currentUserId,
+            finalResult: canDelete
+        });
+
+        const deleteButton = canDelete
+            ? `<button class="post-delete-button" data-post-id="${post.id}">Delete</button>`
+            : '';
+
+        postElement.innerHTML = `
+            <div class="post-header">
+                <img class="post-avatar" src="${post.created_by.avatar_url}" alt="${post.created_by.name}">
+                <div class="post-meta">
+                    <h4 class="post-author">${post.created_by.name}</h4>
+                    <time datetime="${post.created_at}">${formatDate(post.created_at)}</time>
+                </div>
+            </div>
+            <div class="post-body">
+                <p>${post.body}</p>
+                ${postImages}
+            </div>
+            <div class="post-footer">
+                <div class="post-likes">
+                    ${likeAvatars}
+                    <span>${post.likes_count} like${post.likes_count !== 1 ? 's' : ''}</span>
+                </div>
+                <div class="post-comments-toggle" data-post-id="${post.id}">
+                    <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
+                </div>
+                ${deleteButton}
+            </div>
+            <div class="post-comments-list" id="comments-${post.id}" style="display: none;"></div>
+        `;
+
+        container.appendChild(postElement);
+    });
+
+    attachCommentToggles();
+    attachDeleteButtons();
+}
+
 function renderComments(comments, container) {
   container.innerHTML = '';
 
