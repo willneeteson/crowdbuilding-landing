@@ -333,6 +333,16 @@
     color: #e74c3c;
 }
 
+/* Ensure liked hearts are always filled */
+.post-like-button.liked svg path {
+    fill: currentColor !important;
+}
+
+/* Ensure unliked hearts are always unfilled */
+.post-like-button:not(.liked) svg path {
+    fill: none !important;
+}
+
 .post-like-button svg {
     width: 24px;
     height: 24px;

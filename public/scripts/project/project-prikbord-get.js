@@ -109,7 +109,46 @@ async function toggleLike(postId) {
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         console.log('Like toggle response:', data); // Debug log
-        return data.data;
+        
+        // Force update UI directly after API call
+        const updatedPost = data.data;
+        const isLiked = updatedPost.likes && updatedPost.likes.some(like => like.id === currentUserId);
+        
+        // Get all buttons for this post and update them
+        const buttons = document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`);
+        buttons.forEach(button => {
+            // Update button state
+            if (isLiked) {
+                button.classList.add('liked');
+            } else {
+                button.classList.remove('liked');
+            }
+            
+            // Update like count
+            const likeCount = button.querySelector('.like-count');
+            if (likeCount) {
+                likeCount.textContent = updatedPost.likes_count;
+            }
+            
+            // IMPORTANT: Explicitly update heart fill
+            const heartIcon = button.querySelector('svg path');
+            if (heartIcon) {
+                console.log(`Setting heart fill to ${isLiked ? 'currentColor' : 'none'} for post ${postId}`);
+                heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+                
+                // Double check that the fill attribute is set
+                setTimeout(() => {
+                    const currentFill = heartIcon.getAttribute('fill');
+                    console.log(`Current fill for post ${postId}: ${currentFill}`);
+                    if (isLiked && currentFill !== 'currentColor') {
+                        console.log(`Forcing heart fill for post ${postId}`);
+                        heartIcon.setAttribute('fill', 'currentColor');
+                    }
+                }, 100);
+            }
+        });
+        
+        return updatedPost;
     } catch (error) {
         console.error('Error toggling like:', error);
         throw error;
@@ -183,6 +222,7 @@ function renderPosts(posts) {
             </div>
         ` : '';
 
+        // Create the post element without the SVG to avoid issues with fill attribute
         postElement.innerHTML = `
             ${menuHtml}
             <div class="post-header">
@@ -199,10 +239,9 @@ function renderPosts(posts) {
             <div class="post-footer">
                 <button class="post-like-button ${isLiked ? 'liked' : ''}" data-post-id="${post.id}">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
-                            fill="${isLiked ? 'currentColor' : 'none'}" 
-                            stroke="currentColor" 
-                            stroke-width="2"/>
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                            stroke="currentColor" stroke-width="2"
+                            fill="${isLiked ? 'currentColor' : 'none'}"/>
                     </svg>
                     <span class="like-count">${post.likes_count}</span>
                 </button>
@@ -212,15 +251,16 @@ function renderPosts(posts) {
             </div>
         `;
 
-        // Ensure the heart icon is properly filled if the post is liked
+        container.appendChild(postElement);
+
+        // Explicitly set the fill attribute for the heart icon
         if (isLiked) {
             const heartIcon = postElement.querySelector('.post-like-button svg path');
             if (heartIcon) {
+                console.log(`Setting heart fill for post ${post.id} to currentColor`);
                 heartIcon.setAttribute('fill', 'currentColor');
             }
         }
-
-        container.appendChild(postElement);
     });
 
     attachPostClickHandlers();
@@ -552,6 +592,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Only fetch posts if we have a user
         if (currentUserId) {
             fetchGroupPosts('tiny-house-alkmaar');
+            
+            // Wait a bit and then ensure all heart icons are properly filled
+            setTimeout(fixAllHeartIcons, 1000);
         } else {
             console.log('User not logged in, not fetching posts');
             const container = document.getElementById('groupPosts');
@@ -567,3 +610,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
+
+// Function to fix all heart icons
+function fixAllHeartIcons() {
+    console.log('Fixing all heart icons');
+    document.querySelectorAll('.post-item').forEach(post => {
+        const postId = post.getAttribute('data-post-id');
+        const likeButton = post.querySelector('.post-like-button');
+        
+        if (likeButton) {
+            // Check if this post is liked by the current user
+            const isLiked = likeButton.classList.contains('liked');
+            const heartIcon = likeButton.querySelector('svg path');
+            
+            console.log(`Post ${postId} - isLiked: ${isLiked}`);
+            
+            if (isLiked && heartIcon) {
+                console.log(`Fixing heart icon for post ${postId}`);
+                heartIcon.setAttribute('fill', 'currentColor');
+            }
+        }
+    });
+}
