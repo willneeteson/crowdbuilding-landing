@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+  // Add Compressor.js script
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/compressorjs@1.2.1/dist/compressor.min.js';
+  document.head.appendChild(script);
+
   document.getElementById('submitPost')?.addEventListener('click', async () => {
     const newPostBody = document.getElementById('newPostBody');
     const newPostImage = document.getElementById('newPostImage');
@@ -30,8 +35,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const formData = new FormData();
     formData.append('body', body);
+
     if (imageFile) {
-      formData.append('images[]', imageFile);
+      try {
+        // Compress and convert image to WebP
+        const compressedFile = await new Promise((resolve, reject) => {
+          new Compressor(imageFile, {
+            quality: 0.8,
+            mimeType: 'image/webp',
+            success(result) {
+              resolve(result);
+            },
+            error(err) {
+              reject(err);
+            },
+          });
+        });
+
+        formData.append('images[]', compressedFile);
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        alert('Failed to process image. Please try again.');
+        submitButton.disabled = originalButtonState;
+        submitButton.textContent = originalButtonText;
+        return;
+      }
     }
 
     try {
