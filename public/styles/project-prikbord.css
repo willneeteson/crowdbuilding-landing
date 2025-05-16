@@ -1,0 +1,59 @@
+/* Loading states */
+.post-item.loading {
+    text-align: center;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.post-item.error {
+    text-align: center;
+    padding: 2rem;
+    background: #fff3f3;
+    border: 1px solid #ffcdd2;
+    border-radius: 8px;
+    margin: 1rem 0;
+    color: #d32f2f;
+}
+
+.post-item.error button {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post-item.error button:hover {
+    background: #b71c1c;
+}
+
+/* Post animations */
+.post-item {
+    transition: opacity 0.3s ease-out;
+}
+
+/* Button loading state */
+#submitPost:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+} 

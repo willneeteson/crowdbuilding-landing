@@ -2,17 +2,29 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('submitPost')?.addEventListener('click', async () => {
     const newPostBody = document.getElementById('newPostBody');
     const newPostImage = document.getElementById('newPostImage');
+    const submitButton = document.getElementById('submitPost');
     
-    if (!newPostBody || !newPostImage) return;
+    if (!newPostBody || !newPostImage || !submitButton) return;
     
     const body = newPostBody.value.trim();
     const imageFile = newPostImage.files?.[0];
 
     if (!body) return alert('Please write something.');
 
+    // Store original button state
+    const originalButtonText = submitButton.textContent;
+    const originalButtonState = submitButton.disabled;
+
+    // Show loading state
+    submitButton.disabled = true;
+    submitButton.textContent = 'Posting...';
+
     const token = await window.auth.getApiToken();
     if (!token) {
       alert('You are not signed in.');
+      // Restore button state
+      submitButton.disabled = originalButtonState;
+      submitButton.textContent = originalButtonText;
       return;
     }
 
@@ -41,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
       if (container) {
         const postElement = document.createElement('article');
         postElement.className = 'post-item';
+        postElement.style.opacity = '0';
         
         const postImages = data.data.images?.length
           ? data.data.images.map(img =>
@@ -74,14 +87,25 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         container.insertBefore(postElement, container.firstChild);
+        
+        // Fade in the new post
+        requestAnimationFrame(() => {
+          postElement.style.transition = 'opacity 0.3s ease-in';
+          postElement.style.opacity = '1';
+        });
       }
 
+      // Clear form
       newPostBody.value = '';
       newPostImage.value = '';
 
     } catch (error) {
       console.error('Error creating new post:', error);
       alert('Failed to create post.');
+    } finally {
+      // Restore button state
+      submitButton.disabled = originalButtonState;
+      submitButton.textContent = originalButtonText;
     }
   });
 });

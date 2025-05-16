@@ -14,7 +14,28 @@ async function getCurrentUserId() {
     return null;
 }
 
+function showLoadingState(container) {
+    container.innerHTML = `
+        <div class="post-item loading">
+            <div class="loading-spinner"></div>
+            <p>Loading posts...</p>
+        </div>
+    `;
+}
+
+function showErrorState(container, message) {
+    container.innerHTML = `
+        <div class="post-item error">
+            <p>${message}</p>
+            <button onclick="window.location.reload()">Try Again</button>
+        </div>
+    `;
+}
+
 async function fetchGroupPosts(groupSlug) {
+    const container = document.getElementById('groupPosts');
+    showLoadingState(container);
+
     const token = await window.auth.getApiToken();
     const endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
 
@@ -32,6 +53,7 @@ async function fetchGroupPosts(groupSlug) {
         renderPosts(data.data);
     } catch (error) {
         console.error('Error fetching group posts:', error);
+        showErrorState(container, 'Failed to load posts. Please try again.');
     }
 }
 
@@ -202,11 +224,23 @@ function attachDeleteButtons() {
 }
 
 async function deletePost(postId) {
+    const postElement = document.querySelector(`[data-post-id="${postId}"]`).closest('.post-item');
+    const originalContent = postElement.innerHTML;
+    
+    // Show loading state
+    postElement.innerHTML = `
+        <div class="post-item loading">
+            <div class="loading-spinner"></div>
+            <p>Deleting post...</p>
+        </div>
+    `;
+
     const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
     const token = await window.auth.getApiToken();
 
     if (!token) {
         alert('You are not signed in.');
+        postElement.innerHTML = originalContent;
         return;
     }
 
@@ -221,8 +255,15 @@ async function deletePost(postId) {
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         console.log('Post deleted:', data);
+        
+        // Remove the post element with a fade out animation
+        postElement.style.opacity = '0';
+        postElement.style.transition = 'opacity 0.3s ease-out';
+        setTimeout(() => postElement.remove(), 300);
     } catch (error) {
         console.error('Error deleting post:', error);
+        postElement.innerHTML = originalContent;
+        alert('Failed to delete post. Please try again.');
     }
 }
 
