@@ -52,8 +52,12 @@ async function getCurrentMemberstackId() {
         console.log('Memberstack is ready');
 
         console.log('Getting current member...');
-        const member = await $memberstackDom.getCurrentMember();
-        console.log('Member data:', member);
+        const response = await $memberstackDom.getCurrentMember();
+        console.log('Member data:', response);
+
+        // Handle nested data structure
+        const member = response?.data || response;
+        console.log('Processed member data:', member);
 
         if (member && member.id) {
             console.log('Found member ID:', member.id);
