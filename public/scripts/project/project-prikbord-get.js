@@ -590,52 +590,39 @@ function updateLikeButtonState(postId, isLiked, likeCount) {
         // Update the like button class
         if (isLiked) {
             button.classList.add('liked');
+            button.setAttribute('data-liked', 'true'); // Add data attribute for easier debugging
         } else {
             button.classList.remove('liked');
+            button.setAttribute('data-liked', 'false');
         }
         
-        // Update the heart fill - find all possible paths to make sure we get the right one
+        // For maximum reliability, replace the entire SVG
+        replaceHeartSVG(button, isLiked);
+        
+        // Also try the regular approach as a fallback
         const heartIcon = button.querySelector('svg path');
         if (heartIcon) {
-            console.log(`Setting heart ${index} fill to ${isLiked ? 'currentColor' : 'none'} for post ${postId}`);
-            heartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
+            console.log(`Setting heart ${index} fill to ${isLiked ? '#e74c3c' : 'none'} for post ${postId}`);
+            
+            // Set through setAttribute and also through direct style for maximum compatibility
+            heartIcon.setAttribute('fill', isLiked ? '#e74c3c' : 'none');
+            heartIcon.style.fill = isLiked ? '#e74c3c' : 'none';
             
             // If liked, also update the stroke to match (for better visibility)
             if (isLiked) {
+                heartIcon.setAttribute('stroke', '#e74c3c');
+                heartIcon.style.stroke = '#e74c3c';
+            } else {
                 heartIcon.setAttribute('stroke', 'currentColor');
             }
-            
-            // Force a repaint to ensure the fill is applied
-            heartIcon.getBoundingClientRect();
-            
-            // Double-check after a very short delay (helps with rendering issues)
-            setTimeout(() => {
-                const currentFill = heartIcon.getAttribute('fill');
-                console.log(`Verifying heart ${index} fill for post ${postId}: current=${currentFill}, should be=${isLiked ? 'currentColor' : 'none'}`);
-                
-                if (isLiked && currentFill !== 'currentColor') {
-                    console.log(`Re-applying heart fill for post ${postId}`);
-                    heartIcon.setAttribute('fill', 'currentColor');
-                    heartIcon.setAttribute('stroke', 'currentColor');
-                    button.classList.add('liked'); // Re-apply class too
-                }
-            }, 50);
         }
     });
     
-    // Also update any hearts in new or dynamically created elements
-    setTimeout(() => {
-        document.querySelectorAll(`.post-like-button[data-post-id="${postId}"]`).forEach(button => {
-            if (isLiked && !button.classList.contains('liked')) {
-                button.classList.add('liked');
-                const path = button.querySelector('svg path');
-                if (path && path.getAttribute('fill') !== 'currentColor') {
-                    path.setAttribute('fill', 'currentColor');
-                    path.setAttribute('stroke', 'currentColor');
-                }
-            }
-        });
-    }, 100);
+    // Add an extra heart check to the document
+    document.documentElement.setAttribute('data-post-' + postId + '-liked', isLiked ? 'true' : 'false');
+    
+    // Run a fix after a short delay to catch any issues
+    setTimeout(() => window.fixAllHearts(), 100);
 }
 
 // Make these functions available globally for newly created posts
@@ -646,6 +633,20 @@ window.attachMenuHandlers = attachMenuHandlers;
 // Initialise
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Add a style tag to force heart icons to display correctly
+        const styleTag = document.createElement('style');
+        styleTag.innerHTML = `
+            .post-like-button.liked svg path {
+                fill: #e74c3c !important;
+                stroke: #e74c3c !important;
+            }
+            .post-like-button:not(.liked) svg path {
+                fill: none !important;
+                stroke: currentColor !important;
+            }
+        `;
+        document.head.appendChild(styleTag);
+        
         // Get current user ID
         currentUserId = await window.auth.getCurrentMemberstackId();
         console.log('Initialized with user ID:', currentUserId);
@@ -801,3 +802,78 @@ function handleLikeButtonClick(event) {
         alert('Failed to update like status. Please try again.');
     });
 }
+
+// Add a global function to fix all hearts
+window.fixAllHearts = function() {
+    console.log('Manual heart fix triggered');
+    document.querySelectorAll('.post-like-button.liked').forEach(button => {
+        const path = button.querySelector('svg path');
+        if (path) {
+            path.setAttribute('fill', '#e74c3c');
+            path.style.fill = '#e74c3c';
+            path.setAttribute('stroke', '#e74c3c');
+            path.style.stroke = '#e74c3c';
+            console.log('Fixed heart on button', button.getAttribute('data-post-id'));
+        }
+    });
+    
+    // Also handle any lingering hearts that might not be fixed
+    document.querySelectorAll('.post-like-button').forEach(button => {
+        const isLiked = button.classList.contains('liked');
+        if (isLiked) {
+            // Replace the SVG with a correctly filled heart
+            replaceHeartSVG(button, true);
+        }
+    });
+};
+
+// Replace the SVG with a brand new SVG to avoid any style inheritance issues
+function replaceHeartSVG(button, isLiked) {
+    const existingSVG = button.querySelector('svg');
+    if (!existingSVG) return;
+    
+    const likeCount = button.querySelector('.like-count')?.textContent || '0';
+    
+    // Create a new SVG with the correct fill
+    const newSVG = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    newSVG.setAttribute('width', '24');
+    newSVG.setAttribute('height', '24');
+    newSVG.setAttribute('viewBox', '0 0 24 24');
+    newSVG.setAttribute('fill', 'none');
+    
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z');
+    path.setAttribute('stroke-width', '2');
+    
+    if (isLiked) {
+        path.setAttribute('fill', '#e74c3c');
+        path.setAttribute('stroke', '#e74c3c');
+        path.style.fill = '#e74c3c';
+        path.style.stroke = '#e74c3c';
+    } else {
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'currentColor');
+        path.style.fill = 'none';
+    }
+    
+    newSVG.appendChild(path);
+    
+    // Replace the old SVG
+    existingSVG.replaceWith(newSVG);
+    
+    // Make sure the like count is still there
+    const countSpan = button.querySelector('.like-count');
+    if (!countSpan) {
+        const newCountSpan = document.createElement('span');
+        newCountSpan.className = 'like-count';
+        newCountSpan.textContent = likeCount;
+        button.appendChild(newCountSpan);
+    }
+    
+    return newSVG;
+}
+
+// Run multiple heart fixes at different intervals to catch any delayed rendering
+setTimeout(window.fixAllHearts, 1000);
+setTimeout(window.fixAllHearts, 2000);
+setTimeout(window.fixAllHearts, 3000);
