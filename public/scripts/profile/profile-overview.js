@@ -34,15 +34,35 @@
             CHAT_LINK: '.profile__chat-btn',
             CURRENT_USER: '#currentUser'
         },
+        CACHE_TTL: 5 * 60 * 1000, // 5 minutes cache for user data
+        API_TIMEOUT: 8000, // 8 seconds timeout for API requests
         RETRY_DELAY: 500,
-        INIT_DELAY: 1000,
-        CHAT_BASE_URL: 'https://comms.crowdbuilding.com/direct/create?userId=@'
+        RETRY_ATTEMPTS: 2 // Number of retry attempts for API calls
     };
 
-    // Cache DOM elements
-    const domCache = {
+    // Cache for DOM elements and user data
+    const cache = {
         elements: new Map(),
-        get: function(selector) {
+        userData: new Map(),
+        set: function(userId, data) {
+            this.userData.set(userId, {
+                data: data,
+                timestamp: Date.now()
+            });
+        },
+        get: function(userId) {
+            const cached = this.userData.get(userId);
+            if (!cached) return null;
+            
+            // Check if cache is still valid
+            if (Date.now() - cached.timestamp > CONFIG.CACHE_TTL) {
+                this.userData.delete(userId);
+                return null;
+            }
+            
+            return cached.data;
+        },
+        getElement: function(selector) {
             if (!this.elements.has(selector)) {
                 this.elements.set(selector, document.querySelector(selector));
             }
@@ -50,6 +70,7 @@
         },
         clear: function() {
             this.elements.clear();
+            this.userData.clear();
         }
     };
 
@@ -63,6 +84,49 @@
     }
 
     /**
+     * Makes a fetch request with timeout and retry logic
+     * @param {string} url - URL to fetch
+     * @param {Object} options - Fetch options
+     * @returns {Promise<Response>} Fetch response
+     */
+    async function fetchWithTimeout(url, options = {}) {
+        let attempts = 0;
+        
+        const execute = async () => {
+            attempts++;
+            
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), CONFIG.API_TIMEOUT);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                
+                if (attempts <= CONFIG.RETRY_ATTEMPTS) {
+                    // Wait before retry
+                    await new Promise(resolve => setTimeout(resolve, CONFIG.RETRY_DELAY));
+                    return execute();
+                }
+                
+                throw error;
+            }
+        };
+        
+        return execute();
+    }
+
+    /**
      * Updates a DOM element with content and removes shimmer effect
      * @param {string} selector - Class selector of the element to update
      * @param {string} content - Content to set
@@ -70,10 +134,9 @@
      * @returns {Promise<boolean>} Whether the update was successful
      */
     async function updateElement(selector, content, property = 'textContent') {
-        const element = domCache.get(selector);
+        const element = cache.getElement(selector);
         
         if (!element) {
-            console.warn(`Element not found: ${selector}`);
             return false;
         }
 
@@ -86,7 +149,6 @@
             }
             return true;
         } catch (error) {
-            console.error(`Error updating element ${selector}:`, error);
             return false;
         }
     }
@@ -98,7 +160,7 @@
      * @returns {Promise<void>}
      */
     function updateAvatar(element, content) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const img = new Image();
             
             img.onload = () => {
@@ -109,7 +171,6 @@
             };
             
             img.onerror = () => {
-                console.error('Failed to load avatar image, using default');
                 element.src = CONFIG.DEFAULT_AVATAR;
                 element.classList.remove("shimmer-shimmer--circle");
                 resolve();
@@ -117,6 +178,25 @@
             
             img.src = content;
         });
+    }
+
+    /**
+     * Creates DOM fragment for performance
+     * @param {Array} items - Array of items
+     * @param {Function} renderFn - Function to render each item
+     * @returns {DocumentFragment} Document fragment
+     */
+    function createFragment(items, renderFn) {
+        const fragment = document.createDocumentFragment();
+        if (Array.isArray(items) && items.length > 0) {
+            items.forEach(item => {
+                const element = renderFn(item);
+                if (element) {
+                    fragment.appendChild(element);
+                }
+            });
+        }
+        return fragment;
     }
 
     /**
@@ -133,14 +213,18 @@
                 return;
             }
 
-            const interestsList = interests
-                .map(interest => `<li>${typeof interest === 'object' ? interest.name : interest}</li>`)
-                .join('');
-
-            container.innerHTML = `<ul>${interestsList}</ul>`;
+            const ul = document.createElement('ul');
+            const fragment = createFragment(interests, interest => {
+                const li = document.createElement('li');
+                li.textContent = typeof interest === 'object' ? interest.name : interest;
+                return li;
+            });
+            
+            ul.appendChild(fragment);
+            container.innerHTML = '';
+            container.appendChild(ul);
             container.classList.remove("shimmer");
         } catch (error) {
-            console.error('Error rendering interests:', error);
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_INTERESTS;
         }
     }
@@ -159,12 +243,19 @@
                 return;
             }
 
-            container.innerHTML = regions
-                .map(region => `<div class="region-item"><p>${region.name}</p></div>`)
-                .join('');
+            const fragment = createFragment(regions, region => {
+                const div = document.createElement('div');
+                div.className = 'region-item';
+                const p = document.createElement('p');
+                p.textContent = region.name;
+                div.appendChild(p);
+                return div;
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(fragment);
             container.classList.remove("shimmer");
         } catch (error) {
-            console.error('Error rendering regions:', error);
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGIONS;
         }
     }
@@ -181,7 +272,6 @@
             container.textContent = regionArea?.name || CONFIG.DEFAULT_MESSAGES.NO_REGION_AREA;
             container.classList.remove("shimmer");
         } catch (error) {
-            console.error('Error rendering region area:', error);
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_REGION_AREA;
         }
     }
@@ -200,25 +290,28 @@
                 return;
             }
 
-            const housingFormsList = housingForms
-                .map(form => {
-                    if (!form?.title || !form?.id) {
-                        console.warn('Housing form missing title or id:', form);
-                        return '';
-                    }
-                    return `<li><a href="/woonvormen/${form.id}">${form.title}</a></li>`;
-                })
-                .filter(Boolean)
-                .join('');
-
-            if (!housingFormsList) {
+            const ul = document.createElement('ul');
+            const fragment = createFragment(housingForms, form => {
+                if (!form?.title || !form?.id) return null;
+                
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = `/woonvormen/${form.id}`;
+                a.textContent = form.title;
+                li.appendChild(a);
+                return li;
+            });
+            
+            ul.appendChild(fragment);
+            
+            if (!ul.children.length) {
                 container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
             } else {
-                container.innerHTML = `<ul>${housingFormsList}</ul>`;
+                container.innerHTML = '';
+                container.appendChild(ul);
                 container.classList.remove("shimmer");
             }
         } catch (error) {
-            console.error('Error rendering housing forms:', error);
             container.textContent = CONFIG.DEFAULT_MESSAGES.NO_HOUSING_TYPE;
         }
     }
@@ -238,7 +331,7 @@
      * @param {string} memberstackId - The memberstack ID
      */
     function updateChatLink(memberstackId) {
-        const chatLinkElement = domCache.get(CONFIG.SELECTORS.CHAT_LINK);
+        const chatLinkElement = cache.getElement(CONFIG.SELECTORS.CHAT_LINK);
         if (!chatLinkElement) return;
 
         const chatLink = createChatLink(memberstackId);
@@ -257,33 +350,51 @@
     async function fetchUserDetails(apiToken = null) {
         const userId = getUserIdFromUrl();
         if (!userId) {
-            console.error('No user ID found in URL');
-            const userProfile = domCache.get(CONFIG.SELECTORS.USER_PROFILE);
+            const userProfile = cache.getElement(CONFIG.SELECTORS.USER_PROFILE);
             if (userProfile) {
                 userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
             return;
         }
 
+        // Check if we have cached data
+        const cachedData = cache.get(userId);
+        if (cachedData) {
+            displayUserData(cachedData);
+            return;
+        }
+
         try {
             const headers = apiToken ? { Authorization: `Bearer ${apiToken}` } : {};
-            const response = await fetch(`${CONFIG.API_BASE_URL}/users/${userId}`, { headers });
+            const response = await fetchWithTimeout(`${CONFIG.API_BASE_URL}/users/${userId}`, { headers });
 
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
             const { data } = await response.json();
-            console.log('User data:', data); // Debug log
+            
+            // Cache the user data
+            cache.set(userId, data);
+            
+            // Display the user data
+            displayUserData(data);
 
-            // Check if this is the current user's profile
-            const currentMemberstackId = await window.auth.getCurrentMemberstackId();
-            const currentUserDiv = domCache.get(CONFIG.SELECTORS.CURRENT_USER);
-            if (currentUserDiv) {
-                currentUserDiv.style.display = currentMemberstackId === data.memberstack_id ? 'block' : 'none';
+        } catch (error) {
+            const userProfile = cache.getElement(CONFIG.SELECTORS.USER_PROFILE);
+            if (userProfile) {
+                userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
+        }
+    }
 
-            // Update basic profile information
+    /**
+     * Displays user data in the DOM
+     * @param {Object} data - User data
+     */
+    async function displayUserData(data) {
+        try {
+            // Batch DOM updates using Promise.all for better performance
             await Promise.all([
                 updateElement(CONFIG.SELECTORS.AVATAR, data.avatar_url || CONFIG.DEFAULT_AVATAR, 'src'),
                 updateElement(CONFIG.SELECTORS.NAME, data.name || `${data.first_name} ${data.last_name}`),
@@ -293,40 +404,44 @@
                 updateElement(CONFIG.SELECTORS.MEMBERSTACK_ID, data.memberstack_id || CONFIG.DEFAULT_MESSAGES.NO_MEMBERSTACK_ID)
             ]);
 
-            // Update chat link if memberstack_id is available
-            if (data.memberstack_id) {
-                updateChatLink(data.memberstack_id);
-            }
+            // Update complex components with requestAnimationFrame for smoother rendering
+            window.requestAnimationFrame(() => {
+                // Check if this is the current user's profile (non-blocking)
+                window.auth.getCurrentMemberstackId().then(currentMemberstackId => {
+                    const currentUserDiv = cache.getElement(CONFIG.SELECTORS.CURRENT_USER);
+                    if (currentUserDiv) {
+                        currentUserDiv.style.display = currentMemberstackId === data.memberstack_id ? 'block' : 'none';
+                    }
+                });
 
-            // Render complex components
-            const interestsContainer = domCache.get(CONFIG.SELECTORS.INTERESTS);
-            if (interestsContainer) {
-                renderInterests(data.interests, interestsContainer);
-            }
+                // Update chat link if memberstack_id is available
+                if (data.memberstack_id) {
+                    updateChatLink(data.memberstack_id);
+                }
 
-            const regionsContainer = domCache.get(CONFIG.SELECTORS.REGIONS_LIST);
-            if (regionsContainer) {
-                renderRegions(data.regions, regionsContainer);
-            }
+                // Render complex components
+                const interestsContainer = cache.getElement(CONFIG.SELECTORS.INTERESTS);
+                if (interestsContainer) {
+                    renderInterests(data.interests, interestsContainer);
+                }
 
-            const regionAreaContainer = domCache.get(CONFIG.SELECTORS.REGION_AREA);
-            if (regionAreaContainer) {
-                renderRegionArea(data.region_area, regionAreaContainer);
-            }
+                const regionsContainer = cache.getElement(CONFIG.SELECTORS.REGIONS_LIST);
+                if (regionsContainer) {
+                    renderRegions(data.regions, regionsContainer);
+                }
 
-            const housingFormsContainer = domCache.get(CONFIG.SELECTORS.HOUSING_FORMS);
-            if (housingFormsContainer) {
-                console.log('Housing form type:', data.housing_form_type); // Debug log
-                console.log('Housing forms:', data.housing_forms); // Debug log
-                renderHousingForms(
-                    data.housing_forms || [], // Changed from data.housing_form_type?.housing_forms
-                    housingFormsContainer
-                );
-            }
+                const regionAreaContainer = cache.getElement(CONFIG.SELECTORS.REGION_AREA);
+                if (regionAreaContainer) {
+                    renderRegionArea(data.region_area, regionAreaContainer);
+                }
 
+                const housingFormsContainer = cache.getElement(CONFIG.SELECTORS.HOUSING_FORMS);
+                if (housingFormsContainer) {
+                    renderHousingForms(data.housing_forms || [], housingFormsContainer);
+                }
+            });
         } catch (error) {
-            console.error("Error loading user:", error);
-            const userProfile = domCache.get(CONFIG.SELECTORS.USER_PROFILE);
+            const userProfile = cache.getElement(CONFIG.SELECTORS.USER_PROFILE);
             if (userProfile) {
                 userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
             }
@@ -334,26 +449,48 @@
     }
 
     /**
+     * Prefetch and cache API token for faster response
+     */
+    function prefetchApiToken() {
+        // Non-blocking token fetch
+        window.auth.getApiToken().catch(() => {});
+    }
+
+    /**
      * Initialize the profile page
      */
     async function init() {
-        console.log('Initializing profile page...');
-        
-        // Wait for DOM to be fully ready
-        await new Promise(resolve => setTimeout(resolve, CONFIG.INIT_DELAY));
-        
         try {
-            const apiToken = await window.auth.getApiToken();
+            // Prefetch API token in parallel
+            const apiTokenPromise = window.auth.getApiToken();
+            
+            // Start preloading avatar image
+            const avatarElement = cache.getElement(CONFIG.SELECTORS.AVATAR);
+            if (avatarElement && avatarElement.dataset.src) {
+                avatarElement.src = avatarElement.dataset.src;
+            }
+            
+            // Wait for API token
+            const apiToken = await apiTokenPromise;
+            
+            // Fetch user details
             await fetchUserDetails(apiToken);
         } catch (error) {
-            console.error("Initialization error:", error);
+            const userProfile = cache.getElement(CONFIG.SELECTORS.USER_PROFILE);
+            if (userProfile) {
+                userProfile.innerHTML = `<p style="color: red;">${CONFIG.DEFAULT_MESSAGES.LOAD_ERROR}</p>`;
+            }
         }
     }
+
+    // Start API token prefetch as early as possible
+    prefetchApiToken();
 
     // Wait for DOM to be fully loaded before initializing
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        setTimeout(init, CONFIG.INIT_DELAY);
+        // Document already loaded, initialize immediately
+        init();
     }
 })();
