@@ -870,7 +870,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Load user profile card script
         if (!document.querySelector('script[src*="user-profile-card.js"]')) {
             const profileCardScript = document.createElement('script');
-            profileCardScript.src = '/scripts/project/user-profile-card.js';
+            // Use a relative path that works with the current domain
+            profileCardScript.src = window.location.protocol + '//' + window.location.host + '/scripts/project/user-profile-card.js';
             document.head.appendChild(profileCardScript);
         }
         
