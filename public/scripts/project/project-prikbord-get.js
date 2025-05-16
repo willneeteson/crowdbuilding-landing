@@ -3,40 +3,48 @@ let currentUserId = null;
 // Get current user ID from Memberstack
 async function getCurrentUserId() {
   return new Promise((resolve) => {
-    // Check if Memberstack is available
-    if (typeof $memberstackDom === 'undefined') {
-      console.log('Memberstack not available');
-      resolve(null);
-      return;
-    }
+    let attempts = 0;
+    const maxAttempts = 5;
+    const checkInterval = 1000; // 1 second
 
-    // Check if onReady is available
-    if (typeof $memberstackDom.onReady === 'undefined') {
-      console.log('Memberstack onReady not available');
-      resolve(null);
-      return;
-    }
+    function checkMemberstack() {
+      attempts++;
+      console.log(`Checking Memberstack (attempt ${attempts}/${maxAttempts})`);
 
-    // Wait for Memberstack to be ready
-    $memberstackDom.onReady.then(async () => {
-      try {
-        const member = await $memberstackDom.getCurrentMember();
-        if (member) {
-          currentUserId = member.id;
-          console.log('Current user ID set to:', currentUserId);
-          resolve(currentUserId);
+      if (typeof $memberstackDom === 'undefined') {
+        console.log('Memberstack not available');
+        if (attempts < maxAttempts) {
+          setTimeout(checkMemberstack, checkInterval);
         } else {
-          console.log('No member found in Memberstack');
           resolve(null);
         }
-      } catch (error) {
-        console.error('Error getting member:', error);
-        resolve(null);
+        return;
       }
-    }).catch(error => {
-      console.error('Error waiting for Memberstack:', error);
-      resolve(null);
-    });
+
+      // Try to get the current member directly
+      $memberstackDom.getCurrentMember()
+        .then(member => {
+          if (member) {
+            currentUserId = member.id;
+            console.log('Current user ID set to:', currentUserId);
+            resolve(currentUserId);
+          } else {
+            console.log('No member found in Memberstack');
+            resolve(null);
+          }
+        })
+        .catch(error => {
+          console.error('Error getting member:', error);
+          if (attempts < maxAttempts) {
+            setTimeout(checkMemberstack, checkInterval);
+          } else {
+            resolve(null);
+          }
+        });
+    }
+
+    // Start checking
+    checkMemberstack();
   });
 }
 
