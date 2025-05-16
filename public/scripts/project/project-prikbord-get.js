@@ -213,6 +213,94 @@ function renderComments(comments, container) {
     });
 }
 
+async function submitComment(postId, commentText) {
+    const token = await window.auth.getApiToken();
+    if (!token) {
+        alert('You must be logged in to comment.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ body: commentText })
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error('Error submitting comment:', error);
+        throw error;
+    }
+}
+
+function createCommentForm(postId) {
+    const form = document.createElement('form');
+    form.className = 'comment-form';
+    form.innerHTML = `
+        <textarea placeholder="Write a comment..." required></textarea>
+        <button type="submit">Post Comment</button>
+    `;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const textarea = form.querySelector('textarea');
+        const button = form.querySelector('button');
+        const commentText = textarea.value.trim();
+
+        if (!commentText) return;
+
+        // Disable form while submitting
+        textarea.disabled = true;
+        button.disabled = true;
+        button.textContent = 'Posting...';
+
+        try {
+            const newComment = await submitComment(postId, commentText);
+            
+            // Add the new comment to the list
+            const commentsList = document.getElementById(`modal-comments-${postId}`);
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment-item';
+            commentElement.innerHTML = `
+                <img class="post-avatar" src="${newComment.created_by.avatar_url}" alt="${newComment.created_by.name}">
+                <div class="comment-content">
+                    <h5>${newComment.created_by.name}</h5>
+                    <p>${newComment.body}</p>
+                    <time datetime="${newComment.created_at}">${formatDate(newComment.created_at)}</time>
+                </div>
+            `;
+            commentsList.appendChild(commentElement);
+
+            // Clear and re-enable form
+            textarea.value = '';
+            textarea.disabled = false;
+            button.disabled = false;
+            button.textContent = 'Post Comment';
+
+            // Update comment count in the main post list
+            const postElement = document.querySelector(`.post-item[data-post-id="${postId}"]`);
+            if (postElement) {
+                const commentsCount = postElement.querySelector('.post-comments-count span');
+                const currentCount = parseInt(commentsCount.textContent);
+                commentsCount.textContent = `${currentCount + 1} comment${currentCount + 1 !== 1 ? 's' : ''}`;
+            }
+        } catch (error) {
+            alert('Failed to post comment. Please try again.');
+            textarea.disabled = false;
+            button.disabled = false;
+            button.textContent = 'Post Comment';
+        }
+    });
+
+    return form;
+}
+
 function attachPostClickHandlers() {
     // Handle post clicks to open modal
     document.querySelectorAll('.post-item').forEach(post => {
@@ -232,6 +320,10 @@ function attachPostClickHandlers() {
             commentsList.className = 'post-comments-list';
             commentsList.id = `modal-comments-${postId}`;
             postContent.appendChild(commentsList);
+            
+            // Add comment form
+            const commentForm = createCommentForm(postId);
+            postContent.appendChild(commentForm);
             
             // Update modal content
             modalContent.innerHTML = '';
