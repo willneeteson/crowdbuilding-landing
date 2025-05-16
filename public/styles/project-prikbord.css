@@ -428,4 +428,79 @@
 
 .post-modal .post-like-button.liked .heart-icon {
     color: #e74c3c;
+}
+
+/* User Profile Hover Card */
+.user-hover-card {
+  position: absolute;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 1rem;
+  width: 280px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.user-hover-card.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.user-hover-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.user-hover-card-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.user-hover-card-name {
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.user-hover-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-hover-card-stats {
+  display: flex;
+  gap: 1rem;
+  border-top: 1px solid #eee;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.user-hover-card-stat {
+  flex: 1;
+  text-align: center;
+}
+
+.user-hover-card-stat-value {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-hover-card-stat-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.user-hover-trigger {
+  position: relative;
+  cursor: pointer;
 } 

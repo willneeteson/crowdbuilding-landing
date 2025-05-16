@@ -274,9 +274,9 @@ function renderPosts(posts) {
         postElement.innerHTML = `
             ${menuHtml}
             <div class="post-header">
-                <img class="post-avatar" src="${post.created_by.avatar_url}" alt="${post.created_by.name}">
+                <img class="post-avatar" src="${post.created_by.avatar_url}" alt="${post.created_by.name}" data-user-id="${post.created_by.id}">
                 <div class="post-meta">
-                    <h4 class="post-author">${post.created_by.name}</h4>
+                    <h4 class="post-author" data-user-id="${post.created_by.id}">${post.created_by.name}</h4>
                     <time datetime="${post.created_at}">${formatDate(post.created_at)}</time>
                 </div>
             </div>
@@ -333,9 +333,9 @@ function renderComments(comments, container) {
         const likesCount = comment.likes_count || 0;
 
         commentElement.innerHTML = `
-            <img class="post-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}">
+            <img class="post-avatar comment-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}" data-user-id="${comment.created_by.id}">
             <div class="comment-content">
-                <h5>${comment.created_by.name}</h5>
+                <h5 data-user-id="${comment.created_by.id}">${comment.created_by.name}</h5>
                 <p>${comment.body}</p>
                 <div class="comment-footer">
                     <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
@@ -866,6 +866,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         `;
         document.head.appendChild(styleTag);
+        
+        // Load user profile card script
+        if (!document.querySelector('script[src*="user-profile-card.js"]')) {
+            const profileCardScript = document.createElement('script');
+            profileCardScript.src = '/scripts/project/user-profile-card.js';
+            document.head.appendChild(profileCardScript);
+        }
         
         // Also add a script that watches for DOM changes and ensures heart icons are correct
         const scriptTag = document.createElement('script');
