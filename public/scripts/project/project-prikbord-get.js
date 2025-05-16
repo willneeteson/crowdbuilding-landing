@@ -514,15 +514,14 @@ function attachLikeHandlers() {
                     if (modalLikeButton) {
                         if (isLiked) {
                             modalLikeButton.classList.add('liked');
+                            modalHeartIcon.setAttribute('fill', 'currentColor');
                         } else {
                             modalLikeButton.classList.remove('liked');
+                            modalHeartIcon.setAttribute('fill', 'none');
                         }
                     }
                     if (modalLikeCount) {
                         modalLikeCount.textContent = updatedPost.likes_count;
-                    }
-                    if (modalHeartIcon) {
-                        modalHeartIcon.setAttribute('fill', isLiked ? 'currentColor' : 'none');
                     }
                 }
             } catch (error) {

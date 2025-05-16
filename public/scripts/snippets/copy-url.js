@@ -9,75 +9,34 @@
     // Configuration
     const CONFIG = {
         TOOLTIP_DURATION: 2000, // Duration to show tooltip in milliseconds
-        TOOLTIP_CLASS: 'copy-tooltip',
-        TOOLTIP_TEXT: 'Copied!',
-        TOOLTIP_STYLES: `
-            .copy-tooltip {
-                position: absolute;
-                background: #090F3F;
-                color: white;
-                padding: 4px 8px;
-                border-radius: 16px;
-                font-size: 14px;
-                font-weight: 700;
-                pointer-events: none;
-                z-index: 999999;
-                opacity: 0;
-                transition: opacity 0.2s ease-in-out;
-                white-space: nowrap;
-                transform: translateX(-50%);
-            }
-            .copy-tooltip.visible {
-                opacity: 1;
-            }
-        `
+        TOOLTIP_TEXT: 'Copied!'
     };
 
     /**
-     * Creates and shows a tooltip at the top center of the element
-     * @param {HTMLElement} element - The element to position the tooltip above
+     * Shows a tooltip on the element using the existing tooltip system
+     * @param {HTMLElement} element - The element to show the tooltip on
      */
     function showTooltip(element) {
         console.log('Showing tooltip for element:', element);
         
-        // Create tooltip element if it doesn't exist
-        let tooltip = document.querySelector(`.${CONFIG.TOOLTIP_CLASS}`);
-        if (!tooltip) {
-            console.log('Creating new tooltip element');
-            // Add styles if not already added
-            if (!document.querySelector(`#${CONFIG.TOOLTIP_CLASS}-styles`)) {
-                const styleSheet = document.createElement('style');
-                styleSheet.id = `${CONFIG.TOOLTIP_CLASS}-styles`;
-                styleSheet.textContent = CONFIG.TOOLTIP_STYLES;
-                document.head.appendChild(styleSheet);
-            }
-
-            tooltip = document.createElement('div');
-            tooltip.className = CONFIG.TOOLTIP_CLASS;
-            tooltip.textContent = CONFIG.TOOLTIP_TEXT;
-            document.body.appendChild(tooltip);
-        }
-
-        // Get element position
-        const rect = element.getBoundingClientRect();
-        console.log('Element position:', rect);
+        // Set the tooltip data attribute
+        element.setAttribute('data-tooltip', CONFIG.TOOLTIP_TEXT);
         
-        // Position tooltip at top center of element
-        const tooltipLeft = rect.left + (rect.width / 2);
-        const tooltipTop = rect.top - 40;
-        
-        console.log('Tooltip position:', { left: tooltipLeft, top: tooltipTop });
-        
-        tooltip.style.left = `${tooltipLeft}px`;
-        tooltip.style.top = `${tooltipTop}px`;
+        // Trigger mouseover to show tooltip
+        const mouseoverEvent = new MouseEvent('mouseover', {
+            bubbles: true,
+            cancelable: true
+        });
+        element.dispatchEvent(mouseoverEvent);
 
-        // Show tooltip
-        tooltip.classList.add('visible');
-        console.log('Tooltip should be visible now');
-
-        // Hide tooltip after duration
+        // Remove tooltip after duration
         setTimeout(() => {
-            tooltip.classList.remove('visible');
+            const mouseoutEvent = new MouseEvent('mouseout', {
+                bubbles: true,
+                cancelable: true
+            });
+            element.dispatchEvent(mouseoutEvent);
+            element.removeAttribute('data-tooltip');
             console.log('Tooltip hidden');
         }, CONFIG.TOOLTIP_DURATION);
     }
