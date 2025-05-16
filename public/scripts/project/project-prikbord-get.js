@@ -94,11 +94,29 @@ function renderPosts(posts) {
     const container = document.getElementById('groupPosts');
     container.innerHTML = '';
 
+    // Create modal container if it doesn't exist
+    if (!document.getElementById('postModal')) {
+        const modalHtml = `
+            <div id="postModal" class="post-modal-overlay">
+                <div class="post-modal">
+                    <button class="post-modal-close">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+                        </svg>
+                    </button>
+                    <div class="post-modal-content"></div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
     console.log('Rendering posts, currentUserId:', currentUserId);
 
     posts.forEach(post => {
         const postElement = document.createElement('article');
         postElement.className = 'post-item';
+        postElement.setAttribute('data-post-id', post.id);
 
         const likeAvatars = post.likes.map(like =>
             `<img class="like-avatar" src="${like.avatar_url}" alt="Like by user">`
@@ -157,17 +175,16 @@ function renderPosts(posts) {
                     ${likeAvatars}
                     <span>${post.likes_count} like${post.likes_count !== 1 ? 's' : ''}</span>
                 </div>
-                <div class="post-comments-toggle" data-post-id="${post.id}">
+                <div class="post-comments-count" data-post-id="${post.id}">
                     <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
                 </div>
             </div>
-            <div class="post-comments-list" id="comments-${post.id}" style="display: none;"></div>
         `;
 
         container.appendChild(postElement);
     });
 
-    attachCommentToggles();
+    attachPostClickHandlers();
     attachMenuHandlers();
 }
 
@@ -196,25 +213,56 @@ function renderComments(comments, container) {
     });
 }
 
-function attachCommentToggles() {
-    document.querySelectorAll('.post-comments-toggle').forEach(toggle => {
-        toggle.addEventListener('click', async () => {
-            const postId = toggle.getAttribute('data-post-id');
-            const commentsList = document.getElementById(`comments-${postId}`);
-            const isVisible = commentsList.style.display === 'block';
-
-            if (isVisible) {
-                commentsList.style.display = 'none';
-            } else {
-                commentsList.style.display = 'block';
-
-                if (!commentsList.hasAttribute('data-loaded')) {
-                    const comments = await fetchCommentsForPost(postId);
-                    renderComments(comments, commentsList);
-                    commentsList.setAttribute('data-loaded', 'true');
-                }
-            }
+function attachPostClickHandlers() {
+    // Handle post clicks to open modal
+    document.querySelectorAll('.post-item').forEach(post => {
+        post.addEventListener('click', async (e) => {
+            // Don't open modal if clicking menu or its children
+            if (e.target.closest('.post-menu')) return;
+            
+            const postId = post.getAttribute('data-post-id');
+            const modal = document.getElementById('postModal');
+            const modalContent = modal.querySelector('.post-modal-content');
+            
+            // Clone the post content
+            const postContent = post.cloneNode(true);
+            
+            // Add comments section
+            const commentsList = document.createElement('div');
+            commentsList.className = 'post-comments-list';
+            commentsList.id = `modal-comments-${postId}`;
+            postContent.appendChild(commentsList);
+            
+            // Update modal content
+            modalContent.innerHTML = '';
+            modalContent.appendChild(postContent);
+            
+            // Show modal
+            modal.classList.add('show');
+            
+            // Load comments
+            const comments = await fetchCommentsForPost(postId);
+            renderComments(comments, commentsList);
         });
+    });
+
+    // Handle modal close button
+    document.querySelector('.post-modal-close').addEventListener('click', () => {
+        document.getElementById('postModal').classList.remove('show');
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('postModal').addEventListener('click', (e) => {
+        if (e.target.id === 'postModal') {
+            e.target.classList.remove('show');
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            document.getElementById('postModal').classList.remove('show');
+        }
     });
 }
 

@@ -118,4 +118,129 @@
 
 .post-menu-item.delete:hover {
     background-color: #fff5f5;
+}
+
+/* Post modal styles */
+.post-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.post-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.post-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.post-modal-overlay.show .post-modal {
+    transform: translateY(0);
+}
+
+.post-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    z-index: 1;
+}
+
+.post-modal-close:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.post-modal-content {
+    padding: 2rem;
+}
+
+.post-modal .post-item {
+    position: relative;
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-modal .post-comments-list {
+    display: block !important;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+}
+
+.post-modal .comment-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.post-modal .comment-item:last-child {
+    margin-bottom: 0;
+}
+
+.post-modal .comment-content {
+    flex: 1;
+}
+
+.post-modal .comment-content h5 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.post-modal .comment-content p {
+    margin: 0 0 0.5rem 0;
+}
+
+.post-modal .comment-content time {
+    font-size: 0.875rem;
+    color: #666;
+}
+
+/* Make post items clickable */
+.post-item {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.post-item:hover {
+    transform: translateY(-2px);
+}
+
+/* Prevent menu clicks from triggering post modal */
+.post-menu {
+    z-index: 2;
+}
+
+.post-menu-button,
+.post-menu-dropdown,
+.post-menu-item {
+    cursor: pointer;
 } 
