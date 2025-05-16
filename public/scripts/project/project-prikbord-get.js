@@ -36,14 +36,30 @@ async function getApiToken() {
     return null;
 }
 
-async function getCurrentUserId() {
-    if (typeof $memberstackDom !== "undefined") {
+/**
+ * Gets current user's memberstack ID
+ * @returns {Promise<string|null>} Memberstack ID or null if not available
+ */
+async function getCurrentMemberstackId() {
+    if (typeof $memberstackDom === "undefined") {
+        return null;
+    }
+
+    try {
         await $memberstackDom.onReady;
         const member = await $memberstackDom.getCurrentMember();
-        if (member && member.id) {
-            currentUserId = member.id;
-            return currentUserId;
-        }
+        return member?.id || null;
+    } catch (error) {
+        console.error("Error getting current memberstack ID:", error);
+        return null;
+    }
+}
+
+async function getCurrentUserId() {
+    const memberstackId = await getCurrentMemberstackId();
+    if (memberstackId) {
+        currentUserId = memberstackId;
+        return currentUserId;
     }
     return null;
 }
