@@ -3,8 +3,16 @@ let currentUserId = null;
 // Get current user ID from Memberstack
 async function getCurrentUserId() {
   return new Promise((resolve) => {
+    // Check if Memberstack is available
     if (typeof $memberstackDom === 'undefined') {
       console.log('Memberstack not available');
+      resolve(null);
+      return;
+    }
+
+    // Check if onReady is available
+    if (typeof $memberstackDom.onReady === 'undefined') {
+      console.log('Memberstack onReady not available');
       resolve(null);
       return;
     }
