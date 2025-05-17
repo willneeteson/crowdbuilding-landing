@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <span class="like-count">0</span>
             </button>
             <div class="post-comments-count" data-post-id="${data.data.id}">
-              <span>0 comments</span>
+              <span>0 reacties</span>
             </div>
           </div>
         `;

@@ -26,7 +26,7 @@ function showLoadingState(container) {
     container.innerHTML = `
         <div class="post-item loading">
             <div class="loading-spinner"></div>
-            <p>Loading posts...</p>
+            <p>berichten laden...</p>
         </div>
     `;
 }
@@ -364,7 +364,7 @@ function renderPosts(posts, append = false) {
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
                         </svg>
-                        Delete Post
+                        Verwijderen
                     </button>
                 </div>
             </div>
@@ -393,7 +393,7 @@ function renderPosts(posts, append = false) {
                     <span class="like-count">${post.likes_count}</span>
                 </button>
                 <div class="post-comments-count" data-post-id="${post.id}">
-                    <span>${post.comments_count} comment${post.comments_count !== 1 ? 's' : ''}</span>
+                    <span>${post.comments_count} reactie${post.comments_count !== 1 ? 's' : ''}</span>
                 </div>
             </div>
         `;
@@ -410,7 +410,7 @@ function renderComments(comments, container) {
     container.innerHTML = '';
 
     if (comments.length === 0) {
-        container.innerHTML = `<div class="comment-item empty">No comments yet.</div>`;
+        container.innerHTML = `<div class="comment-item empty">Nog geen reacties.</div>`;
         return;
     }
 
@@ -550,7 +550,7 @@ function createCommentForm(postId) {
             if (postElement) {
                 const commentsCount = postElement.querySelector('.post-comments-count span');
                 const currentCount = parseInt(commentsCount.textContent);
-                commentsCount.textContent = `${currentCount + 1} comment${currentCount + 1 !== 1 ? 's' : ''}`;
+                commentsCount.textContent = `${currentCount + 1} reactie${currentCount + 1 !== 1 ? 's' : ''}`;
             }
         } catch (error) {
             alert('Failed to post comment. Please try again.');
@@ -1260,7 +1260,7 @@ function handleLikeButtonClick(event) {
 async function toggleCommentLike(commentId) {
     const token = await window.auth.getApiToken();
     if (!token) {
-        alert('You must be logged in to like comments.');
+        alert('Je moet ingelogd zijn om reacties te liken.');
         return;
     }
 
