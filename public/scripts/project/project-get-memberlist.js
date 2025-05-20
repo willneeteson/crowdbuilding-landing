@@ -93,8 +93,27 @@ function populateProjectData(data) {
     }
 }
 
-// Example usage:
-// fetch('your-api-endpoint')
-//     .then(response => response.json())
-//     .then(data => populateProjectData(data.data))
-//     .catch(error => console.error('Error fetching project data:', error)); 
+// Function to fetch project data
+async function fetchProjectData() {
+    try {
+        const projectId = 'cpo-project-park-romana';
+        const response = await fetch(`https://api.crowdbuilding.com/api/groups/${projectId}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('Fetched project data:', data);
+        
+        if (data && data.data) {
+            populateProjectData(data.data);
+        } else {
+            console.error('Invalid data format received from API');
+        }
+    } catch (error) {
+        console.error('Error fetching project data:', error);
+    }
+}
+
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', fetchProjectData); 
