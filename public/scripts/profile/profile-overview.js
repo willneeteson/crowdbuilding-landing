@@ -8,6 +8,7 @@
     // Configuration
     const CONFIG = {
         API_BASE_URL: 'https://api.crowdbuilding.com/api/v1',
+        CHAT_BASE_URL: 'https://comms.crowdbuilding.com/direct/create',
         DEFAULT_AVATAR: 'https://cdn.prod.website-files.com/66dffceb975388322f140196/6810dfceaa06e55034a48587_cb_placeholder-avatar.svg',
         DEFAULT_MESSAGES: {
             NO_BIO: 'Geen bio beschikbaar.',
@@ -323,7 +324,7 @@
      */
     function createChatLink(memberstackId) {
         if (!memberstackId) return '';
-        return `${CONFIG.CHAT_BASE_URL}${memberstackId}:chat.crowdbuilding.com`;
+        return `${CONFIG.CHAT_BASE_URL}?userId=@${memberstackId}:chat.crowdbuilding.com&isDirect=true`;
     }
 
     /**
