@@ -97,7 +97,7 @@ function populateProjectData(data) {
 async function fetchProjectData() {
     try {
         const projectId = 'cpo-project-park-romana';
-        const response = await fetch(`https://api.crowdbuilding.com/api/groups/${projectId}`);
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
