@@ -152,11 +152,11 @@ function showNotification(type, message) {
 // Function to fetch group data and questions
 async function fetchGroupData() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`);
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch group data: ${response.status}`);
+            throw new Error(errorData.message || `Failed to fetch group questions: ${response.status}`);
         }
 
         const data = await response.json();
@@ -167,7 +167,7 @@ async function fetchGroupData() {
         
         return data.data;
     } catch (error) {
-        console.error('Error fetching group data:', error);
+        console.error('Error fetching group questions:', error);
         showNotification('error', error.message || 'Failed to load group questions');
         throw error;
     }
