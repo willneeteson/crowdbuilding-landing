@@ -151,7 +151,7 @@ async function joinGroup(answers = {}) {
 
         console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
-        const response = await fetch(`${API_BASE_URL}/groups/${GROUP_ID}/join`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody)
@@ -244,8 +244,8 @@ async function fetchGroupData() {
             'Authorization': `Bearer ${apiToken}`
         };
 
-        console.log('Making request to:', `${API_BASE_URL}/groups/${GROUP_ID}/members/questions`);
-        const response = await fetch(`${API_BASE_URL}/groups/${GROUP_ID}/members/questions`, {
+        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`, {
             method: 'GET',
             headers: headers
         });
