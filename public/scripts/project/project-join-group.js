@@ -1,16 +1,90 @@
 // Default group ID
 const DEFAULT_GROUP_ID = 'tiny-house-alkmaar';
 
+// Function to get CSRF token
+function getCsrfToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (!metaTag) {
+        console.warn('CSRF token meta tag not found');
+        return '';
+    }
+    return metaTag.getAttribute('content') || '';
+}
+
+// Function to create question form
+function createQuestionForm(questions) {
+    const formContainer = document.createElement('div');
+    formContainer.className = 'group-questions-form';
+    
+    questions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-container';
+        
+        const label = document.createElement('label');
+        label.textContent = question.title;
+        if (question.required) {
+            label.innerHTML += ' <span class="required">*</span>';
+        }
+        
+        const explanation = document.createElement('p');
+        explanation.className = 'question-explanation';
+        explanation.textContent = question.explanation;
+        
+        let input;
+        if (question.question_type === 'multiple_choice') {
+            input = document.createElement('select');
+            input.required = question.required;
+            
+            // Add empty option
+            const emptyOption = document.createElement('option');
+            emptyOption.value = '';
+            emptyOption.textContent = 'Select an option';
+            input.appendChild(emptyOption);
+            
+            // Add question answers as options
+            question.question_answers.forEach(answer => {
+                const option = document.createElement('option');
+                option.value = answer.answer;
+                option.textContent = answer.answer;
+                input.appendChild(option);
+            });
+        } else {
+            input = document.createElement('textarea');
+            input.required = question.required;
+            input.rows = 3;
+        }
+        
+        input.name = `question_${question.id}`;
+        input.id = `question_${question.id}`;
+        input.className = 'question-input';
+        
+        questionDiv.appendChild(label);
+        questionDiv.appendChild(explanation);
+        questionDiv.appendChild(input);
+        formContainer.appendChild(questionDiv);
+    });
+    
+    return formContainer;
+}
+
 // Function to handle joining a group
-async function joinGroup(groupId = DEFAULT_GROUP_ID) {
+async function joinGroup(groupId = DEFAULT_GROUP_ID, answers = {}) {
     try {
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
+
+        // Only add CSRF token if it exists
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+
         const response = await fetch(`/api/groups/${groupId}/join`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            }
+            headers: headers,
+            body: JSON.stringify({ answers })
         });
 
         const data = await response.json();
@@ -53,8 +127,13 @@ function updateGroupUI(isJoined) {
 
 // Function to show notifications
 function showNotification(type, message) {
-    const notificationContainer = document.querySelector('.notification-container');
-    if (!notificationContainer) return;
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.querySelector('.notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
 
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -68,20 +147,96 @@ function showNotification(type, message) {
     }, 5000);
 }
 
+// Function to fetch group data and questions
+async function fetchGroupData(groupId) {
+    try {
+        const response = await fetch(`/api/groups/${groupId}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to fetch group data');
+        }
+        
+        return data.data;
+    } catch (error) {
+        console.error('Error fetching group data:', error);
+        showNotification('error', 'Failed to load group questions');
+        throw error;
+    }
+}
+
 // Event listener for join button
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
         joinButton.addEventListener('click', async (e) => {
             e.preventDefault();
-            // Use the group ID from the button's data attribute or fall back to default
             const groupId = joinButton.dataset.groupId || DEFAULT_GROUP_ID;
             
             try {
-                joinButton.disabled = true;
-                await joinGroup(groupId);
+                // Fetch group data and questions
+                const groupData = await fetchGroupData(groupId);
+                
+                // Create modal for questions
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+                
+                const closeButton = document.createElement('span');
+                closeButton.className = 'close-button';
+                closeButton.innerHTML = '&times;';
+                closeButton.onclick = () => modal.remove();
+                
+                const title = document.createElement('h2');
+                title.textContent = 'Join Group';
+                
+                const form = document.createElement('form');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
+                    
+                    // Collect answers
+                    const answers = {};
+                    const inputs = form.querySelectorAll('input, select, textarea');
+                    inputs.forEach(input => {
+                        if (input.name) {
+                            answers[input.name] = input.value;
+                        }
+                    });
+                    
+                    // Submit join request
+                    try {
+                        joinButton.disabled = true;
+                        await joinGroup(groupId, answers);
+                        modal.remove();
+                    } catch (error) {
+                        joinButton.disabled = false;
+                    }
+                };
+                
+                // Add questions to form
+                if (groupData.questions && groupData.questions.length > 0) {
+                    const questionsForm = createQuestionForm(groupData.questions);
+                    form.appendChild(questionsForm);
+                }
+                
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = 'Submit';
+                submitButton.className = 'submit-button';
+                
+                form.appendChild(submitButton);
+                
+                modalContent.appendChild(closeButton);
+                modalContent.appendChild(title);
+                modalContent.appendChild(form);
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
+                
             } catch (error) {
-                joinButton.disabled = false;
+                console.error('Error:', error);
+                showNotification('error', 'Failed to load group questions');
             }
         });
     }
