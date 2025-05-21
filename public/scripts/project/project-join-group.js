@@ -123,10 +123,15 @@ async function joinGroup(answers = {}) {
         // Format answers into the expected structure
         const formattedAnswers = Object.entries(answers)
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
-            .map(([name, value]) => ({
-                question_id: parseInt(name.replace('question_', '')),
-                answer: value
-            }));
+            .map(([name, value]) => {
+                const questionId = name.replace('question_', '');
+                return {
+                    question_id: parseInt(questionId),
+                    answer: value
+                };
+            });
+
+        console.log('Formatted answers for API:', formattedAnswers);
 
         const headers = {
             'Content-Type': 'application/json',
@@ -134,17 +139,22 @@ async function joinGroup(answers = {}) {
             'Authorization': `Bearer ${apiToken}`
         };
 
+        const requestBody = {
+            answers: formattedAnswers,
+            email_visibility: answers.email_visibility === 'on'
+        };
+
+        console.log('Request body:', requestBody);
+
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ 
-                answers: formattedAnswers,
-                email_visibility: answers.email_visibility === 'on'
-            })
+            body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            console.log('Error response:', errorData);
             if (errorData.errors) {
                 // Handle validation errors
                 const errorMessages = Object.values(errorData.errors).flat();
@@ -154,6 +164,7 @@ async function joinGroup(answers = {}) {
         }
 
         const data = await response.json();
+        console.log('Success response:', data);
 
         // Handle successful join
         if (data.message) {
@@ -330,7 +341,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         console.log('Found form inputs:', inputs);
                         inputs.forEach(input => {
                             if (input.name) {
-                                answers[input.name] = input.value;
+                                // Handle checkbox inputs differently
+                                if (input.type === 'checkbox') {
+                                    answers[input.name] = input.checked ? 'on' : 'off';
+                                } else {
+                                    answers[input.name] = input.value.trim();
+                                }
                             }
                         });
                         console.log('Collected answers:', answers);
@@ -340,6 +356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         modal.remove();
                     } catch (error) {
                         console.error('Form submission error:', error);
+                        showNotification('error', error.message || 'Failed to submit form');
                     }
                 };
                 
