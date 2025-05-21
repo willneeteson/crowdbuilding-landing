@@ -137,15 +137,25 @@ async function joinGroup(answers = {}) {
         // Format answers into the expected structure
         const formattedAnswers = Object.entries(answers)
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
-            .reduce((acc, [name, value]) => {
+            .map(([name, value]) => {
                 // Extract the question ID from the input name (e.g., "question_123" -> "123")
                 const questionId = name.replace('question_', '');
-                acc[questionId] = value || '';
-                return acc;
-            }, {});
+                console.log(`Formatting answer for question ${questionId}:`, {
+                    originalName: name,
+                    questionId: questionId,
+                    value: value,
+                    isEmpty: value === '',
+                    length: value.length
+                });
+
+                // Create the answer object in the format the API expects
+                const answerObj = {};
+                answerObj[questionId] = value || '';  // Use questionId as the key
+                return answerObj;
+            });
 
         // Ensure we have at least one answer
-        if (Object.keys(formattedAnswers).length === 0) {
+        if (formattedAnswers.length === 0) {
             throw new Error('No answers provided');
         }
 
