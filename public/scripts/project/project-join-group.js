@@ -393,7 +393,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const form = document.createElement('form');
                 form.onsubmit = async (e) => {
                     e.preventDefault();
-                    
                     try {
                         // Validate required fields
                         const requiredInputs = form.querySelectorAll('[required]');
@@ -402,58 +401,37 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (!input.value.trim()) {
                                 isValid = false;
                                 input.classList.add('error');
-                                console.log('Missing required field:', input.name);
                             } else {
                                 input.classList.remove('error');
                             }
                         });
-                        
                         if (!isValid) {
                             showNotification('error', 'Please fill in all required fields');
                             return;
                         }
-                        
                         // Collect answers
                         const answers = {};
                         const inputs = form.querySelectorAll('input, select, textarea');
-                        console.log('Form state:', {
-                            formId: form.id,
-                            formAction: form.action,
-                            formMethod: form.method,
-                            totalInputs: inputs.length
-                        });
-                        
-                        console.log('Found form inputs:', Array.from(inputs).map(input => ({
-                            name: input.name,
-                            type: input.type,
-                            value: input.value,
-                            required: input.required,
-                            id: input.id,
-                            placeholder: input.placeholder,
-                            className: input.className
-                        })));
-                        
                         inputs.forEach(input => {
                             if (input.name) {
-                                // Handle checkbox inputs differently
                                 if (input.type === 'checkbox') {
                                     answers[input.name] = input.checked ? 'on' : 'off';
                                 } else {
-                                    const value = input.value.trim();
-                                    answers[input.name] = value;
-                                    console.log(`Setting answer for ${input.name} (${input.id}):`, {
-                                        value: value,
-                                        isEmpty: value === '',
-                                        length: value.length
-                                    });
+                                    answers[input.name] = input.value.trim();
                                 }
                             }
                         });
-                        console.log('Collected answers:', answers);
-                        
                         // Submit join request
                         await joinGroup(answers);
-                        modal.remove();
+                        // Show success step in modal
+                        modalContent.innerHTML = `
+                            <span class="close-button" style="float:right;cursor:pointer;font-size:28px;">&times;</span>
+                            <h2>Success!</h2>
+                            <p>You have successfully joined the group.</p>
+                            <button class="close-modal-btn" style="margin-top:20px;">Close</button>
+                        `;
+                        modalContent.querySelector('.close-button').onclick = () => modal.remove();
+                        modalContent.querySelector('.close-modal-btn').onclick = () => modal.remove();
                     } catch (error) {
                         console.error('Form submission error:', error);
                         showNotification('error', error.message || 'Failed to submit form');
