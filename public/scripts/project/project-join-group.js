@@ -128,6 +128,7 @@ async function joinGroup(answers = {}) {
         const formattedAnswers = Object.entries(answers)
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
             .map(([name, value]) => {
+                // Extract the question ID from the input name (e.g., "question_123" -> "123")
                 const questionId = name.replace('question_', '');
                 console.log(`Formatting answer for question ${questionId}:`, {
                     originalName: name,
@@ -136,11 +137,18 @@ async function joinGroup(answers = {}) {
                     isEmpty: value === '',
                     length: value.length
                 });
+
+                // Ensure we're sending the exact structure the API expects
                 return {
-                    question_id: questionId, // Don't parse as integer, keep as string
-                    answer: value
+                    question_id: questionId,  // Keep as string
+                    answer: value || ''       // Ensure we never send null/undefined
                 };
             });
+
+        // Ensure we have at least one answer
+        if (formattedAnswers.length === 0) {
+            throw new Error('No answers provided');
+        }
 
         console.log('Raw answers before formatting:', answers);
         console.log('Formatted answers for API:', formattedAnswers);
