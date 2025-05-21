@@ -258,56 +258,164 @@ async function fetchGroupData() {
 document.addEventListener('DOMContentLoaded', async () => {
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
-        try {
-            // Fetch group data and questions
-            const groupData = await fetchGroupData();
-            console.log('Fetched group data:', groupData);
+        joinButton.addEventListener('click', async (e) => {
+            e.preventDefault();
             
-            // Create container for questions
-            const questionsContainer = document.createElement('div');
-            questionsContainer.className = 'group-questions-container';
-            
-            // Add questions to container
-            if (groupData.questions && groupData.questions.length > 0) {
-                console.log('Creating questions form with questions:', groupData.questions);
-                const questionsForm = createQuestionForm(groupData.questions);
-                questionsContainer.appendChild(questionsForm);
-            } else {
-                console.log('No questions found in group data');
-            }
-            
-            // Insert questions before the join button
-            joinButton.parentNode.insertBefore(questionsContainer, joinButton);
-            
-            // Update join button click handler
-            joinButton.addEventListener('click', async (e) => {
-                e.preventDefault();
+            try {
+                // Fetch group data and questions
+                const groupData = await fetchGroupData();
+                console.log('Fetched group data:', groupData);
                 
-                try {
-                    // Collect answers
-                    const answers = {};
-                    const inputs = questionsContainer.querySelectorAll('input, select, textarea');
-                    console.log('Found form inputs:', inputs);
-                    inputs.forEach(input => {
-                        if (input.name) {
-                            answers[input.name] = input.value;
-                        }
-                    });
-                    console.log('Collected answers:', answers);
+                // Create modal
+                const modal = document.createElement('div');
+                modal.className = 'modal';
+                
+                const modalContent = document.createElement('div');
+                modalContent.className = 'modal-content';
+                
+                const closeButton = document.createElement('span');
+                closeButton.className = 'close-button';
+                closeButton.innerHTML = '&times;';
+                closeButton.onclick = () => modal.remove();
+                
+                const title = document.createElement('h2');
+                title.textContent = 'Join Group';
+                
+                const form = document.createElement('form');
+                form.onsubmit = async (e) => {
+                    e.preventDefault();
                     
-                    // Submit join request
-                    joinButton.disabled = true;
-                    await joinGroup(answers);
-                } catch (error) {
-                    joinButton.disabled = false;
+                    try {
+                        // Collect answers
+                        const answers = {};
+                        const inputs = form.querySelectorAll('input, select, textarea');
+                        console.log('Found form inputs:', inputs);
+                        inputs.forEach(input => {
+                            if (input.name) {
+                                answers[input.name] = input.value;
+                            }
+                        });
+                        console.log('Collected answers:', answers);
+                        
+                        // Submit join request
+                        joinButton.disabled = true;
+                        await joinGroup(answers);
+                        modal.remove();
+                    } catch (error) {
+                        joinButton.disabled = false;
+                    }
+                };
+                
+                // Add questions to form
+                if (groupData.questions && groupData.questions.length > 0) {
+                    console.log('Creating questions form with questions:', groupData.questions);
+                    const questionsForm = createQuestionForm(groupData.questions);
+                    form.appendChild(questionsForm);
+                } else {
+                    console.log('No questions found in group data');
                 }
-            });
-            
-        } catch (error) {
-            console.error('Error:', error);
-            showNotification('error', error.message || 'Failed to load group questions');
-        }
+                
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = 'Submit';
+                submitButton.className = 'submit-button';
+                
+                form.appendChild(submitButton);
+                
+                modalContent.appendChild(closeButton);
+                modalContent.appendChild(title);
+                modalContent.appendChild(form);
+                modal.appendChild(modalContent);
+                document.body.appendChild(modal);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification('error', error.message || 'Failed to load group questions');
+            }
+        });
     } else {
         console.log('Join button not found');
     }
 });
+
+// Add some basic modal styles
+const style = document.createElement('style');
+style.textContent = `
+    .modal {
+        display: block;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 600px;
+        border-radius: 8px;
+        position: relative;
+    }
+    
+    .close-button {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .close-button:hover {
+        color: black;
+    }
+    
+    .question-container {
+        margin-bottom: 20px;
+    }
+    
+    .question-explanation {
+        color: #666;
+        margin: 5px 0;
+    }
+    
+    .question-input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    
+    .email-visibility-container {
+        margin: 20px 0;
+        padding: 10px;
+        background-color: #f8f8f8;
+        border-radius: 4px;
+    }
+    
+    .submit-button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .submit-button:hover {
+        background-color: #45a049;
+    }
+    
+    .required {
+        color: red;
+    }
+`;
+document.head.appendChild(style);
