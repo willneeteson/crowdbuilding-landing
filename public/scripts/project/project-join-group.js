@@ -80,8 +80,9 @@ function createQuestionForm(questions) {
             input.placeholder = 'Type your answer here...';
         }
         
-        input.name = `question_${questionId}`;
-        input.id = `question_${questionId}`;
+        // Use the exact question ID from the API
+        input.name = questionId;  // Don't prefix with 'question_'
+        input.id = questionId;    // Use the same ID
         input.className = 'question-input';
         
         questionDiv.appendChild(label);
