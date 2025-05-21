@@ -129,9 +129,15 @@ async function joinGroup(answers = {}) {
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
             .map(([name, value]) => {
                 const questionId = name.replace('question_', '');
-                console.log(`Formatting answer for question ${questionId}:`, value);
+                console.log(`Formatting answer for question ${questionId}:`, {
+                    originalName: name,
+                    questionId: questionId,
+                    value: value,
+                    isEmpty: value === '',
+                    length: value.length
+                });
                 return {
-                    question_id: parseInt(questionId),
+                    question_id: questionId, // Don't parse as integer, keep as string
                     answer: value
                 };
             });
@@ -165,6 +171,8 @@ async function joinGroup(answers = {}) {
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             console.log('Error response:', errorData);
+            console.log('Response status:', response.status);
+            console.log('Response headers:', Object.fromEntries(response.headers.entries()));
             if (errorData.errors) {
                 // Handle validation errors
                 const errorMessages = Object.values(errorData.errors).flat();
@@ -349,12 +357,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Collect answers
                         const answers = {};
                         const inputs = form.querySelectorAll('input, select, textarea');
+                        console.log('Form state:', {
+                            formId: form.id,
+                            formAction: form.action,
+                            formMethod: form.method,
+                            totalInputs: inputs.length
+                        });
+                        
                         console.log('Found form inputs:', Array.from(inputs).map(input => ({
                             name: input.name,
                             type: input.type,
                             value: input.value,
                             required: input.required,
-                            id: input.id
+                            id: input.id,
+                            placeholder: input.placeholder,
+                            className: input.className
                         })));
                         
                         inputs.forEach(input => {
@@ -365,7 +382,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 } else {
                                     const value = input.value.trim();
                                     answers[input.name] = value;
-                                    console.log(`Setting answer for ${input.name} (${input.id}):`, value);
+                                    console.log(`Setting answer for ${input.name} (${input.id}):`, {
+                                        value: value,
+                                        isEmpty: value === '',
+                                        length: value.length
+                                    });
                                 }
                             }
                         });
