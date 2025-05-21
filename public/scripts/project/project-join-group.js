@@ -310,9 +310,20 @@ async function fetchGroupData() {
 
 // Function to check membership status and update UI
 async function checkMembershipStatus() {
+    const joinButton = document.querySelector('.join-group-button');
+    if (joinButton) {
+        joinButton.disabled = true;
+        joinButton.textContent = 'Loading...';
+    }
     try {
         const apiToken = await window.auth.getApiToken();
-        if (!apiToken) return;
+        if (!apiToken) {
+            if (joinButton) {
+                joinButton.disabled = false;
+                joinButton.textContent = 'Join Group';
+            }
+            return;
+        }
 
         const headers = {
             'Accept': 'application/json',
