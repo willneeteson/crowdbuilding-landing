@@ -66,8 +66,12 @@ function createQuestionForm(questions) {
             input.placeholder = 'Type your answer here...';
         }
         
-        input.name = `question_${question.id}`;
-        input.id = `question_${question.id}`;
+        // Use the question's ID directly
+        const questionId = question.id || question.question_id;
+        console.log(`Setting up question with ID: ${questionId}`, question);
+        
+        input.name = `question_${questionId}`;
+        input.id = `question_${questionId}`;
         input.className = 'question-input';
         
         questionDiv.appendChild(label);
