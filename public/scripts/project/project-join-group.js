@@ -152,21 +152,21 @@ function showNotification(type, message) {
 // Function to fetch group data and questions
 async function fetchGroupData() {
     try {
+        // Get API token from auth module
+        const apiToken = await window.auth.getApiToken();
+        if (!apiToken) {
+            throw new Error('Authentication required. Please log in to continue.');
+        }
+
         const headers = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
         };
-
-        // Add CSRF token if available
-        const csrfToken = getCsrfToken();
-        if (csrfToken) {
-            headers['X-CSRF-TOKEN'] = csrfToken;
-        }
 
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`, {
             method: 'GET',
-            headers: headers,
-            credentials: 'include' // This ensures cookies are sent with the request
+            headers: headers
         });
         
         if (!response.ok) {
