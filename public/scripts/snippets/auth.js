@@ -14,7 +14,8 @@
     // Cache for tokens and user data
     const cache = {
         apiToken: null,
-        memberstackId: null
+        memberstackId: null,
+        userEmail: null
     };
 
     /**
@@ -45,6 +46,15 @@
             }
 
             try {
+                // Get current member data to get email
+                const member = await $memberstackDom.getCurrentMember();
+                const memberData = member?.data || member;
+                
+                if (!memberData || !memberData.email) {
+                    console.error('Could not get member email from Memberstack');
+                    return null;
+                }
+
                 console.log('Attempting to exchange token with API');
                 const response = await fetch(
                     `${CONFIG.API_BASE_URL}/sanctum/token`,
@@ -52,8 +62,10 @@
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            memberstack_token: memberstackToken,
                             device_name: CONFIG.DEVICE_NAME,
+                            memberstack_token: memberstackToken,
+                            email: memberData.email,
+                            password: memberstackToken // Using memberstack token as password since we don't have the actual password
                         }),
                     }
                 );
@@ -63,6 +75,7 @@
                     const data = await response.json();
                     console.log('Successfully obtained API token');
                     cache.apiToken = data.token;
+                    cache.userEmail = memberData.email;
                     return data.token;
                 } else {
                     // Try to get detailed error information
@@ -144,6 +157,7 @@
     function clearAuthCache() {
         cache.apiToken = null;
         cache.memberstackId = null;
+        cache.userEmail = null;
     }
 
     // Export functions to global scope
