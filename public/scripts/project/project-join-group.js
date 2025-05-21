@@ -170,29 +170,40 @@ async function fetchGroupData() {
             throw new Error('Authentication required. Please log in to continue.');
         }
 
+        console.log('Fetching questions with token:', apiToken);
+
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${apiToken}`
         };
 
+        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`);
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`, {
             method: 'GET',
             headers: headers
         });
         
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
             // Check if response is JSON
             const contentType = response.headers.get('content-type');
+            console.log('Response content type:', contentType);
+            
             if (contentType && contentType.includes('application/json')) {
                 const errorData = await response.json();
+                console.log('Error data:', errorData);
                 throw new Error(errorData.message || `Failed to fetch group questions: ${response.status}`);
             } else {
+                const text = await response.text();
+                console.log('Non-JSON response:', text);
                 throw new Error(`Failed to fetch group questions: ${response.status} - Server returned non-JSON response`);
             }
         }
 
         const data = await response.json();
+        console.log('Response data:', data);
         
         if (!data || !data.data) {
             throw new Error('Invalid response format from server');
