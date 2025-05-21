@@ -19,6 +19,11 @@ function createQuestionForm(questions) {
     const formContainer = document.createElement('div');
     formContainer.className = 'group-questions-form';
     
+    if (!Array.isArray(questions) || questions.length === 0) {
+        console.log('No questions to display');
+        return formContainer;
+    }
+    
     questions.forEach((question, index) => {
         console.log('Creating question:', question);
         
@@ -26,17 +31,17 @@ function createQuestionForm(questions) {
         questionDiv.className = 'question-container';
         
         const label = document.createElement('label');
-        label.textContent = question.title;
+        label.textContent = question.title || question.question;
         if (question.required) {
             label.innerHTML += ' <span class="required">*</span>';
         }
         
         const explanation = document.createElement('p');
         explanation.className = 'question-explanation';
-        explanation.textContent = question.explanation;
+        explanation.textContent = question.explanation || '';
         
         let input;
-        if (question.question_type === 'multiple_choice') {
+        if (question.type === 'multiple_choice' || question.question_type === 'multiple_choice') {
             input = document.createElement('select');
             input.required = question.required;
             
@@ -47,11 +52,12 @@ function createQuestionForm(questions) {
             input.appendChild(emptyOption);
             
             // Add question answers as options
-            question.question_answers.forEach(answer => {
-                const option = document.createElement('option');
-                option.value = answer.answer;
-                option.textContent = answer.answer;
-                input.appendChild(option);
+            const options = question.options || question.question_answers || [];
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.answer || option;
+                optionElement.textContent = option.answer || option;
+                input.appendChild(optionElement);
             });
         } else {
             input = document.createElement('textarea');
@@ -209,13 +215,13 @@ async function fetchGroupData() {
         }
 
         const data = await response.json();
-        console.log('Response data:', data);
+        console.log('Raw response data:', data);
         
-        if (!data || !data.data) {
-            throw new Error('Invalid response format from server');
-        }
+        // The questions might be directly in the data array
+        const questions = Array.isArray(data) ? data : (data.data || []);
+        console.log('Processed questions:', questions);
         
-        return data.data;
+        return { questions };
     } catch (error) {
         console.error('Error fetching group questions:', error);
         showNotification('error', error.message || 'Failed to load group questions');
