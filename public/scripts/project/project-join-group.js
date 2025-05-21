@@ -328,8 +328,8 @@ async function checkMembershipStatus() {
 
         if (response.ok) {
             const data = await response.json();
-            // If membership object exists and is not null, user is a member
-            if (data.membership) {
+            // Use is_member boolean to determine membership
+            if (data.is_member) {
                 updateGroupUI(true);
             } else {
                 updateGroupUI(false);
