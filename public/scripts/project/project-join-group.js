@@ -71,16 +71,17 @@ function createQuestionForm(questions) {
 // Function to handle joining a group
 async function joinGroup(answers = {}) {
     try {
+        // Get API token from auth module
+        const apiToken = await window.auth.getApiToken();
+        if (!apiToken) {
+            throw new Error('Authentication required. Please log in to continue.');
+        }
+
         const headers = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
         };
-
-        // Only add CSRF token if it exists
-        const csrfToken = getCsrfToken();
-        if (csrfToken) {
-            headers['X-CSRF-TOKEN'] = csrfToken;
-        }
 
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
