@@ -68,7 +68,16 @@
                     const data = await response.json();
                     console.log('Successfully obtained API token');
                     cache.apiToken = data.token;
-                    cache.userEmail = memberData.email;
+
+                    // Get member email if possible
+                    try {
+                        const memberResponse = await $memberstackDom.getCurrentMember();
+                        const member = memberResponse?.data || memberResponse;
+                        cache.userEmail = member?.email || null;
+                    } catch (e) {
+                        cache.userEmail = null;
+                    }
+
                     return data.token;
                 } else {
                     // Try to get detailed error information
