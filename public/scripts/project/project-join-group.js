@@ -100,9 +100,20 @@ function createQuestionForm(questions) {
     return formContainer;
 }
 
+// Function to show loading state
+function setLoading(isLoading) {
+    const submitButton = document.querySelector('.submit-button');
+    if (submitButton) {
+        submitButton.disabled = isLoading;
+        submitButton.textContent = isLoading ? 'Loading...' : 'Submit';
+    }
+}
+
 // Function to handle joining a group
 async function joinGroup(answers = {}) {
     try {
+        setLoading(true);
+        
         // Get API token from auth module
         const apiToken = await window.auth.getApiToken();
         if (!apiToken) {
@@ -157,6 +168,8 @@ async function joinGroup(answers = {}) {
         console.error('Error joining group:', error);
         showNotification('error', error.message || 'Failed to join group');
         throw error;
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -262,6 +275,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             
             try {
+                // Disable join button while loading
+                joinButton.disabled = true;
+                joinButton.textContent = 'Loading...';
+                
                 // Fetch group data and questions
                 const groupData = await fetchGroupData();
                 console.log('Fetched group data:', groupData);
@@ -276,7 +293,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const closeButton = document.createElement('span');
                 closeButton.className = 'close-button';
                 closeButton.innerHTML = '&times;';
-                closeButton.onclick = () => modal.remove();
+                closeButton.onclick = () => {
+                    modal.remove();
+                    joinButton.disabled = false;
+                    joinButton.textContent = 'Join Group';
+                };
                 
                 const title = document.createElement('h2');
                 title.textContent = 'Join Group';
@@ -286,6 +307,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.preventDefault();
                     
                     try {
+                        // Validate required fields
+                        const requiredInputs = form.querySelectorAll('[required]');
+                        let isValid = true;
+                        requiredInputs.forEach(input => {
+                            if (!input.value.trim()) {
+                                isValid = false;
+                                input.classList.add('error');
+                            } else {
+                                input.classList.remove('error');
+                            }
+                        });
+                        
+                        if (!isValid) {
+                            showNotification('error', 'Please fill in all required fields');
+                            return;
+                        }
+                        
                         // Collect answers
                         const answers = {};
                         const inputs = form.querySelectorAll('input, select, textarea');
@@ -298,11 +336,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         console.log('Collected answers:', answers);
                         
                         // Submit join request
-                        joinButton.disabled = true;
                         await joinGroup(answers);
                         modal.remove();
                     } catch (error) {
-                        joinButton.disabled = false;
+                        console.error('Form submission error:', error);
                     }
                 };
                 
@@ -328,9 +365,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modal.appendChild(modalContent);
                 document.body.appendChild(modal);
                 
+                // Reset join button state
+                joinButton.disabled = false;
+                joinButton.textContent = 'Join Group';
+                
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('error', error.message || 'Failed to load group questions');
+                joinButton.disabled = false;
+                joinButton.textContent = 'Join Group';
             }
         });
     } else {
@@ -350,6 +393,7 @@ style.textContent = `
         width: 100%;
         height: 100%;
         background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease-in-out;
     }
     
     .modal-content {
@@ -361,6 +405,17 @@ style.textContent = `
         max-width: 600px;
         border-radius: 8px;
         position: relative;
+        animation: slideIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
     
     .close-button {
@@ -369,6 +424,7 @@ style.textContent = `
         font-size: 28px;
         font-weight: bold;
         cursor: pointer;
+        transition: color 0.2s;
     }
     
     .close-button:hover {
@@ -382,6 +438,7 @@ style.textContent = `
     .question-explanation {
         color: #666;
         margin: 5px 0;
+        font-size: 0.9em;
     }
     
     .question-input {
@@ -390,6 +447,16 @@ style.textContent = `
         margin-top: 5px;
         border: 1px solid #ddd;
         border-radius: 4px;
+        transition: border-color 0.2s;
+    }
+    
+    .question-input:focus {
+        border-color: #4CAF50;
+        outline: none;
+    }
+    
+    .question-input.error {
+        border-color: #ff4444;
     }
     
     .email-visibility-container {
@@ -408,14 +475,44 @@ style.textContent = `
         cursor: pointer;
         width: 100%;
         margin-top: 20px;
+        transition: background-color 0.2s;
     }
     
-    .submit-button:hover {
+    .submit-button:hover:not(:disabled) {
         background-color: #45a049;
+    }
+    
+    .submit-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
     }
     
     .required {
         color: red;
+    }
+    
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 4px;
+        color: white;
+        z-index: 1001;
+        animation: slideInRight 0.3s ease-in-out;
+    }
+    
+    .notification.success {
+        background-color: #4CAF50;
+    }
+    
+    .notification.error {
+        background-color: #ff4444;
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 `;
 document.head.appendChild(style);
