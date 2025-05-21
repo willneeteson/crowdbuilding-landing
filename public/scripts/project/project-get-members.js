@@ -78,8 +78,11 @@ async function fetchMembersData() {
         console.log('Starting to fetch members data...');
         
         // Get authentication token
+        console.log('Checking if auth module exists:', typeof window.auth !== 'undefined');
+        console.log('Checking if getApiToken exists:', typeof window.auth?.getApiToken === 'function');
+        
         const token = await window.auth.getApiToken();
-        console.log('Got auth token:', token ? 'Yes' : 'No');
+        console.log('Got auth token:', token ? 'Token exists' : 'No token');
         
         if (!token) {
             console.log('No authentication token available, showing login message');
@@ -147,8 +150,15 @@ async function initialize() {
             return;
         }
 
+        // Wait for Memberstack to be ready
+        if (typeof $memberstackDom !== 'undefined') {
+            console.log('Waiting for Memberstack to be ready...');
+            await $memberstackDom.onReady;
+            console.log('Memberstack is ready');
+        }
+
         // Wait a bit for auth to initialize
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
         await fetchMembersData();
     } catch (error) {
