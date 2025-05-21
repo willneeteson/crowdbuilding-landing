@@ -1,5 +1,6 @@
 // Hardcoded group ID
 const GROUP_ID = 'tiny-house-alkmaar';
+const API_BASE_URL = 'https://api.crowdbuilding.com';
 
 // Function to get CSRF token
 function getCsrfToken() {
@@ -81,7 +82,7 @@ async function joinGroup(answers = {}) {
             headers['X-CSRF-TOKEN'] = csrfToken;
         }
 
-        const response = await fetch(`/api/v1/groups/${GROUP_ID}/join`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({ answers })
@@ -151,7 +152,7 @@ function showNotification(type, message) {
 // Function to fetch group data and questions
 async function fetchGroupData() {
     try {
-        const response = await fetch(`/api/v1/groups/${GROUP_ID}`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}`);
         
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
