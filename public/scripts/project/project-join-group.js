@@ -25,7 +25,15 @@ function createQuestionForm(questions) {
     }
     
     questions.forEach((question, index) => {
-        console.log('Creating question:', question);
+        console.log('Creating question:', {
+            id: question.id,
+            question_id: question.question_id,
+            title: question.title,
+            question: question.question,
+            required: question.required,
+            type: question.type,
+            question_type: question.question_type
+        });
         
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-container';
