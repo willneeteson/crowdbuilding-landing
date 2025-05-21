@@ -217,7 +217,7 @@ function updateGroupUI(isJoined) {
             joinButton.classList.add('joined');
             joinButton.disabled = true;
         } else {
-            joinButton.textContent = 'Join Group';
+            joinButton.textContent = 'Sluit je aan';
             joinButton.classList.remove('joined');
             joinButton.disabled = false;
         }
@@ -320,7 +320,7 @@ async function checkMembershipStatus() {
         if (!apiToken) {
             if (joinButton) {
                 joinButton.disabled = false;
-                joinButton.textContent = 'Join Group';
+                joinButton.textContent = 'Sluit je aan';
             }
             return;
         }
@@ -384,11 +384,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeButton.onclick = () => {
                     modal.remove();
                     joinButton.disabled = false;
-                    joinButton.textContent = 'Join Group';
+                    joinButton.textContent = 'Sluit je aan';
                 };
                 
                 const title = document.createElement('h2');
-                title.textContent = 'Join Group';
+                title.textContent = 'Sluit je aan';
                 
                 const form = document.createElement('form');
                 form.onsubmit = async (e) => {
@@ -462,13 +462,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Reset join button state
                 joinButton.disabled = false;
-                joinButton.textContent = 'Join Group';
+                joinButton.textContent = 'Sluit je aan';
                 
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('error', error.message || 'Failed to load group questions');
                 joinButton.disabled = false;
-                joinButton.textContent = 'Join Group';
+                joinButton.textContent = 'Sluit je aan';
             }
         });
     } else {
