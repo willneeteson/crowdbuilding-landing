@@ -22,15 +22,22 @@
      * @returns {Promise<string|null>} API token or null if not available
      */
     async function getApiToken() {
+        console.log('getApiToken called');
+        
         // Return cached token if available
         if (cache.apiToken) {
+            console.log('Using cached API token');
             return cache.apiToken;
         }
 
         // If Memberstack is available, attempt to get a token
         if (typeof $memberstackDom !== "undefined") {
+            console.log('Memberstack DOM is available');
             await $memberstackDom.onReady;
+            console.log('Memberstack is ready');
+            
             const memberstackToken = $memberstackDom.getMemberCookie();
+            console.log('Memberstack token:', memberstackToken ? 'exists' : 'not found');
 
             if (!memberstackToken) {
                 console.warn("User not signed in.");
@@ -38,6 +45,7 @@
             }
 
             try {
+                console.log('Attempting to exchange token with API');
                 const response = await fetch(
                     `${CONFIG.API_BASE_URL}/sanctum/token`,
                     {
@@ -50,14 +58,31 @@
                     }
                 );
 
+                console.log('API response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('Successfully obtained API token');
                     cache.apiToken = data.token;
                     return data.token;
+                } else {
+                    // Try to get detailed error information
+                    const errorText = await response.text();
+                    console.error('API token exchange failed:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        error: errorText
+                    });
+                    
+                    // If the error is a 500, it's likely a server issue
+                    if (response.status === 500) {
+                        console.error('Server error occurred. Please check the API server logs.');
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching token:", error.message);
             }
+        } else {
+            console.warn('Memberstack DOM is not available');
         }
         return null;
     }
