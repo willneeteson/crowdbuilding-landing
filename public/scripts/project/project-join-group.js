@@ -14,10 +14,14 @@ function getCsrfToken() {
 
 // Function to create question form
 function createQuestionForm(questions) {
+    console.log('Creating form for questions:', questions);
+    
     const formContainer = document.createElement('div');
     formContainer.className = 'group-questions-form';
     
     questions.forEach((question, index) => {
+        console.log('Creating question:', question);
+        
         const questionDiv = document.createElement('div');
         questionDiv.className = 'question-container';
         
@@ -53,6 +57,7 @@ function createQuestionForm(questions) {
             input = document.createElement('textarea');
             input.required = question.required;
             input.rows = 3;
+            input.placeholder = 'Type your answer here...';
         }
         
         input.name = `question_${question.id}`;
@@ -65,6 +70,7 @@ function createQuestionForm(questions) {
         formContainer.appendChild(questionDiv);
     });
     
+    console.log('Created form container:', formContainer);
     return formContainer;
 }
 
@@ -224,6 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             // Fetch group data and questions
             const groupData = await fetchGroupData();
+            console.log('Fetched group data:', groupData);
             
             // Create container for questions
             const questionsContainer = document.createElement('div');
@@ -231,8 +238,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Add questions to container
             if (groupData.questions && groupData.questions.length > 0) {
+                console.log('Creating questions form with questions:', groupData.questions);
                 const questionsForm = createQuestionForm(groupData.questions);
                 questionsContainer.appendChild(questionsForm);
+            } else {
+                console.log('No questions found in group data');
             }
             
             // Insert questions before the join button
@@ -246,11 +256,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Collect answers
                     const answers = {};
                     const inputs = questionsContainer.querySelectorAll('input, select, textarea');
+                    console.log('Found form inputs:', inputs);
                     inputs.forEach(input => {
                         if (input.name) {
                             answers[input.name] = input.value;
                         }
                     });
+                    console.log('Collected answers:', answers);
                     
                     // Submit join request
                     joinButton.disabled = true;
@@ -264,5 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error:', error);
             showNotification('error', error.message || 'Failed to load group questions');
         }
+    } else {
+        console.log('Join button not found');
     }
 });
