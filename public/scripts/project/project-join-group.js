@@ -1,5 +1,5 @@
-// Default group ID
-const DEFAULT_GROUP_ID = 'tiny-house-alkmaar';
+// Hardcoded group ID
+const GROUP_ID = 'tiny-house-alkmaar';
 
 // Function to get CSRF token
 function getCsrfToken() {
@@ -68,7 +68,7 @@ function createQuestionForm(questions) {
 }
 
 // Function to handle joining a group
-async function joinGroup(groupId = DEFAULT_GROUP_ID, answers = {}) {
+async function joinGroup(answers = {}) {
     try {
         const headers = {
             'Content-Type': 'application/json',
@@ -81,17 +81,18 @@ async function joinGroup(groupId = DEFAULT_GROUP_ID, answers = {}) {
             headers['X-CSRF-TOKEN'] = csrfToken;
         }
 
-        const response = await fetch(`/api/groups/${groupId}/join`, {
+        const response = await fetch(`/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({ answers })
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to join group');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to join group: ${response.status}`);
         }
+
+        const data = await response.json();
 
         // Handle successful join
         if (data.message) {
@@ -148,19 +149,25 @@ function showNotification(type, message) {
 }
 
 // Function to fetch group data and questions
-async function fetchGroupData(groupId) {
+async function fetchGroupData() {
     try {
-        const response = await fetch(`/api/groups/${groupId}`);
-        const data = await response.json();
+        const response = await fetch(`/api/v1/groups/${GROUP_ID}`);
         
         if (!response.ok) {
-            throw new Error(data.message || 'Failed to fetch group data');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Failed to fetch group data: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data || !data.data) {
+            throw new Error('Invalid response format from server');
         }
         
         return data.data;
     } catch (error) {
         console.error('Error fetching group data:', error);
-        showNotification('error', 'Failed to load group questions');
+        showNotification('error', error.message || 'Failed to load group questions');
         throw error;
     }
 }
@@ -171,11 +178,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (joinButton) {
         joinButton.addEventListener('click', async (e) => {
             e.preventDefault();
-            const groupId = joinButton.dataset.groupId || DEFAULT_GROUP_ID;
             
             try {
                 // Fetch group data and questions
-                const groupData = await fetchGroupData(groupId);
+                const groupData = await fetchGroupData();
                 
                 // Create modal for questions
                 const modal = document.createElement('div');
@@ -208,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Submit join request
                     try {
                         joinButton.disabled = true;
-                        await joinGroup(groupId, answers);
+                        await joinGroup(answers);
                         modal.remove();
                     } catch (error) {
                         joinButton.disabled = false;
@@ -236,7 +242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
             } catch (error) {
                 console.error('Error:', error);
-                showNotification('error', 'Failed to load group questions');
+                showNotification('error', error.message || 'Failed to load group questions');
             }
         });
     }
