@@ -24,13 +24,13 @@ function populateMembersList(data) {
             // Ensure avatar_url is a complete URL
             const avatarUrl = member.avatar_url 
                 ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
-                : '/images/default-avatar.png';
+                : 'https://api.crowdbuilding.com/storage/default-avatar.png';
             
             return `
                 <div class="w-embed">
                     <div class="member-item">
                         <div class="member-avatar">
-                            <img src="${avatarUrl}" alt="${member.name}" class="member-image">
+                            <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
                         </div>
                         <div class="member-info">
                             <div class="member-name">${member.name}</div>
@@ -80,8 +80,7 @@ async function fetchMembersData() {
                 'Authorization': `Bearer ${token}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            },
-            credentials: 'include'
+            }
         });
         
         console.log('API Response status:', response.status);
