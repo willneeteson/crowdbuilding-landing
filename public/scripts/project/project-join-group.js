@@ -152,11 +152,32 @@ function showNotification(type, message) {
 // Function to fetch group data and questions
 async function fetchGroupData() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`);
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        };
+
+        // Add CSRF token if available
+        const csrfToken = getCsrfToken();
+        if (csrfToken) {
+            headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`, {
+            method: 'GET',
+            headers: headers,
+            credentials: 'include' // This ensures cookies are sent with the request
+        });
         
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Failed to fetch group questions: ${response.status}`);
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `Failed to fetch group questions: ${response.status}`);
+            } else {
+                throw new Error(`Failed to fetch group questions: ${response.status} - Server returned non-JSON response`);
+            }
         }
 
         const data = await response.json();
