@@ -67,7 +67,7 @@ function populateProjectData(data) {
         }
         
         // Project images
-        const imagesContainer = document.querySelector('.project-images');
+        const imagesContainer = document.getElementById('gallery');
         if (imagesContainer && data.images && data.images.length > 0) {
             imagesContainer.innerHTML = data.images.map(image => 
                 `<img src="${image.original_url}" alt="${image.name}" class="project-image">`
