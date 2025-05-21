@@ -308,8 +308,44 @@ async function fetchGroupData() {
     }
 }
 
+// Function to check membership status and update UI
+async function checkMembershipStatus() {
+    try {
+        const apiToken = await window.auth.getApiToken();
+        if (!apiToken) return;
+
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
+        };
+
+        // Call the group API to get membership info
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // If membership object exists and is not null, user is a member
+            if (data.membership) {
+                updateGroupUI(true);
+            } else {
+                updateGroupUI(false);
+            }
+        } else {
+            updateGroupUI(false);
+        }
+    } catch (error) {
+        console.error('Error checking membership status:', error);
+        updateGroupUI(false);
+    }
+}
+
 // Event listener for join button
 document.addEventListener('DOMContentLoaded', async () => {
+    await checkMembershipStatus();
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
         joinButton.addEventListener('click', async (e) => {
