@@ -198,35 +198,31 @@ async function fetchGroupData() {
 document.addEventListener('DOMContentLoaded', async () => {
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
-        joinButton.addEventListener('click', async (e) => {
-            e.preventDefault();
+        try {
+            // Fetch group data and questions
+            const groupData = await fetchGroupData();
             
-            try {
-                // Fetch group data and questions
-                const groupData = await fetchGroupData();
+            // Create container for questions
+            const questionsContainer = document.createElement('div');
+            questionsContainer.className = 'group-questions-container';
+            
+            // Add questions to container
+            if (groupData.questions && groupData.questions.length > 0) {
+                const questionsForm = createQuestionForm(groupData.questions);
+                questionsContainer.appendChild(questionsForm);
+            }
+            
+            // Insert questions before the join button
+            joinButton.parentNode.insertBefore(questionsContainer, joinButton);
+            
+            // Update join button click handler
+            joinButton.addEventListener('click', async (e) => {
+                e.preventDefault();
                 
-                // Create modal for questions
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                const modalContent = document.createElement('div');
-                modalContent.className = 'modal-content';
-                
-                const closeButton = document.createElement('span');
-                closeButton.className = 'close-button';
-                closeButton.innerHTML = '&times;';
-                closeButton.onclick = () => modal.remove();
-                
-                const title = document.createElement('h2');
-                title.textContent = 'Join Group';
-                
-                const form = document.createElement('form');
-                form.onsubmit = async (e) => {
-                    e.preventDefault();
-                    
+                try {
                     // Collect answers
                     const answers = {};
-                    const inputs = form.querySelectorAll('input, select, textarea');
+                    const inputs = questionsContainer.querySelectorAll('input, select, textarea');
                     inputs.forEach(input => {
                         if (input.name) {
                             answers[input.name] = input.value;
@@ -234,38 +230,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                     
                     // Submit join request
-                    try {
-                        joinButton.disabled = true;
-                        await joinGroup(answers);
-                        modal.remove();
-                    } catch (error) {
-                        joinButton.disabled = false;
-                    }
-                };
-                
-                // Add questions to form
-                if (groupData.questions && groupData.questions.length > 0) {
-                    const questionsForm = createQuestionForm(groupData.questions);
-                    form.appendChild(questionsForm);
+                    joinButton.disabled = true;
+                    await joinGroup(answers);
+                } catch (error) {
+                    joinButton.disabled = false;
                 }
-                
-                const submitButton = document.createElement('button');
-                submitButton.type = 'submit';
-                submitButton.textContent = 'Submit';
-                submitButton.className = 'submit-button';
-                
-                form.appendChild(submitButton);
-                
-                modalContent.appendChild(closeButton);
-                modalContent.appendChild(title);
-                modalContent.appendChild(form);
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showNotification('error', error.message || 'Failed to load group questions');
-            }
-        });
+            });
+            
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('error', error.message || 'Failed to load group questions');
+        }
     }
 });
