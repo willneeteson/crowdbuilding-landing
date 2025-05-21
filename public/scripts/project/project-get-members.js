@@ -35,8 +35,21 @@ function populateMembersList(data) {
 // Function to fetch members data
 async function fetchMembersData() {
     try {
+        // Get authentication token
+        const token = await window.auth.getApiToken();
+        if (!token) {
+            console.error('No authentication token available');
+            return;
+        }
+
         const projectId = 'tiny-house-alkmaar';
-        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`);
+        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+        
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
