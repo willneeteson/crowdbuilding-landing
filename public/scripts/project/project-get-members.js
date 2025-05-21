@@ -1,3 +1,18 @@
+// Function to show login message
+function showLoginMessage() {
+    const membersContainer = document.getElementById('projectMembers');
+    if (!membersContainer) return;
+
+    membersContainer.innerHTML = `
+        <div class="w-embed">
+            <div class="login-message">
+                <p>Log in om de leden te bekijken</p>
+                <a href="/login" class="login-button">Inloggen</a>
+            </div>
+        </div>
+    `;
+}
+
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
@@ -67,7 +82,8 @@ async function fetchMembersData() {
         console.log('Got auth token:', token ? 'Yes' : 'No');
         
         if (!token) {
-            console.error('No authentication token available');
+            console.log('No authentication token available, showing login message');
+            showLoginMessage();
             return;
         }
 
@@ -92,7 +108,7 @@ async function fetchMembersData() {
             // Check if user is not authenticated
             if (response.status === 403) {
                 console.log('User needs to be authenticated');
-                // You might want to show a login prompt or redirect to login
+                showLoginMessage();
                 return;
             }
             
@@ -109,6 +125,7 @@ async function fetchMembersData() {
         }
     } catch (error) {
         console.error('Error fetching members data:', error);
+        showLoginMessage();
     }
 }
 
@@ -136,6 +153,7 @@ async function initialize() {
         await fetchMembersData();
     } catch (error) {
         console.error('Initialization error:', error);
+        showLoginMessage();
     }
 }
 
