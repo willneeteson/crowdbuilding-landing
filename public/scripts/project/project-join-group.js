@@ -14,7 +14,13 @@ function getCsrfToken() {
 
 // Function to create question form
 function createQuestionForm(questions) {
-    console.log('Creating form for questions:', questions);
+    console.log('Creating form for questions:', questions.map(q => ({
+        id: q.id,
+        question_id: q.question_id,
+        title: q.title,
+        question: q.question,
+        required: q.required
+    })));
     
     const formContainer = document.createElement('div');
     formContainer.className = 'group-questions-form';
@@ -25,14 +31,14 @@ function createQuestionForm(questions) {
     }
     
     questions.forEach((question, index) => {
-        console.log('Creating question:', {
+        // Use the question's ID directly
+        const questionId = question.id || question.question_id;
+        console.log(`Setting up question with ID: ${questionId}`, {
             id: question.id,
             question_id: question.question_id,
             title: question.title,
             question: question.question,
-            required: question.required,
-            type: question.type,
-            question_type: question.question_type
+            required: question.required
         });
         
         const questionDiv = document.createElement('div');
@@ -74,10 +80,6 @@ function createQuestionForm(questions) {
             input.placeholder = 'Type your answer here...';
         }
         
-        // Use the question's ID directly
-        const questionId = question.id || question.question_id;
-        console.log(`Setting up question with ID: ${questionId}`, question);
-        
         input.name = `question_${questionId}`;
         input.id = `question_${questionId}`;
         input.className = 'question-input';
@@ -108,7 +110,6 @@ function createQuestionForm(questions) {
     emailVisibilityDiv.appendChild(emailLabel);
     formContainer.appendChild(emailVisibilityDiv);
     
-    console.log('Created form container:', formContainer);
     return formContainer;
 }
 
@@ -300,7 +301,13 @@ async function fetchGroupData() {
         
         // The questions might be directly in the data array
         const questions = Array.isArray(data) ? data : (data.data || []);
-        console.log('Processed questions:', questions);
+        console.log('Processed questions:', questions.map(q => ({
+            id: q.id,
+            question_id: q.question_id,
+            title: q.title,
+            question: q.question,
+            required: q.required
+        })));
         
         return { questions };
     } catch (error) {
