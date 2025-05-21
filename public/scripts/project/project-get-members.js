@@ -21,11 +21,16 @@ function populateMembersList(data) {
         // Create HTML for members
         const membersHTML = data.members.map(member => {
             console.log('Processing member:', member);
+            // Ensure avatar_url is a complete URL
+            const avatarUrl = member.avatar_url 
+                ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
+                : '/images/default-avatar.png';
+            
             return `
                 <div class="w-embed">
                     <div class="member-item">
                         <div class="member-avatar">
-                            <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}" class="member-image">
+                            <img src="${avatarUrl}" alt="${member.name}" class="member-image">
                         </div>
                         <div class="member-info">
                             <div class="member-name">${member.name}</div>
@@ -70,10 +75,13 @@ async function fetchMembersData() {
         console.log('Fetching members for project:', projectId);
         
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
+            method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            }
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         });
         
         console.log('API Response status:', response.status);
@@ -81,6 +89,14 @@ async function fetchMembersData() {
         if (!response.ok) {
             const errorText = await response.text();
             console.error('API Error:', errorText);
+            
+            // Check if user is not authenticated
+            if (response.status === 403) {
+                console.log('User needs to be authenticated');
+                // You might want to show a login prompt or redirect to login
+                return;
+            }
+            
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -115,6 +131,9 @@ async function initialize() {
             return;
         }
 
+        // Wait a bit for auth to initialize
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         await fetchMembersData();
     } catch (error) {
         console.error('Initialization error:', error);
