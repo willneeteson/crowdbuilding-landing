@@ -77,10 +77,18 @@ async function fetchMembersData() {
     try {
         console.log('Starting to fetch members data...');
         
-        // Get authentication token
-        console.log('Checking if auth module exists:', typeof window.auth !== 'undefined');
-        console.log('Checking if getApiToken exists:', typeof window.auth?.getApiToken === 'function');
+        // Check if user is logged in first
+        const isLoggedIn = await window.auth.isUserLoggedIn();
+        console.log('Is user logged in:', isLoggedIn);
         
+        if (!isLoggedIn) {
+            console.log('User is not logged in, showing login message');
+            showLoginMessage();
+            return;
+        }
+
+        // Get authentication token
+        console.log('Getting API token...');
         const token = await window.auth.getApiToken();
         console.log('Got auth token:', token ? 'Token exists' : 'No token');
         
