@@ -152,6 +152,10 @@ async function joinGroup(answers = {}) {
             'Authorization': `Bearer ${apiToken}`
         };
 
+        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`);
+        console.log('With headers:', headers);
+        console.log('With body:', JSON.stringify(requestBody, null, 2));
+
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
@@ -349,7 +353,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             name: input.name,
                             type: input.type,
                             value: input.value,
-                            required: input.required
+                            required: input.required,
+                            id: input.id
                         })));
                         
                         inputs.forEach(input => {
@@ -360,7 +365,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 } else {
                                     const value = input.value.trim();
                                     answers[input.name] = value;
-                                    console.log(`Setting answer for ${input.name}:`, value);
+                                    console.log(`Setting answer for ${input.name} (${input.id}):`, value);
                                 }
                             }
                         });
