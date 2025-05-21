@@ -77,6 +77,12 @@ async function joinGroup(answers = {}) {
             throw new Error('Authentication required. Please log in to continue.');
         }
 
+        // Format answers into the expected structure
+        const formattedAnswers = Object.entries(answers).map(([name, value]) => ({
+            question_id: parseInt(name.replace('question_', '')),
+            answer: value
+        }));
+
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
@@ -86,11 +92,16 @@ async function joinGroup(answers = {}) {
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ answers })
+            body: JSON.stringify({ answers: formattedAnswers })
         });
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
+            if (errorData.errors) {
+                // Handle validation errors
+                const errorMessages = Object.values(errorData.errors).flat();
+                throw new Error(errorMessages.join('. '));
+            }
             throw new Error(errorData.message || `Failed to join group: ${response.status}`);
         }
 
