@@ -77,7 +77,7 @@ function createQuestionForm(questions) {
             input = document.createElement('textarea');
             input.required = question.required;
             input.rows = 3;
-            input.placeholder = 'Type your answer here...';
+            input.placeholder = 'Antwoord';
         }
         
         // Use the exact question ID from the API
