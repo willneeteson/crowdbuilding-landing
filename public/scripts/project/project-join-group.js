@@ -124,6 +124,30 @@ async function joinGroup(answers = {}) {
             throw new Error('Authentication required. Please log in to continue.');
         }
 
+        // Collect answers
+        const answers = {};
+        const inputs = form.querySelectorAll('input, select, textarea');
+        console.log('Found form inputs:', Array.from(inputs).map(input => ({
+            name: input.name,
+            type: input.type,
+            value: input.value,
+            required: input.required
+        })));
+        
+        inputs.forEach(input => {
+            if (input.name) {
+                // Handle checkbox inputs differently
+                if (input.type === 'checkbox') {
+                    answers[input.name] = input.checked ? 'on' : 'off';
+                } else {
+                    const value = input.value.trim();
+                    answers[input.name] = value;
+                    console.log(`Setting answer for ${input.name}:`, value);
+                }
+            }
+        });
+        console.log('Collected answers:', answers);
+
         // Format answers into the expected structure
         const formattedAnswers = Object.entries(answers)
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
@@ -136,6 +160,7 @@ async function joinGroup(answers = {}) {
                 };
             });
 
+        console.log('Raw answers before formatting:', answers);
         console.log('Formatted answers for API:', formattedAnswers);
 
         const headers = {
@@ -149,7 +174,7 @@ async function joinGroup(answers = {}) {
             email_visibility: answers.email_visibility === 'on'
         };
 
-        console.log('Request body:', JSON.stringify(requestBody, null, 2));
+        console.log('Final request body:', JSON.stringify(requestBody, null, 2));
 
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
@@ -344,7 +369,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Collect answers
                         const answers = {};
                         const inputs = form.querySelectorAll('input, select, textarea');
-                        console.log('Found form inputs:', inputs);
+                        console.log('Found form inputs:', Array.from(inputs).map(input => ({
+                            name: input.name,
+                            type: input.type,
+                            value: input.value,
+                            required: input.required
+                        })));
+                        
                         inputs.forEach(input => {
                             if (input.name) {
                                 // Handle checkbox inputs differently
