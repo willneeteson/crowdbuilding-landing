@@ -16,16 +16,16 @@ function populateProjectData(data) {
         
         // Project details
         const phaseElement = document.querySelector('.project-phase');
-        if (phaseElement) phaseElement.textContent = data.phase.name;
+        if (phaseElement) phaseElement.textContent = data.phase?.name || '';
 
         const developmentFormElement = document.querySelector('.project-development-form');
-        if (developmentFormElement) developmentFormElement.textContent = data.development_form.name;
+        if (developmentFormElement) developmentFormElement.textContent = data.development_form?.name || '';
 
         const homesCountElement = document.querySelector('.project-homes-count');
-        if (homesCountElement) homesCountElement.textContent = data.number_of_homes;
+        if (homesCountElement) homesCountElement.textContent = data.number_of_homes || '';
 
         const memberStatusElement = document.querySelector('.project-member-status');
-        if (memberStatusElement) memberStatusElement.textContent = data.member_status.name;
+        if (memberStatusElement) memberStatusElement.textContent = data.member_status?.name || '';
         
         // Contact information
         const contactNameElement = document.querySelector('.project-contact-name');
@@ -70,22 +70,22 @@ function populateProjectData(data) {
         const imagesContainer = document.getElementById('gallery');
         if (imagesContainer && data.images && data.images.length > 0) {
             imagesContainer.innerHTML = data.images.map(image => 
-                `<img src="${image.original_url}" alt="${image.name}" class="project-image">`
+                `<img src="${image.conversions?.thumb?.url || image.original_url}" alt="${image.name}" class="project-image">`
             ).join('');
         }
         
         // Project status indicators
         const buildingPermitElement = document.querySelector('.project-building-permit');
-        if (buildingPermitElement) buildingPermitElement.textContent = data.building_permit_status.name;
+        if (buildingPermitElement) buildingPermitElement.textContent = data.building_permit_status?.name || '';
 
         const constructionFinancingElement = document.querySelector('.project-construction-financing');
-        if (constructionFinancingElement) constructionFinancingElement.textContent = data.needs_construction_financing.name;
+        if (constructionFinancingElement) constructionFinancingElement.textContent = data.needs_construction_financing?.name || '';
 
         const planningCostsElement = document.querySelector('.project-planning-costs');
-        if (planningCostsElement) planningCostsElement.textContent = data.needs_planning_costs_financing.name;
+        if (planningCostsElement) planningCostsElement.textContent = data.needs_planning_costs_financing?.name || '';
 
         const chamberRegistrationElement = document.querySelector('.project-chamber-registration');
-        if (chamberRegistrationElement) chamberRegistrationElement.textContent = data.chamber_of_commerce_registration_status.name;
+        if (chamberRegistrationElement) chamberRegistrationElement.textContent = data.chamber_of_commerce_registration_status?.name || '';
 
         console.log('Project data populated successfully');
     } catch (error) {
