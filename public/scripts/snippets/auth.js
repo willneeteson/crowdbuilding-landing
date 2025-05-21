@@ -8,7 +8,7 @@
     // Configuration
     const CONFIG = {
         API_BASE_URL: 'https://api.crowdbuilding.com/api/v1',
-        DEVICE_NAME: 'web-browser'
+        DEVICE_NAME: 'kaartenbak-browser'
     };
 
     // Cache for tokens and user data
@@ -46,27 +46,20 @@
             }
 
             try {
-                // Get current member data to get email
-                const member = await $memberstackDom.getCurrentMember();
-                const memberData = member?.data || member;
-                
-                if (!memberData || !memberData.email) {
-                    console.error('Could not get member email from Memberstack');
-                    return null;
-                }
-
                 console.log('Attempting to exchange token with API');
                 const response = await fetch(
                     `${CONFIG.API_BASE_URL}/sanctum/token`,
                     {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
                         body: JSON.stringify({
                             device_name: CONFIG.DEVICE_NAME,
-                            memberstack_token: memberstackToken,
-                            email: memberData.email,
-                            password: memberstackToken // Using memberstack token as password since we don't have the actual password
+                            memberstack_token: memberstackToken
                         }),
+                        redirect: "follow"
                     }
                 );
 
