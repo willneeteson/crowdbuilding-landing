@@ -1,18 +1,20 @@
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
-        const membersContainer = document.querySelector('.project-members-list');
+        const membersContainer = document.getElementById('projectMembers');
         if (!membersContainer) return;
 
         // Create HTML for members
         const membersHTML = data.members.map(member => `
-            <div class="member-item">
-                <div class="member-avatar">
-                    <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}" class="member-image">
-                </div>
-                <div class="member-info">
-                    <div class="member-name">${member.name}</div>
-                    <div class="member-role">${member.role_label || 'Member'}</div>
+            <div class="w-embed">
+                <div class="member-item">
+                    <div class="member-avatar">
+                        <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}" class="member-image">
+                    </div>
+                    <div class="member-info">
+                        <div class="member-name">${member.name}</div>
+                        <div class="member-role">${member.role_label || 'Member'}</div>
+                    </div>
                 </div>
             </div>
         `).join('');
