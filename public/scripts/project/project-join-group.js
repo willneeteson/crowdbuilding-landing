@@ -146,11 +146,10 @@ async function joinGroup(answers = {}) {
                     length: value.length
                 });
 
-                // Ensure we're sending the exact structure the API expects
-                return {
-                    question_id: questionId,  // Keep as string
-                    answer: value || ''       // Ensure we never send null/undefined
-                };
+                // Create the answer object in the format the API expects
+                const answerObj = {};
+                answerObj[questionId] = value || '';  // Use questionId as the key
+                return answerObj;
             });
 
         // Ensure we have at least one answer
@@ -162,8 +161,7 @@ async function joinGroup(answers = {}) {
         console.log('Formatted answers for API:', formattedAnswers);
 
         const requestBody = {
-            answers: formattedAnswers,
-            email_visibility: answers.email_visibility === 'on'
+            answers: formattedAnswers
         };
 
         console.log('Final request body:', JSON.stringify(requestBody, null, 2));
