@@ -125,6 +125,7 @@ async function joinGroup(answers = {}) {
             .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
             .map(([name, value]) => {
                 const questionId = name.replace('question_', '');
+                console.log(`Formatting answer for question ${questionId}:`, value);
                 return {
                     question_id: parseInt(questionId),
                     answer: value
@@ -144,7 +145,7 @@ async function joinGroup(answers = {}) {
             email_visibility: answers.email_visibility === 'on'
         };
 
-        console.log('Request body:', requestBody);
+        console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
@@ -325,6 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             if (!input.value.trim()) {
                                 isValid = false;
                                 input.classList.add('error');
+                                console.log('Missing required field:', input.name);
                             } else {
                                 input.classList.remove('error');
                             }
@@ -345,7 +347,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 if (input.type === 'checkbox') {
                                     answers[input.name] = input.checked ? 'on' : 'off';
                                 } else {
-                                    answers[input.name] = input.value.trim();
+                                    const value = input.value.trim();
+                                    answers[input.name] = value;
+                                    console.log(`Setting answer for ${input.name}:`, value);
                                 }
                             }
                         });
