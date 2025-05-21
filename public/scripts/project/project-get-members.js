@@ -1,23 +1,40 @@
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
+        console.log('Starting to populate members list with data:', data);
+        
         const membersContainer = document.getElementById('projectMembers');
-        if (!membersContainer) return;
+        console.log('Found members container:', membersContainer);
+        
+        if (!membersContainer) {
+            console.error('Members container not found!');
+            return;
+        }
+
+        if (!data.members || !Array.isArray(data.members)) {
+            console.error('No members array in data:', data);
+            return;
+        }
+
+        console.log('Number of members to display:', data.members.length);
 
         // Create HTML for members
-        const membersHTML = data.members.map(member => `
-            <div class="w-embed">
-                <div class="member-item">
-                    <div class="member-avatar">
-                        <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}" class="member-image">
-                    </div>
-                    <div class="member-info">
-                        <div class="member-name">${member.name}</div>
-                        <div class="member-role">${member.role_label || 'Member'}</div>
+        const membersHTML = data.members.map(member => {
+            console.log('Processing member:', member);
+            return `
+                <div class="w-embed">
+                    <div class="member-item">
+                        <div class="member-avatar">
+                            <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}" class="member-image">
+                        </div>
+                        <div class="member-info">
+                            <div class="member-name">${member.name}</div>
+                            <div class="member-role">${member.role_label || 'Member'}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
         // Add members count to the heading if it exists
         const headingElement = membersContainer.previousElementSibling;
@@ -26,6 +43,7 @@ function populateMembersList(data) {
         }
 
         // Update the container with members list
+        console.log('Generated HTML:', membersHTML);
         membersContainer.innerHTML = membersHTML;
 
         console.log('Members list populated successfully');
@@ -37,14 +55,20 @@ function populateMembersList(data) {
 // Function to fetch members data
 async function fetchMembersData() {
     try {
+        console.log('Starting to fetch members data...');
+        
         // Get authentication token
         const token = await window.auth.getApiToken();
+        console.log('Got auth token:', token ? 'Yes' : 'No');
+        
         if (!token) {
             console.error('No authentication token available');
             return;
         }
 
         const projectId = 'tiny-house-alkmaar';
+        console.log('Fetching members for project:', projectId);
+        
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -52,7 +76,11 @@ async function fetchMembersData() {
             }
         });
         
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error:', errorText);
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -62,12 +90,36 @@ async function fetchMembersData() {
         if (data && data.data) {
             populateMembersList(data.data);
         } else {
-            console.error('Invalid data format received from API');
+            console.error('Invalid data format received from API:', data);
         }
     } catch (error) {
         console.error('Error fetching members data:', error);
     }
 }
 
-// Call the function when the page loads
-document.addEventListener('DOMContentLoaded', fetchMembersData);
+// Wait for both DOM and auth to be ready
+async function initialize() {
+    try {
+        console.log('Waiting for DOM to be ready...');
+        await new Promise(resolve => {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', resolve);
+            } else {
+                resolve();
+            }
+        });
+
+        console.log('Waiting for auth to be ready...');
+        if (typeof window.auth === 'undefined') {
+            console.error('Auth module not found!');
+            return;
+        }
+
+        await fetchMembersData();
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
+}
+
+// Start the initialization
+initialize();
