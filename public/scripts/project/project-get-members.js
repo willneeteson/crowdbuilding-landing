@@ -19,10 +19,10 @@ function populateMembersList(data) {
             </div>
         `).join('');
 
-        // Add members count
-        const membersCountElement = document.querySelector('.project-members-count');
-        if (membersCountElement) {
-            membersCountElement.textContent = data.members_count || 0;
+        // Add members count to the heading if it exists
+        const headingElement = membersContainer.previousElementSibling;
+        if (headingElement && headingElement.tagName === 'H3') {
+            headingElement.textContent = `Members (${data.members_count || 0})`;
         }
 
         // Update the container with members list
