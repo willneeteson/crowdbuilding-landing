@@ -75,6 +75,26 @@ function createQuestionForm(questions) {
         questionDiv.appendChild(input);
         formContainer.appendChild(questionDiv);
     });
+
+    // Add email visibility checkbox
+    const emailVisibilityDiv = document.createElement('div');
+    emailVisibilityDiv.className = 'email-visibility-container';
+    
+    const emailCheckbox = document.createElement('input');
+    emailCheckbox.type = 'checkbox';
+    emailCheckbox.id = 'email_visibility';
+    emailCheckbox.name = 'email_visibility';
+    emailCheckbox.required = true;
+    emailCheckbox.className = 'email-visibility-checkbox';
+    
+    const emailLabel = document.createElement('label');
+    emailLabel.htmlFor = 'email_visibility';
+    emailLabel.textContent = 'Admin can see your email';
+    emailLabel.className = 'email-visibility-label';
+    
+    emailVisibilityDiv.appendChild(emailCheckbox);
+    emailVisibilityDiv.appendChild(emailLabel);
+    formContainer.appendChild(emailVisibilityDiv);
     
     console.log('Created form container:', formContainer);
     return formContainer;
@@ -90,10 +110,12 @@ async function joinGroup(answers = {}) {
         }
 
         // Format answers into the expected structure
-        const formattedAnswers = Object.entries(answers).map(([name, value]) => ({
-            question_id: parseInt(name.replace('question_', '')),
-            answer: value
-        }));
+        const formattedAnswers = Object.entries(answers)
+            .filter(([name]) => name !== 'email_visibility') // Exclude email visibility from answers
+            .map(([name, value]) => ({
+                question_id: parseInt(name.replace('question_', '')),
+                answer: value
+            }));
 
         const headers = {
             'Content-Type': 'application/json',
@@ -104,7 +126,10 @@ async function joinGroup(answers = {}) {
         const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({ answers: formattedAnswers })
+            body: JSON.stringify({ 
+                answers: formattedAnswers,
+                email_visibility: answers.email_visibility === 'on'
+            })
         });
 
         if (!response.ok) {
