@@ -13,6 +13,21 @@ function showLoginMessage() {
     `;
 }
 
+// Function to show permission message
+function showPermissionMessage() {
+    const membersContainer = document.getElementById('projectMembers');
+    if (!membersContainer) return;
+
+    membersContainer.innerHTML = `
+        <div class="w-embed">
+            <div class="permission-message">
+                <p>Je moet lid zijn van deze groep om de leden te bekijken</p>
+                <a href="/join-group" class="join-button">Word lid</a>
+            </div>
+        </div>
+    `;
+}
+
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
@@ -118,8 +133,8 @@ async function fetchMembersData() {
             
             // Check if user is not authenticated
             if (response.status === 403) {
-                console.log('User needs to be authenticated');
-                showLoginMessage();
+                console.log('User needs to be a member of the group');
+                showPermissionMessage();
                 return;
             }
             
@@ -136,7 +151,7 @@ async function fetchMembersData() {
         }
     } catch (error) {
         console.error('Error fetching members data:', error);
-        showLoginMessage();
+        showPermissionMessage();
     }
 }
 
@@ -171,7 +186,7 @@ async function initialize() {
         await fetchMembersData();
     } catch (error) {
         console.error('Initialization error:', error);
-        showLoginMessage();
+        showPermissionMessage();
     }
 }
 
