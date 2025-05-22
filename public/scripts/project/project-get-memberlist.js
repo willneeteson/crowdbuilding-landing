@@ -96,7 +96,7 @@ function populateProjectData(data) {
 // Function to fetch project data
 async function fetchProjectData() {
     try {
-        const projectId = 'tiny-house-alkmaar';
+        const projectId = 'will-s-farm';
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

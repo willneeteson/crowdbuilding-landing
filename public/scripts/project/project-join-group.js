@@ -1,5 +1,5 @@
 // Hardcoded group ID
-const GROUP_ID = 'tiny-house-alkmaar';
+const GROUP_ID = 'will-s-farm';
 const API_BASE_URL = 'https://api.crowdbuilding.com';
 
 // Function to get CSRF token

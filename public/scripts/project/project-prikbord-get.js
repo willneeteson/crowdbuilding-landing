@@ -148,7 +148,7 @@ function loadMorePosts() {
     }
     
     // Extract the group slug from the URL or use a default
-    const groupSlug = 'tiny-house-alkmaar'; // Use your actual way of getting the group slug
+    const groupSlug = 'will-s-farm'; // Use your actual way of getting the group slug
     
     // Fetch the next page of posts
     fetchGroupPosts(groupSlug, nextCursor);
@@ -696,7 +696,7 @@ async function deletePost(postId) {
         </div>
     `;
 
-    const groupSlug = 'tiny-house-alkmaar'; // Replace this dynamically if needed
+    const groupSlug = 'will-s-farm'; // Replace this dynamically if needed
     const token = await window.auth.getApiToken();
 
     if (!token) {
@@ -1076,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Only fetch posts if we have a user
         if (currentUserId) {
             // Call fetchGroupPosts with null cursor to fetch first page
-            fetchGroupPosts('tiny-house-alkmaar', null);
+            fetchGroupPosts('will-s-farm', null);
             
             // Wait a bit and then ensure all heart icons are properly filled
             setTimeout(fixAllHeartIcons, 1000);

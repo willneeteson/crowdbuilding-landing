@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-      const response = await fetch('https://api.crowdbuilding.com/api/v1/groups/tiny-house-alkmaar/posts', {
+      const response = await fetch('https://api.crowdbuilding.com/api/v1/groups/will-s-farm/posts', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
