@@ -213,7 +213,7 @@ function updateGroupUI(isJoined) {
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
         if (isJoined) {
-            joinButton.textContent = 'Already joined this group';
+            joinButton.textContent = 'Je bent lid';
             joinButton.classList.add('joined');
             joinButton.disabled = true;
         } else {
