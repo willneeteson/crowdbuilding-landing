@@ -96,7 +96,15 @@ function populateProjectData(data) {
 // Function to fetch project data
 async function fetchProjectData() {
     try {
-        const projectId = 'will-s-farm';
+        // Get the current page slug from the URL
+        const pathParts = window.location.pathname.split('/');
+        const projectId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        
+        if (!projectId) {
+            console.error('No project ID found in URL');
+            return;
+        }
+
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
