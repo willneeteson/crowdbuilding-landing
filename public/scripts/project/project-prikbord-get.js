@@ -296,6 +296,16 @@ function renderPosts(posts, append = false) {
         container.innerHTML = '';
     }
 
+    // Show message if there are no posts
+    if (!posts || posts.length === 0) {
+        container.innerHTML = `
+            <div class="post-item empty">
+                <p>Nog geen berichten</p>
+            </div>
+        `;
+        return;
+    }
+
     // Create modal container if it doesn't exist
     if (!document.getElementById('postModal')) {
         const modalHtml = `
