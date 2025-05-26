@@ -1,5 +1,16 @@
-// Hardcoded group ID
-const GROUP_ID = 'will-s-farm';
+// Get group ID from URL
+function getGroupId() {
+    const pathParts = window.location.pathname.split('/');
+    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    
+    if (!groupSlug) {
+        console.error('No group slug found in URL');
+        throw new Error('No group found in URL');
+    }
+    
+    return groupSlug;
+}
+
 const API_BASE_URL = 'https://api.crowdbuilding.com';
 
 // Function to get CSRF token
@@ -119,7 +130,7 @@ function setLoading(isLoading) {
     const submitButton = document.querySelector('.submit-button');
     if (submitButton) {
         submitButton.disabled = isLoading;
-        submitButton.textContent = isLoading ? 'Loading...' : 'Submit';
+        submitButton.textContent = isLoading ? 'Laden...' : 'Verstuur';
     }
 }
 
@@ -133,6 +144,9 @@ async function joinGroup(answers = {}) {
         if (!apiToken) {
             throw new Error('Authentication required. Please log in to continue.');
         }
+
+        // Get group ID from URL
+        const groupId = getGroupId();
 
         // Format answers into the expected structure
         const formattedAnswers = Object.entries(answers)
@@ -164,11 +178,11 @@ async function joinGroup(answers = {}) {
             'Authorization': `Bearer ${apiToken}`
         };
 
-        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`);
+        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${groupId}/join`);
         console.log('With headers:', headers);
         console.log('With body:', JSON.stringify(requestBody, null, 2));
 
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/join`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${groupId}/join`, {
             method: 'POST',
             headers: headers,
             body: JSON.stringify(requestBody)
@@ -255,6 +269,9 @@ async function fetchGroupData() {
             throw new Error('Authentication required. Please log in to continue.');
         }
 
+        // Get group ID from URL
+        const groupId = getGroupId();
+
         console.log('Fetching questions with token:', apiToken);
 
         const headers = {
@@ -263,8 +280,8 @@ async function fetchGroupData() {
             'Authorization': `Bearer ${apiToken}`
         };
 
-        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`);
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}/members/questions`, {
+        console.log('Making request to:', `${API_BASE_URL}/api/v1/groups/${groupId}/members/questions`);
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${groupId}/members/questions`, {
             method: 'GET',
             headers: headers
         });
@@ -313,7 +330,7 @@ async function checkMembershipStatus() {
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
         joinButton.disabled = true;
-        joinButton.textContent = 'Loading...';
+        joinButton.textContent = 'Laden...';
     }
     try {
         const apiToken = await window.auth.getApiToken();
@@ -325,6 +342,9 @@ async function checkMembershipStatus() {
             return;
         }
 
+        // Get group ID from URL
+        const groupId = getGroupId();
+
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -332,7 +352,7 @@ async function checkMembershipStatus() {
         };
 
         // Call the group API to get membership info
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${GROUP_ID}`, {
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${groupId}`, {
             method: 'GET',
             headers: headers
         });
