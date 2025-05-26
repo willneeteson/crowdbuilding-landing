@@ -147,8 +147,14 @@ function loadMorePosts() {
         button.innerText = 'Laden...';
     }
     
-    // Extract the group slug from the URL or use a default
-    const groupSlug = 'will-s-farm'; // Use your actual way of getting the group slug
+    // Get the current page slug from the URL
+    const pathParts = window.location.pathname.split('/');
+    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    
+    if (!groupSlug) {
+        console.error('No group slug found in URL');
+        return;
+    }
     
     // Fetch the next page of posts
     fetchGroupPosts(groupSlug, nextCursor);
@@ -696,7 +702,16 @@ async function deletePost(postId) {
         </div>
     `;
 
-    const groupSlug = 'will-s-farm'; // Replace this dynamically if needed
+    // Get the current page slug from the URL
+    const pathParts = window.location.pathname.split('/');
+    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    
+    if (!groupSlug) {
+        console.error('No group slug found in URL');
+        postElement.innerHTML = originalContent;
+        return;
+    }
+
     const token = await window.auth.getApiToken();
 
     if (!token) {
@@ -1075,8 +1090,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Only fetch posts if we have a user
         if (currentUserId) {
+            // Get the current page slug from the URL
+            const pathParts = window.location.pathname.split('/');
+            const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+            
+            if (!groupSlug) {
+                console.error('No group slug found in URL');
+                const container = document.getElementById('groupPosts');
+                if (container) {
+                    container.innerHTML = '<div class="post-item">Error: No group found in URL.</div>';
+                }
+                return;
+            }
+            
             // Call fetchGroupPosts with null cursor to fetch first page
-            fetchGroupPosts('will-s-farm', null);
+            fetchGroupPosts(groupSlug, null);
             
             // Wait a bit and then ensure all heart icons are properly filled
             setTimeout(fixAllHeartIcons, 1000);
