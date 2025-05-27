@@ -326,19 +326,8 @@ async function fetchProjectData() {
 
 // Function to show project details modal
 function showProjectDetailsModal() {
-    console.log('Attempting to show project details modal. [DEBUG]');
-    console.log('Current window.projectData at modal show:', JSON.stringify(window.projectData, null, 2));
-
-    if (!window.projectData || Object.keys(window.projectData).length === 0) {
-        console.error('No project data available or projectData is empty in showProjectDetailsModal. [DEBUG]');
-        const modal = document.getElementById('projectDetailsModal');
-        if (modal) {
-            const modalBody = modal.querySelector('.modal-body');
-            if (modalBody) {
-                modalBody.innerHTML = '<p style="color: red; font-weight: bold;">Project data is currently unavailable or empty. Please check console logs. [DEBUG]</p>';
-            }
-            modal.style.display = 'flex'; // Show modal with error message
-        }
+    if (!window.projectData) {
+        console.error('No project data available');
         return;
     }
 
@@ -346,148 +335,36 @@ function showProjectDetailsModal() {
     const modal = document.getElementById('projectDetailsModal');
     
     if (!modal) {
-        console.error('Modal element #projectDetailsModal not found in DOM. [DEBUG]');
+        console.error('Modal element not found');
         return;
     }
 
     const modalBody = modal.querySelector('.modal-body');
     if (!modalBody) {
-        console.error('Modal body element .modal-body not found within #projectDetailsModal. [DEBUG]');
-        if (modal) {
-             const modalContentElement = modal.querySelector('.modal-content');
-             if (modalContentElement) {
-                const newModalBody = document.createElement('div');
-                newModalBody.className = 'modal-body';
-                modalContentElement.appendChild(newModalBody);
-                console.warn('Dynamically created .modal-body as it was missing. This might indicate an issue with initial modal HTML. [DEBUG]');
-                // modalBody = newModalBody; // Reassign to use the newly created body
-             } else {
-                console.error('Cannot create .modal-body as .modal-content is also missing. [DEBUG]');
-                modal.innerHTML = '<p style="color: red;">Critical error: Modal structure highly incomplete. [DEBUG]</p>';
-                return;
-             }
-        } else { // Should not happen if modal was found above
-            return;
-        }
-        // If we had to create modalBody, we should re-query for it or use the new reference.
-        // For now, error out if it wasn't there initially as per original structure.
-        // This path indicates a fundamental problem with the modal's static HTML.
-        console.error('Modal body was not found initially. Aborting content population. [DEBUG]');
+        console.error('Modal body not found');
         return;
     }
 
-    let modalContent = '';
-    try {
-        modalContent = `
+    // Create simple content with just the essential data
+    const modalContent = `
         <div class="modal-section">
-            <h4>Project Information [DEBUG]</h4>
             <div class="project-details">
-                ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${String(data.title)}</div>` : '<!-- No title [DEBUG] -->'}
-                ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${String(data.subtitle)}</div>` : '<!-- No subtitle [DEBUG] -->'}
-                ${data.intro ? `<div class="detail-item"><strong>Introduction:</strong> ${data.intro}</div>` : '<!-- No intro [DEBUG] -->'}
-                ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${String(data.location)}</div>` : '<!-- No location [DEBUG] -->'}
-                ${(data.phase && data.phase.name) ? `<div class="detail-item"><strong>Phase:</strong> ${String(data.phase.name)}</div>` : '<!-- No phase [DEBUG] -->'}
-                ${(data.development_form && data.development_form.name) ? `<div class="detail-item"><strong>Development Form:</strong> ${String(data.development_form.name)}</div>` : '<!-- No dev form [DEBUG] -->'}
-                ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${Number(data.number_of_homes)}</div>` : '<!-- No homes count [DEBUG] -->'}
-                ${(data.member_status && data.member_status.name) ? `<div class="detail-item"><strong>Member Status:</strong> ${String(data.member_status.name)}</div>` : '<!-- No member status [DEBUG] -->'}
+                <div class="detail-item"><strong>Phase:</strong> ${data.phase?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Location:</strong> ${data.location || 'N/A'}</div>
+                <div class="detail-item"><strong>Development Form:</strong> ${data.development_form?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes || 'N/A'}</div>
+                <div class="detail-item"><strong>Member Status:</strong> ${data.member_status?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Building Permit:</strong> ${data.building_permit_status?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing?.name || 'N/A'}</div>
+                <div class="detail-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status?.name || 'N/A'}</div>
             </div>
         </div>
-
-        ${(data.housing_forms && Array.isArray(data.housing_forms) && data.housing_forms.length > 0) ? `
-            <div class="modal-section">
-                <h4>Housing Forms [DEBUG]</h4>
-                <div class="tags-list">
-                    ${data.housing_forms.map(form => `<div class="tag">${String(form.title || 'N/A')}</div>`).join('')}
-                </div>
-            </div>
-        ` : '<!-- No housing forms [DEBUG] -->'}
-
-        ${(data.interests && Array.isArray(data.interests) && data.interests.length > 0) ? `
-            <div class="modal-section">
-                <h4>Interests [DEBUG]</h4>
-                <div class="tags-list">
-                    ${data.interests.map(interest => `<div class="tag">${String(interest.name || 'N/A')}</div>`).join('')}
-                </div>
-            </div>
-        ` : '<!-- No interests [DEBUG] -->'}
-
-        ${(data.buy_budgets && Array.isArray(data.buy_budgets) && data.buy_budgets.length > 0) ? `
-            <div class="modal-section">
-                <h4>Buy Budgets [DEBUG]</h4>
-                <div class="tags-list">
-                    ${data.buy_budgets.map(budget => `<div class="tag">${String(budget.name || 'N/A')}</div>`).join('')}
-                </div>
-            </div>
-        ` : '<!-- No buy budgets [DEBUG] -->'}
-
-        ${(data.target_audiences && Array.isArray(data.target_audiences) && data.target_audiences.length > 0) ? `
-            <div class="modal-section">
-                <h4>Target Audiences [DEBUG]</h4>
-                <div class="tags-list">
-                    ${data.target_audiences.map(audience => `<div class="tag">${String(audience.name || 'N/A')}</div>`).join('')}
-                </div>
-            </div>
-        ` : '<!-- No target audiences [DEBUG] -->'}
-
-        <div class="modal-section">
-            <h4>Project Status [DEBUG]</h4>
-            <div class="project-status">
-                ${(data.building_permit_status && data.building_permit_status.name) ? `<div class="status-item"><strong>Building Permit:</strong> ${String(data.building_permit_status.name)}</div>` : '<!-- No permit status [DEBUG] -->'}
-                ${(data.needs_construction_financing && data.needs_construction_financing.name) ? `<div class="status-item"><strong>Construction Financing:</strong> ${String(data.needs_construction_financing.name)}</div>` : '<!-- No construction financing [DEBUG] -->'}
-                ${(data.needs_planning_costs_financing && data.needs_planning_costs_financing.name) ? `<div class="status-item"><strong>Planning Costs:</strong> ${String(data.needs_planning_costs_financing.name)}</div>` : '<!-- No planning costs [DEBUG] -->'}
-                ${(data.chamber_of_commerce_registration_status && data.chamber_of_commerce_registration_status.name) ? `<div class="status-item"><strong>Chamber Registration:</strong> ${String(data.chamber_of_commerce_registration_status.name)}</div>` : '<!-- No chamber status [DEBUG] -->'}
-            </div>
-        </div>
-
-        ${(data.contact_name || data.contact_email) ? `
-            <div class="modal-section">
-                <h4>Contact Information [DEBUG]</h4>
-                <div class="contact-info">
-                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${String(data.contact_name)}</div>` : '<!-- No contact name [DEBUG] -->'}
-                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${String(data.contact_email)}</div>` : '<!-- No contact email [DEBUG] -->'}
-                </div>
-            </div>
-        ` : '<!-- No contact info [DEBUG] -->'}
-
-        ${(data.images && Array.isArray(data.images) && data.images.length > 0) ? `
-            <div class="modal-section">
-                <h4>Project Images [DEBUG]</h4>
-                <div class="project-images">
-                    ${data.images.map(image => `
-                        <img src="${(image.conversions && image.conversions.thumb && image.conversions.thumb.url) || image.original_url || ''}" 
-                             alt="${String(image.name || 'Project image')}" 
-                             class="project-image"
-                             onerror="this.style.display='none'; console.error('Image failed to load: ' + this.src + '[DEBUG]');">
-                    `).join('')}
-                </div>
-            </div>
-        ` : '<!-- No images [DEBUG] -->'}
     `;
-    } catch (e) {
-        console.error('Error during modalContent HTML generation:', e, '[DEBUG]');
-        modalBody.innerHTML = `<p style="color: red; font-weight: bold;">Error generating modal content. Check console. [DEBUG]</p><pre>${e.stack}</pre>`;
-        modal.style.display = 'flex';
-        return;
-    }
-    
-    console.log('Generated modalContent string [DEBUG]:', modalContent);
-    if (modalContent.trim() === '' || (modalContent.includes("<!-- No") && !modalContent.includes("<div class=\"detail-item") && !modalContent.includes("<div class=\"tag") && !modalContent.includes("<div class=\"status-item") && !modalContent.includes("<img"))) {
-        console.warn('ModalContent appears to be empty or only comments, suggesting all data fields are missing or conditions not met. [DEBUG]');
-    }
 
-    modalBody.innerHTML = modalContent; // Set the content
-    modal.style.display = 'flex';      // Display the modal
-    console.log('Modal display has been set to flex. [DEBUG]');
-    console.log('Final modalBody.innerHTML length [DEBUG]:', modalBody.innerHTML.length);
-
-    if (modalBody.innerHTML.trim() === '') {
-        console.error('CRITICAL: Modal body is TRULY empty after setting innerHTML. This implies modalContent was an empty string or only whitespace. [DEBUG]');
-    } else if (modalBody.children.length === 0 && modalBody.textContent.trim() === '') {
-         console.warn('Modal body has no child elements and its textContent is empty. The HTML might be malformed or consist only of comments. [DEBUG]');
-         console.log('Final modalBody.innerHTML for inspection:', modalBody.innerHTML);
-    } else {
-        console.log('Modal content seems to be populated. Check visually. [DEBUG]');
-    }
+    // Set content and show modal
+    modalBody.innerHTML = modalContent;
+    modal.style.display = 'flex';
 }
 
 // Function to close project details modal
