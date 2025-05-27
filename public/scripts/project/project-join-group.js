@@ -233,8 +233,8 @@ async function joinGroup(answers = {}) {
         // Show completion modal
         const completionContent = `
             <div class="modal-header">
-                <button class="close-button">&times;</button>
                 <h3>Aanmelding verstuurd</h3>
+                <button class="close-button">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="completion-message">
@@ -435,8 +435,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const modalSystem = await window.waitForModalSystem();
                 const modalContent = `
                     <div class="modal-header">
-                        <button class="close-button">&times;</button>
                         <h3>Aanmelden interesselijst</h3>
+                        <button class="close-button">&times;</button>
                     </div>
                     <div class="modal-body">
                         ${form.outerHTML}
@@ -533,10 +533,11 @@ style.textContent = `
         display: flex;
         flex-direction: column;
         max-height: 90vh;
+        overflow: hidden;
     }
     
     .modal-header {
-        padding: 24px 32px;
+        padding: 20px 24px;
         border-bottom: 1px solid #e0e0e0;
         position: sticky;
         top: 0;
@@ -546,6 +547,7 @@ style.textContent = `
         display: flex;
         align-items: center;
         justify-content: center;
+        min-height: 64px;
     }
     
     .modal-header h3 {
@@ -553,16 +555,19 @@ style.textContent = `
         font-size: 16px;
         font-weight: 600;
         color: #333;
+        text-align: center;
+        flex: 1;
     }
     
     .modal-body {
-        padding: 32px;
+        padding: 24px;
         overflow-y: auto;
+        flex: 1;
     }
     
     .close-button {
         position: absolute;
-        left: 16px;
+        right: 20px;
         top: 50%;
         transform: translateY(-50%);
         color: #666;
@@ -576,6 +581,13 @@ style.textContent = `
         align-items: center;
         justify-content: center;
         border-radius: 50%;
+        background: transparent;
+        border: none;
+        padding: 0;
+    }
+    
+    .close-button:hover {
+        color: #333;
         background: #f5f5f5;
     }
     
