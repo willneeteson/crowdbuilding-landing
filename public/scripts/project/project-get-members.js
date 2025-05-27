@@ -47,6 +47,22 @@ function showLoadingState() {
     membersContainer.innerHTML = loadingHTML;
 }
 
+// Function to show project details modal
+function showProjectDetailsModal() {
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Function to close project details modal
+function closeProjectDetailsModal() {
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
@@ -91,48 +107,61 @@ function populateMembersList(data) {
             ? `<div class="member-avatar remaining-count">+${remainingCount}</div>`
             : '';
 
-        // Create the compact view container
+        // Create the compact view container with two click handlers
         const compactViewHTML = `
-            <div class="members-compact-view" onclick="showMembersModal()">
-                ${avatarsHTML}
-                ${remainingHTML}
+            <div class="members-compact-view">
+                <div class="members-avatars" onclick="showMembersModal()">
+                    ${avatarsHTML}
+                    ${remainingHTML}
+                </div>
+                <button class="details-button" onclick="showProjectDetailsModal()">View Details</button>
             </div>
         `;
 
-        // Create the modal HTML with all project details
-        const modalHTML = `
+        // Create the members modal HTML
+        const membersModalHTML = `
             <div id="membersModal" class="members-modal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Project Details</h3>
+                        <h3>Members (${members.length})</h3>
                         <span class="close-modal" onclick="closeMembersModal()">&times;</span>
                     </div>
                     <div class="modal-body">
-                        <div class="modal-section">
-                            <h4>Members (${members.length})</h4>
-                            <div class="members-list">
-                                ${members.map(member => {
-                                    const avatarUrl = member.avatar_url 
-                                        ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
-                                        : 'https://api.crowdbuilding.com/storage/default-avatar.png';
-                                    
-                                    return `
-                                        <div class="member-item">
-                                            <a href="/user?id=${member.id}" class="member-link">
-                                                <div class="member-avatar">
-                                                    <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
-                                                </div>
-                                                <div class="member-info">
-                                                    <div class="member-name">${member.name}</div>
-                                                    <div class="member-role">${member.role_label || 'Member'}</div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
+                        <div class="members-list">
+                            ${members.map(member => {
+                                const avatarUrl = member.avatar_url 
+                                    ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
+                                    : 'https://api.crowdbuilding.com/storage/default-avatar.png';
+                                
+                                return `
+                                    <div class="member-item">
+                                        <a href="/user?id=${member.id}" class="member-link">
+                                            <div class="member-avatar">
+                                                <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                                            </div>
+                                            <div class="member-info">
+                                                <div class="member-name">${member.name}</div>
+                                                <div class="member-role">${member.role_label || 'Member'}</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                `;
+                            }).join('')}
                         </div>
-                        
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Create the project details modal HTML
+        const projectDetailsModalHTML = `
+            <div id="projectDetailsModal" class="members-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Project Details</h3>
+                        <span class="close-modal" onclick="closeProjectDetailsModal()">&times;</span>
+                    </div>
+                    <div class="modal-body">
                         <div class="modal-section">
                             <h4>Project Information</h4>
                             <div class="project-details">
@@ -205,8 +234,8 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Add the compact view and modal to the container
-        membersContainer.innerHTML = compactViewHTML + modalHTML;
+        // Add the compact view and both modals to the container
+        membersContainer.innerHTML = compactViewHTML + membersModalHTML + projectDetailsModalHTML;
 
         console.log('Members list populated successfully');
     } catch (error) {
