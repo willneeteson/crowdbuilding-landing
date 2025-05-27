@@ -232,10 +232,6 @@ async function joinGroup(answers = {}) {
 
         // Show completion modal
         const completionContent = `
-            <div class="cb-modal-header">
-                <h3>Aanmelding verstuurd</h3>
-                <span class="cb-modal-close">×</span>
-            </div>
             <div class="cb-modal-body">
                 <div class="completion-message">
                     <h3>Dank voor je aanmelding!</h3>
@@ -243,7 +239,7 @@ async function joinGroup(answers = {}) {
                 </div>
             </div>
         `;
-        modalSystem.createModal('', completionContent, { id: 'completionModal' });
+        modalSystem.createModal('Aanmelding verstuurd', completionContent, { id: 'completionModal' });
         modalSystem.showModal('completionModal');
 
         // Update UI to reflect joined status
@@ -434,15 +430,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Wait for modal system and create modal with form
                 const modalSystem = await window.waitForModalSystem();
                 const modalContent = `
-                    <div class="cb-modal-header">
-                        <h3>Aanmelden interesselijst</h3>
-                        <span class="cb-modal-close">×</span>
-                    </div>
                     <div class="cb-modal-body">
                         ${form.outerHTML}
                     </div>
                 `;
-                modalSystem.createModal('', modalContent, { id: 'joinGroupModal' });
+                modalSystem.createModal('Aanmelden interesselijst', modalContent, { id: 'joinGroupModal' });
                 modalSystem.showModal('joinGroupModal');
 
                 // Set up form submission handler after modal is created
@@ -506,12 +498,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Add some basic modal styles
 const style = document.createElement('style');
 style.textContent = `
+    /* Modal structure styles */
+    .cb-modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
+        height: auto;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .cb-modal-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .cb-modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Form and content styles */
     .group-join-info {
         background-color: #f8f9fa;
         padding: 20px;
         margin: 0 0 28px;
         border-radius: 12px;
-        border-left: 4px solid #FF5C54;
         color: #333;
         font-size: 0.95em;
         line-height: 1.6;
@@ -644,6 +663,15 @@ style.textContent = `
     
     /* Responsive adjustments */
     @media (max-width: 480px) {
+        .cb-modal-content {
+            max-height: 100vh;
+            border-radius: 0;
+        }
+
+        .cb-modal-body {
+            padding: 20px;
+        }
+
         .group-join-info {
             margin-top: 0;
         }
