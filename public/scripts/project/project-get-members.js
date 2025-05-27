@@ -63,6 +63,92 @@ function closeProjectDetailsModal() {
     }
 }
 
+// Function to populate project details modal
+function populateProjectDetailsModal(data) {
+    const modal = document.getElementById('projectDetailsModal');
+    if (!modal) return;
+
+    const modalContent = `
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Project Details</h3>
+                <span class="close-modal" onclick="closeProjectDetailsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h4>Project Information</h4>
+                    <div class="project-details">
+                        ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
+                        ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
+                        ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
+                        ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
+                        ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
+                        ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
+                    </div>
+                </div>
+
+                ${data.housing_forms && data.housing_forms.length > 0 ? `
+                    <div class="modal-section">
+                        <h4>Housing Forms</h4>
+                        <div class="tags-list">
+                            ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${data.interests && data.interests.length > 0 ? `
+                    <div class="modal-section">
+                        <h4>Interests</h4>
+                        <div class="tags-list">
+                            ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${data.buy_budgets && data.buy_budgets.length > 0 ? `
+                    <div class="modal-section">
+                        <h4>Buy Budgets</h4>
+                        <div class="tags-list">
+                            ${data.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                ${data.target_audiences && data.target_audiences.length > 0 ? `
+                    <div class="modal-section">
+                        <h4>Target Audiences</h4>
+                        <div class="tags-list">
+                            ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="modal-section">
+                    <h4>Status</h4>
+                    <div class="project-status">
+                        ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
+                        ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
+                        ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
+                        ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
+                    </div>
+                </div>
+
+                ${data.contact_name || data.contact_email ? `
+                    <div class="modal-section">
+                        <h4>Contact Information</h4>
+                        <div class="contact-info">
+                            ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
+                            ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
+    modal.innerHTML = modalContent;
+}
+
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
@@ -153,85 +239,9 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Create the project details modal HTML
+        // Create the project details modal container
         const projectDetailsModalHTML = `
-            <div id="projectDetailsModal" class="members-modal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Project Details</h3>
-                        <span class="close-modal" onclick="closeProjectDetailsModal()">&times;</span>
-                    </div>
-                    <div class="modal-body">
-                        <div class="modal-section">
-                            <h4>Project Information</h4>
-                            <div class="project-details">
-                                ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
-                                ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
-                                ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
-                                ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
-                                ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
-                                ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
-                            </div>
-                        </div>
-
-                        ${data.housing_forms && data.housing_forms.length > 0 ? `
-                            <div class="modal-section">
-                                <h4>Housing Forms</h4>
-                                <div class="tags-list">
-                                    ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${data.interests && data.interests.length > 0 ? `
-                            <div class="modal-section">
-                                <h4>Interests</h4>
-                                <div class="tags-list">
-                                    ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${data.buy_budgets && data.buy_budgets.length > 0 ? `
-                            <div class="modal-section">
-                                <h4>Buy Budgets</h4>
-                                <div class="tags-list">
-                                    ${data.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        ${data.target_audiences && data.target_audiences.length > 0 ? `
-                            <div class="modal-section">
-                                <h4>Target Audiences</h4>
-                                <div class="tags-list">
-                                    ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <div class="modal-section">
-                            <h4>Status</h4>
-                            <div class="project-status">
-                                ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
-                                ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
-                                ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
-                                ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
-                            </div>
-                        </div>
-
-                        ${data.contact_name || data.contact_email ? `
-                            <div class="modal-section">
-                                <h4>Contact Information</h4>
-                                <div class="contact-info">
-                                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
-                                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
+            <div id="projectDetailsModal" class="members-modal" style="display: none;"></div>
         `;
 
         // Add the compact view and both modals to the container

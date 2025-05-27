@@ -227,6 +227,11 @@ function populateProjectData(data) {
         }
 
         console.log('Project data populated successfully');
+
+        // Populate the project details modal
+        if (typeof populateProjectDetailsModal === 'function') {
+            populateProjectDetailsModal(data);
+        }
     } catch (error) {
         console.error('Error populating project data:', error);
     }
