@@ -325,11 +325,6 @@ window.closeProjectDetailsModal = function() {
 // Function to populate project details modal
 function populateProjectDetailsModal(data) {
     console.log('Populating modal with data:', data);
-    console.log('Development form:', data.development_form);
-    console.log('Number of homes:', data.number_of_homes);
-    console.log('Contact info:', { name: data.contact_name, email: data.contact_email });
-    console.log('Interests:', data.interests);
-    
     const modalBody = document.querySelector('#projectDetailsModal .modal-body');
     if (!modalBody) {
         console.error('Modal body not found');
@@ -346,6 +341,7 @@ function populateProjectDetailsModal(data) {
                 ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
                 ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
                 ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
+                ${data.member_status?.name ? `<div class="detail-item"><strong>Member Status:</strong> ${data.member_status.name}</div>` : ''}
             </div>
         </div>
 
@@ -395,15 +391,13 @@ function populateProjectDetailsModal(data) {
             </div>
         </div>
 
-        ${data.contact_name || data.contact_email ? `
-            <div class="modal-section">
-                <h4>Contact Information</h4>
-                <div class="contact-info">
-                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
-                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
-                </div>
+        <div class="modal-section">
+            <h4>Contact Information</h4>
+            <div class="contact-info">
+                ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
+                ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
             </div>
-        ` : ''}
+        </div>
     `;
 
     modalBody.innerHTML = modalContent;
