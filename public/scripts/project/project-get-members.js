@@ -60,7 +60,7 @@ function populateMembersList(data) {
                 : 'https://api.crowdbuilding.com/storage/default-avatar.png';
             
             return `
-                <div class="w-embed">
+                <div class="member-wrapper">
                     <a href="/user?id=${member.id}" class="member-link">
                         <div class="member-item">
                             <div class="member-avatar">
