@@ -120,8 +120,93 @@ function showModal() {
         return;
     }
 
+    // Add styles for the details modal
+    const styles = `
+        <style>
+            .cb-details-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                gap: 24px;
+                padding: 24px;
+            }
+
+            .cb-detail-item {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .cb-detail-item strong {
+                color: #666;
+                font-size: 14px;
+                font-weight: 500;
+            }
+
+            .cb-detail-item span {
+                color: #333;
+                font-size: 16px;
+                line-height: 1.4;
+            }
+
+            .cb-detail-item.full-width {
+                grid-column: 1 / -1;
+            }
+
+            .tags-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 4px;
+            }
+
+            .tag {
+                background: #f5f5f5;
+                padding: 6px 12px;
+                border-radius: 99px;
+                font-size: 14px;
+                color: #333;
+                white-space: nowrap;
+            }
+
+            @media (max-width: 768px) {
+                .cb-details-grid {
+                    grid-template-columns: 1fr;
+                    padding: 16px;
+                    gap: 20px;
+                }
+
+                .cb-detail-item {
+                    padding-bottom: 16px;
+                    border-bottom: 1px solid #eee;
+                }
+
+                .cb-detail-item:last-child {
+                    border-bottom: none;
+                    padding-bottom: 0;
+                }
+
+                .tags-list {
+                    margin-top: 8px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .cb-details-grid {
+                    padding: 12px;
+                    gap: 16px;
+                }
+
+                .tag {
+                    padding: 4px 10px;
+                    font-size: 13px;
+                }
+            }
+        </style>
+    `;
+
     // Create modal content
     const content = `
+        ${styles}
         <div class="cb-details-grid">
             <div class="cb-detail-item">
                 <strong>Fase</strong>
