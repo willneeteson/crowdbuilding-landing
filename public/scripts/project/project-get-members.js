@@ -224,16 +224,19 @@ function populateMembersList(data) {
             /* Loading state styles */
             .members-compact-view.loading {
                 cursor: default;
+                opacity: 1;
             }
             .member-avatar.loading {
                 background: #f0f0f0;
                 animation: pulse 1.5s infinite;
+                opacity: 1;
             }
             .loading-placeholder {
                 width: 100%;
                 height: 100%;
                 background: rgba(0, 0, 0, 0.1);
                 border-radius: 50%;
+                opacity: 1;
             }
             @keyframes pulse {
                 0% {
@@ -369,6 +372,9 @@ async function initialize() {
                 resolve();
             }
         });
+
+        // Show loading state immediately after DOM is ready
+        showLoadingState();
 
         console.log('Waiting for auth to be ready...');
         if (typeof window.auth === 'undefined') {
