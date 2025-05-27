@@ -351,9 +351,25 @@
 .detail-item,
 .status-item,
 .contact-item {
-    padding: 8px;
-    background: #f8f8f8;
-    border-radius: 4px;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child,
+.status-item:last-child,
+.contact-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item strong,
+.status-item strong,
+.contact-item strong {
+    min-width: 140px;
+    color: #666;
+    font-weight: 600;
 }
 
 .tags-list {
@@ -469,25 +485,6 @@
 #projectDetailsModal .contact-info {
     display: grid;
     gap: 1rem;
-}
-
-#projectDetailsModal .detail-item,
-#projectDetailsModal .status-item,
-#projectDetailsModal .contact-item {
-    background-color: #f8f8f8;
-    padding: 1rem;
-    border-radius: 6px;
-    display: flex;
-    gap: 1rem;
-    align-items: flex-start;
-}
-
-#projectDetailsModal .detail-item strong,
-#projectDetailsModal .status-item strong,
-#projectDetailsModal .contact-item strong {
-    min-width: 140px;
-    color: #666;
-    font-weight: 600;
 }
 
 #projectDetailsModal .tags-list {
