@@ -116,7 +116,15 @@ async function fetchMembersData() {
             return;
         }
 
-        const projectId = 'will-s-farm';
+        // Get the current page slug from the URL
+        const pathParts = window.location.pathname.split('/');
+        const projectId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        
+        if (!projectId) {
+            console.error('No project ID found in URL');
+            return;
+        }
+
         console.log('Fetching members for project:', projectId);
         
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
