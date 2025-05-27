@@ -99,34 +99,107 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Create the modal HTML
+        // Create the modal HTML with all project details
         const modalHTML = `
             <div id="membersModal" class="members-modal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h3>Members (${members.length})</h3>
+                        <h3>Project Details</h3>
                         <span class="close-modal" onclick="closeMembersModal()">&times;</span>
                     </div>
                     <div class="modal-body">
-                        ${members.map(member => {
-                            const avatarUrl = member.avatar_url 
-                                ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
-                                : 'https://api.crowdbuilding.com/storage/default-avatar.png';
-                            
-                            return `
-                                <div class="member-item">
-                                    <a href="/user?id=${member.id}" class="member-link">
-                                        <div class="member-avatar">
-                                            <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                        <div class="modal-section">
+                            <h4>Members (${members.length})</h4>
+                            <div class="members-list">
+                                ${members.map(member => {
+                                    const avatarUrl = member.avatar_url 
+                                        ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
+                                        : 'https://api.crowdbuilding.com/storage/default-avatar.png';
+                                    
+                                    return `
+                                        <div class="member-item">
+                                            <a href="/user?id=${member.id}" class="member-link">
+                                                <div class="member-avatar">
+                                                    <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                                                </div>
+                                                <div class="member-info">
+                                                    <div class="member-name">${member.name}</div>
+                                                    <div class="member-role">${member.role_label || 'Member'}</div>
+                                                </div>
+                                            </a>
                                         </div>
-                                        <div class="member-info">
-                                            <div class="member-name">${member.name}</div>
-                                            <div class="member-role">${member.role_label || 'Member'}</div>
-                                        </div>
-                                    </a>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="modal-section">
+                            <h4>Project Information</h4>
+                            <div class="project-details">
+                                ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
+                                ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
+                                ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
+                                ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
+                                ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
+                                ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
+                            </div>
+                        </div>
+
+                        ${data.housing_forms && data.housing_forms.length > 0 ? `
+                            <div class="modal-section">
+                                <h4>Housing Forms</h4>
+                                <div class="tags-list">
+                                    ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
                                 </div>
-                            `;
-                        }).join('')}
+                            </div>
+                        ` : ''}
+
+                        ${data.interests && data.interests.length > 0 ? `
+                            <div class="modal-section">
+                                <h4>Interests</h4>
+                                <div class="tags-list">
+                                    ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${data.buy_budgets && data.buy_budgets.length > 0 ? `
+                            <div class="modal-section">
+                                <h4>Buy Budgets</h4>
+                                <div class="tags-list">
+                                    ${data.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${data.target_audiences && data.target_audiences.length > 0 ? `
+                            <div class="modal-section">
+                                <h4>Target Audiences</h4>
+                                <div class="tags-list">
+                                    ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="modal-section">
+                            <h4>Status</h4>
+                            <div class="project-status">
+                                ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
+                                ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
+                                ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
+                                ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
+                            </div>
+                        </div>
+
+                        ${data.contact_name || data.contact_email ? `
+                            <div class="modal-section">
+                                <h4>Contact Information</h4>
+                                <div class="contact-info">
+                                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
+                                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             </div>

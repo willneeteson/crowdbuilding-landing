@@ -108,9 +108,13 @@ function populateProjectData(data) {
         const housingFormsContainer = document.querySelector('.project-housing-forms');
         if (housingFormsContainer) {
             if (data.housing_forms && data.housing_forms.length > 0) {
-                housingFormsContainer.innerHTML = data.housing_forms.map(form => 
+                const maxItems = 3;
+                const remainingCount = Math.max(0, data.housing_forms.length - maxItems);
+                const displayForms = data.housing_forms.slice(0, maxItems);
+                
+                housingFormsContainer.innerHTML = displayForms.map(form => 
                     `<div class="housing-form">${form.title}</div>`
-                ).join('');
+                ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
                 housingFormsContainer.style.display = 'block';
             } else {
                 housingFormsContainer.style.display = 'none';
@@ -121,9 +125,13 @@ function populateProjectData(data) {
         const interestsContainer = document.querySelector('.project-interests');
         if (interestsContainer) {
             if (data.interests && data.interests.length > 0) {
-                interestsContainer.innerHTML = data.interests.map(interest => 
+                const maxItems = 3;
+                const remainingCount = Math.max(0, data.interests.length - maxItems);
+                const displayInterests = data.interests.slice(0, maxItems);
+                
+                interestsContainer.innerHTML = displayInterests.map(interest => 
                     `<div class="interest-tag">${interest.name}</div>`
-                ).join('');
+                ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
                 interestsContainer.style.display = 'block';
             } else {
                 interestsContainer.style.display = 'none';
@@ -134,9 +142,13 @@ function populateProjectData(data) {
         const buyBudgetsContainer = document.querySelector('.project-buy-budgets');
         if (buyBudgetsContainer) {
             if (data.buy_budgets && data.buy_budgets.length > 0) {
-                buyBudgetsContainer.innerHTML = data.buy_budgets.map(budget => 
+                const maxItems = 3;
+                const remainingCount = Math.max(0, data.buy_budgets.length - maxItems);
+                const displayBudgets = data.buy_budgets.slice(0, maxItems);
+                
+                buyBudgetsContainer.innerHTML = displayBudgets.map(budget => 
                     `<div class="budget-tag">${budget.name}</div>`
-                ).join('');
+                ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
                 buyBudgetsContainer.style.display = 'block';
             } else {
                 buyBudgetsContainer.style.display = 'none';
@@ -147,9 +159,13 @@ function populateProjectData(data) {
         const targetAudiencesContainer = document.querySelector('.project-target-audiences');
         if (targetAudiencesContainer) {
             if (data.target_audiences && data.target_audiences.length > 0) {
-                targetAudiencesContainer.innerHTML = data.target_audiences.map(audience => 
+                const maxItems = 3;
+                const remainingCount = Math.max(0, data.target_audiences.length - maxItems);
+                const displayAudiences = data.target_audiences.slice(0, maxItems);
+                
+                targetAudiencesContainer.innerHTML = displayAudiences.map(audience => 
                     `<div class="audience-tag">${audience.name}</div>`
-                ).join('');
+                ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
                 targetAudiencesContainer.style.display = 'block';
             } else {
                 targetAudiencesContainer.style.display = 'none';
