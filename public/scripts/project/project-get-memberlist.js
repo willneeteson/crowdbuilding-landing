@@ -305,7 +305,7 @@ function showProjectDetailsModal() {
 }
 
 // Function to close project details modal
-function closeProjectDetailsModal() {
+window.closeProjectDetailsModal = function() {
     const modal = document.getElementById('projectDetailsModal');
     if (modal) {
         modal.style.display = 'none';
