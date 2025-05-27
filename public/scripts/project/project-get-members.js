@@ -49,24 +49,24 @@ function showLoadingState() {
 
 // Function to show project details modal
 function showProjectDetailsModal() {
-    const modal = document.getElementById('projectDetailsModal');
-    if (modal) {
-        modal.style.display = 'flex';
+    const detailsElement = document.querySelector('.project__sidebar-group details');
+    if (detailsElement) {
+        detailsElement.setAttribute('open', '');
     }
 }
 
 // Function to close project details modal
 function closeProjectDetailsModal() {
-    const modal = document.getElementById('projectDetailsModal');
-    if (modal) {
-        modal.style.display = 'none';
+    const detailsElement = document.querySelector('.project__sidebar-group details');
+    if (detailsElement) {
+        detailsElement.removeAttribute('open');
     }
 }
 
 // Function to populate project details modal
 function populateProjectDetailsModal(data) {
-    const modal = document.getElementById('projectDetailsModal');
-    if (!modal) return;
+    const detailsElement = document.querySelector('.project__sidebar-group details');
+    if (!detailsElement) return;
 
     const modalContent = `
         <div class="modal-content">
@@ -146,7 +146,7 @@ function populateProjectDetailsModal(data) {
         </div>
     `;
 
-    modal.innerHTML = modalContent;
+    detailsElement.innerHTML = modalContent;
 }
 
 // Function to populate members list in Webflow
@@ -239,13 +239,8 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Create the project details modal container
-        const projectDetailsModalHTML = `
-            <div id="projectDetailsModal" class="members-modal" style="display: none;"></div>
-        `;
-
-        // Add the compact view and both modals to the container
-        membersContainer.innerHTML = compactViewHTML + membersModalHTML + projectDetailsModalHTML;
+        // Add the compact view and members modal to the container
+        membersContainer.innerHTML = compactViewHTML + membersModalHTML;
 
         console.log('Members list populated successfully');
     } catch (error) {
