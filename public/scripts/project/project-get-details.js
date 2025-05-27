@@ -1,41 +1,48 @@
 // Wait for DOM to be ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Get project ID from URL
-    const pathParts = window.location.pathname.split('/');
-    const projectId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        // Wait for modal system to be ready
+        const modalSystem = await window.waitForModalSystem();
+        
+        // Get project ID from URL
+        const pathParts = window.location.pathname.split('/');
+        const projectId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
 
-    if (!projectId) {
-        console.error('No project ID found in URL');
-        return;
+        if (!projectId) {
+            console.error('No project ID found in URL');
+            return;
+        }
+
+        // Create the project details modal
+        modalSystem.createModal('Project Details', '', { id: 'projectDetailsModal' });
+
+        // Fetch project data
+        fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(response => {
+                const data = response.data;
+                
+                // Store data globally
+                window.projectData = data;
+                console.log('Project data stored:', data);
+
+                // Update page elements with project data
+                updatePageElements(data);
+
+                // Add click handler for modal
+                setupModalHandler();
+            })
+            .catch(error => {
+                console.error('Error fetching project data:', error);
+            });
+    } catch (error) {
+        console.error('Error initializing project details:', error);
     }
-
-    // Create the project details modal
-    window.modalSystem.createModal('Project Details', '', { id: 'projectDetailsModal' });
-
-    // Fetch project data
-    fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(response => {
-            const data = response.data;
-            
-            // Store data globally
-            window.projectData = data;
-            console.log('Project data stored:', data);
-
-            // Update page elements with project data
-            updatePageElements(data);
-
-            // Add click handler for modal
-            setupModalHandler();
-        })
-        .catch(error => {
-            console.error('Error fetching project data:', error);
-        });
 });
 
 function updatePageElements(data) {

@@ -234,8 +234,9 @@ async function joinGroup(answers = {}) {
         // Update UI to reflect joined status
         updateGroupUI(true);
 
-        // Close the join modal
-        window.modalSystem.closeModal('joinGroupModal');
+        // Get modal system and close the join modal
+        const modalSystem = await window.waitForModalSystem();
+        modalSystem.closeModal('joinGroupModal');
 
         return data;
     } catch (error) {
@@ -450,9 +451,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 form.appendChild(submitButton);
                 
-                // Create modal with form
-                window.modalSystem.createModal('Aanmelden interesselijst', form.outerHTML, { id: 'joinGroupModal' });
-                window.modalSystem.showModal('joinGroupModal');
+                // Wait for modal system and create modal with form
+                const modalSystem = await window.waitForModalSystem();
+                modalSystem.createModal('Aanmelden interesselijst', form.outerHTML, { id: 'joinGroupModal' });
+                modalSystem.showModal('joinGroupModal');
                 
                 // Reset join button state
                 joinButton.disabled = false;

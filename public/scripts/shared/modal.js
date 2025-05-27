@@ -2,6 +2,8 @@
 class ModalSystem {
     constructor() {
         this.addStyles();
+        // Dispatch event when modal system is ready
+        window.dispatchEvent(new Event('modalSystemReady'));
     }
 
     addStyles() {
@@ -217,6 +219,19 @@ class ModalSystem {
         }
     }
 }
+
+// Helper function to ensure modal system is ready
+window.waitForModalSystem = () => {
+    return new Promise((resolve) => {
+        if (window.modalSystem) {
+            resolve(window.modalSystem);
+        } else {
+            window.addEventListener('modalSystemReady', () => {
+                resolve(window.modalSystem);
+            });
+        }
+    });
+};
 
 // Create global instance
 window.modalSystem = new ModalSystem(); 

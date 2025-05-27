@@ -150,7 +150,7 @@ function populateProjectDetailsModal(data) {
 }
 
 // Function to populate members list in Webflow
-function populateMembersList(data) {
+async function populateMembersList(data) {
     try {
         console.log('Starting to populate members list with data:', data);
         
@@ -228,8 +228,9 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Create the members modal
-        window.modalSystem.createModal(`Members (${members.length})`, membersListContent, { id: 'membersModal' });
+        // Wait for modal system and create the members modal
+        const modalSystem = await window.waitForModalSystem();
+        modalSystem.createModal(`Members (${members.length})`, membersListContent, { id: 'membersModal' });
 
         // Add the compact view to the container
         membersContainer.innerHTML = compactViewHTML;
@@ -241,8 +242,13 @@ function populateMembersList(data) {
 }
 
 // Function to show the members modal
-function showMembersModal() {
-    window.modalSystem.showModal('membersModal');
+async function showMembersModal() {
+    try {
+        const modalSystem = await window.waitForModalSystem();
+        modalSystem.showModal('membersModal');
+    } catch (error) {
+        console.error('Error showing members modal:', error);
+    }
 }
 
 // Function to fetch members data
