@@ -532,10 +532,9 @@ style.textContent = `
         padding: 20px;
         margin: 0 0 28px;
         border-radius: 12px;
-        color: #333;
+        color: #090F3F;
         font-size: 0.95em;
         line-height: 1.6;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
     
     .completion-message {
@@ -552,7 +551,7 @@ style.textContent = `
     }
     
     .completion-message p {
-        color: #333;
+        color: #090F3F;
         font-size: 1.1em;
         line-height: 1.6;
         max-width: 400px;
@@ -572,12 +571,12 @@ style.textContent = `
     .question-container label {
         display: block;
         margin-bottom: 8px;
-        color: #333;
+        color: #090F3F;
         font-weight: 500;
     }
     
     .question-explanation {
-        color: #666;
+        color: #090F3F;
         margin: 8px 0 12px;
         font-size: 0.9em;
         line-height: 1.5;
@@ -676,6 +675,10 @@ style.textContent = `
         .group-join-info {
             margin-top: 0;
         }
+    }
+
+    .email-visibility-label {
+        color: #090F3F;
     }
 `;
 document.head.appendChild(style);

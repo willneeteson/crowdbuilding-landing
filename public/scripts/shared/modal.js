@@ -39,7 +39,6 @@ class ModalSystem {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 20px;
                 padding-bottom: 15px;
                 border-bottom: 1px solid #eee;
             }

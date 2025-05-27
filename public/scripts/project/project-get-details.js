@@ -137,13 +137,13 @@ function showModal() {
             }
 
             .cb-detail-item strong {
-                color: #666;
+                color: #090F3F;
                 font-size: 14px;
                 font-weight: 500;
             }
 
             .cb-detail-item span {
-                color: #333;
+                color: #090F3F;
                 font-size: 16px;
                 line-height: 1.4;
             }
@@ -164,7 +164,7 @@ function showModal() {
                 padding: 6px 12px;
                 border-radius: 99px;
                 font-size: 14px;
-                color: #333;
+                color: #090F3F;
                 white-space: nowrap;
             }
 
