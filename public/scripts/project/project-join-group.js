@@ -499,20 +499,22 @@ style.textContent = `
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0,0,0,0.5);
-        animation: fadeIn 0.3s ease-in-out;
+        background-color: rgba(0, 0, 0, 0.6);
+        animation: fadeIn 0.25s ease-out;
+        backdrop-filter: blur(3px);
     }
     
     .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border: 1px solid #888;
-        width: 80%;
-        max-width: 600px;
-        border-radius: 8px;
+        background-color: #ffffff;
+        margin: 5% auto;
+        padding: 32px;
+        border: none;
+        width: 90%;
+        max-width: 540px;
+        border-radius: 16px;
         position: relative;
-        animation: slideIn 0.3s ease-in-out;
+        animation: slideIn 0.3s ease-out;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
     
     @keyframes fadeIn {
@@ -521,92 +523,147 @@ style.textContent = `
     }
     
     @keyframes slideIn {
-        from { transform: translateY(-20px); opacity: 0; }
+        from { transform: translateY(-30px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
     }
     
     .close-button {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        color: #666;
+        font-size: 24px;
+        font-weight: normal;
         cursor: pointer;
-        transition: color 0.2s;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f5f5f5;
     }
     
     .close-button:hover {
-        color: black;
+        color: #333;
+        background: #eeeeee;
+        transform: scale(1.05);
     }
     
     .question-container {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
+    }
+    
+    .question-container label {
+        display: block;
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: 500;
     }
     
     .question-explanation {
         color: #666;
-        margin: 5px 0;
+        margin: 8px 0 12px;
         font-size: 0.9em;
+        line-height: 1.5;
     }
     
     .question-input {
         width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        transition: border-color 0.2s;
+        padding: 12px;
+        margin-top: 6px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-size: 15px;
     }
     
     .question-input:focus {
         border-color: #4CAF50;
         outline: none;
+        box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
     }
     
     .question-input.error {
         border-color: #ff4444;
+        background-color: #fff8f8;
+    }
+    
+    .question-input.error:focus {
+        box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
     }
     
     .email-visibility-container {
-        margin: 20px 0;
-        padding: 10px;
-        background-color: #f8f8f8;
-        border-radius: 4px;
+        margin: 24px 0;
+        padding: 16px;
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        border: 1.5px solid #e0e0e0;
+    }
+    
+    .email-visibility-container label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .email-visibility-checkbox {
+        width: 18px;
+        height: 18px;
+        margin: 0;
     }
     
     .submit-button {
         background-color: #4CAF50;
         color: white;
-        padding: 10px 20px;
+        padding: 14px 24px;
         border: none;
-        border-radius: 4px;
+        border-radius: 8px;
         cursor: pointer;
         width: 100%;
-        margin-top: 20px;
-        transition: background-color 0.2s;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
     }
     
     .submit-button:hover:not(:disabled) {
-        background-color: #45a049;
+        background-color: #43a047;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    }
+    
+    .submit-button:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
     }
     
     .submit-button:disabled {
         background-color: #cccccc;
         cursor: not-allowed;
+        opacity: 0.8;
     }
     
     .required {
-        color: red;
+        color: #ff4444;
+        margin-left: 4px;
     }
     
     .notification {
         position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 4px;
+        top: 24px;
+        right: 24px;
+        padding: 16px 24px;
+        border-radius: 12px;
         color: white;
         z-index: 1001;
-        animation: slideInRight 0.3s ease-in-out;
+        animation: slideInRight 0.3s ease-out;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-width: 400px;
     }
     
     .notification.success {
@@ -623,31 +680,58 @@ style.textContent = `
     }
 
     .group-join-info {
-        background-color: #f5f5f5;
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 4px;
+        background-color: #f5f7fa;
+        padding: 20px;
+        margin-bottom: 28px;
+        border-radius: 12px;
         border-left: 4px solid #4CAF50;
         color: #333;
         font-size: 0.95em;
-        line-height: 1.5;
+        line-height: 1.6;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
     .completion-message {
         text-align: center;
-        padding: 30px 20px;
+        padding: 40px 24px;
     }
 
     .completion-message h3 {
         color: #4CAF50;
-        margin-bottom: 15px;
-        font-size: 1.4em;
+        margin-bottom: 16px;
+        font-size: 1.5em;
+        font-weight: 600;
     }
 
     .completion-message p {
         color: #333;
         font-size: 1.1em;
-        line-height: 1.5;
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+        .modal-content {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .submit-button {
+            margin-top: auto;
+            margin-bottom: 24px;
+        }
+
+        .close-button {
+            top: 24px;
+            right: 24px;
+        }
     }
 `;
 document.head.appendChild(style);
