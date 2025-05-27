@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
 
         // Create the project details modal
-        modalSystem.createModal('Project Details', '', { id: 'projectDetailsModal' });
+        modalSystem.createModal('Project Kenmerken', '', { id: 'projectDetailsModal' });
 
         // Fetch project data
         fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`)
@@ -125,40 +125,40 @@ function showModal() {
     const content = `
         <div class="cb-details-grid">
             <div class="cb-detail-item">
-                <strong>Phase</strong>
-                <span>${data.phase?.name || 'Not specified'}</span>
+                <strong>Fase</strong>
+                <span>${data.phase?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Location</strong>
-                <span>${data.location || 'Not specified'}</span>
+                <strong>Locatie</strong>
+                <span>${data.location || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Development Form</strong>
-                <span>${data.development_form?.name || 'Not specified'}</span>
+                <strong>Ontwikkelvorm</strong>
+                <span>${data.development_form?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Number of Homes</strong>
-                <span>${data.number_of_homes || 'Not specified'}</span>
+                <strong>Aantal Woningen</strong>
+                <span>${data.number_of_homes || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Member Status</strong>
-                <span>${data.member_status?.name || 'Not specified'}</span>
+                <strong>Lidmaatschap Status</strong>
+                <span>${data.member_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Building Permit</strong>
-                <span>${data.building_permit_status?.name || 'Not specified'}</span>
+                <strong>Bouwvergunning</strong>
+                <span>${data.building_permit_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Construction Financing</strong>
-                <span>${data.needs_construction_financing?.name || 'Not specified'}</span>
+                <strong>Bouwfinanciering</strong>
+                <span>${data.needs_construction_financing?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Planning Costs</strong>
-                <span>${data.needs_planning_costs_financing?.name || 'Not specified'}</span>
+                <strong>Plankosten</strong>
+                <span>${data.needs_planning_costs_financing?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Chamber Registration</strong>
-                <span>${data.chamber_of_commerce_registration_status?.name || 'Not specified'}</span>
+                <strong>KvK Registratie</strong>
+                <span>${data.chamber_of_commerce_registration_status?.name || 'Niet gespecificeerd'}</span>
             </div>
         </div>
     `;
