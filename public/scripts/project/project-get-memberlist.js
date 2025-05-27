@@ -338,6 +338,16 @@ function populateProjectDetailsModal(data) {
 
     // Add the new list
     detailsElement.appendChild(detailsList);
+
+    // Add click event listener to the summary
+    summaryElement.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (detailsElement.hasAttribute('open')) {
+            detailsElement.removeAttribute('open');
+        } else {
+            detailsElement.setAttribute('open', '');
+        }
+    });
 }
 
 // Helper function to create a detail item

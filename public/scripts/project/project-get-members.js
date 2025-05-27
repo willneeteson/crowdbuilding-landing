@@ -51,6 +51,13 @@ function showLoadingState() {
 function showProjectDetailsModal() {
     const detailsElement = document.querySelector('.project__sidebar-group details');
     if (detailsElement) {
+        // Create summary if it doesn't exist
+        let summaryElement = detailsElement.querySelector('summary');
+        if (!summaryElement) {
+            summaryElement = document.createElement('summary');
+            summaryElement.textContent = 'Project Details';
+            detailsElement.insertBefore(summaryElement, detailsElement.firstChild);
+        }
         detailsElement.setAttribute('open', '');
     }
 }
