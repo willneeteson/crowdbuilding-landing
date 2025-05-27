@@ -300,6 +300,54 @@ document.addEventListener('DOMContentLoaded', fetchProjectData);
 function showProjectDetailsModal() {
     const modal = document.getElementById('projectDetailsModal');
     if (modal) {
+        // Get the project data from the current page elements
+        const projectData = {
+            title: document.querySelector('.project-title')?.textContent,
+            subtitle: document.querySelector('.project-subtitle')?.textContent,
+            location: document.querySelector('.project-location')?.textContent,
+            phase: { name: document.querySelector('.project-phase')?.textContent },
+            development_form: { name: document.querySelector('.project-development-form')?.textContent },
+            number_of_homes: document.querySelector('.project-homes-count')?.textContent,
+            contact_name: document.querySelector('.project-contact-name')?.textContent,
+            contact_email: document.querySelector('.project-contact-email')?.textContent,
+            building_permit_status: { name: document.querySelector('.project-building-permit')?.textContent },
+            needs_construction_financing: { name: document.querySelector('.project-construction-financing')?.textContent },
+            needs_planning_costs_financing: { name: document.querySelector('.project-planning-costs')?.textContent },
+            chamber_of_commerce_registration_status: { name: document.querySelector('.project-chamber-registration')?.textContent }
+        };
+
+        // Get housing forms
+        const housingFormsContainer = document.querySelector('.project-housing-forms');
+        if (housingFormsContainer) {
+            projectData.housing_forms = Array.from(housingFormsContainer.querySelectorAll('.housing-form'))
+                .map(form => ({ title: form.textContent }));
+        }
+
+        // Get interests
+        const interestsContainer = document.querySelector('.project-interests');
+        if (interestsContainer) {
+            projectData.interests = Array.from(interestsContainer.querySelectorAll('.interest-tag'))
+                .map(interest => ({ name: interest.textContent }));
+        }
+
+        // Get buy budgets
+        const buyBudgetsContainer = document.querySelector('.project-buy-budgets');
+        if (buyBudgetsContainer) {
+            projectData.buy_budgets = Array.from(buyBudgetsContainer.querySelectorAll('.budget-tag'))
+                .map(budget => ({ name: budget.textContent }));
+        }
+
+        // Get target audiences
+        const targetAudiencesContainer = document.querySelector('.project-target-audiences');
+        if (targetAudiencesContainer) {
+            projectData.target_audiences = Array.from(targetAudiencesContainer.querySelectorAll('.audience-tag'))
+                .map(audience => ({ name: audience.textContent }));
+        }
+
+        // Populate the modal with the collected data
+        populateProjectDetailsModal(projectData);
+        
+        // Show the modal
         modal.style.display = 'flex';
     }
 }
