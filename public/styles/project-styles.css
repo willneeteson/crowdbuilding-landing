@@ -498,6 +498,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
+    justify-content: flex-end;
 }
 
 #projectDetailsModal .tag {
@@ -653,4 +654,28 @@ button.post-menu-item.delete {
     background: white;
     border: 1px solid #00000020;
     border-radius: 8px;
+}
+
+#projectDetailsModal .detail-item,
+#projectDetailsModal .status-item,
+#projectDetailsModal .contact-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+#projectDetailsModal .detail-item > *:last-child,
+#projectDetailsModal .status-item > *:last-child,
+#projectDetailsModal .contact-item > *:last-child {
+    margin-left: auto;
+    text-align: right;
+}
+
+#projectDetailsModal .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: flex-end;
 } 
