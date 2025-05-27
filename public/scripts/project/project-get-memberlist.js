@@ -300,18 +300,53 @@ document.addEventListener('DOMContentLoaded', fetchProjectData);
 
 // Function to show project details modal
 function showProjectDetailsModal() {
+    console.log('Attempting to show modal...');
     const modal = document.getElementById('projectDetailsModal');
-    console.log('Showing modal:', modal);
-    console.log('Current project data:', window.projectData);
+    console.log('Modal element:', modal);
+    console.log('Project data:', window.projectData);
     
-    if (modal && window.projectData) {
-        // Make sure the modal content is up to date
-        populateProjectDetailsModal(window.projectData);
-        modal.style.display = 'flex';
-        console.log('Modal display set to flex');
-    } else {
-        console.error('Modal or project data not found:', { modal, projectData: window.projectData });
+    if (!modal) {
+        console.error('Modal element not found in DOM');
+        return;
     }
+    
+    if (!window.projectData) {
+        console.error('No project data available');
+        return;
+    }
+
+    // Ensure modal exists in DOM
+    if (!document.body.contains(modal)) {
+        console.log('Modal not in DOM, creating it...');
+        const modalHTML = `
+            <div id="projectDetailsModal" class="members-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Project Details</h3>
+                        <span class="close-modal" onclick="closeProjectDetailsModal()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+
+    // Get the modal again after potential creation
+    const updatedModal = document.getElementById('projectDetailsModal');
+    if (!updatedModal) {
+        console.error('Failed to create modal');
+        return;
+    }
+
+    // Populate the modal content
+    populateProjectDetailsModal(window.projectData);
+    
+    // Show the modal
+    updatedModal.style.display = 'flex';
+    console.log('Modal should now be visible');
 }
 
 // Function to close project details modal
@@ -326,11 +361,13 @@ window.closeProjectDetailsModal = function() {
 function populateProjectDetailsModal(data) {
     console.log('Populating modal with data:', data);
     const modalBody = document.querySelector('#projectDetailsModal .modal-body');
+    
     if (!modalBody) {
-        console.error('Modal body not found');
+        console.error('Modal body element not found');
         return;
     }
 
+    // Create the content
     const modalContent = `
         <div class="modal-section">
             <h4>Project Information</h4>
@@ -400,8 +437,9 @@ function populateProjectDetailsModal(data) {
         </div>
     `;
 
+    // Set the content
     modalBody.innerHTML = modalContent;
-    console.log('Modal content populated');
+    console.log('Modal content set:', modalBody.innerHTML);
 }
 
 // Helper function to create a detail item
@@ -410,4 +448,19 @@ function createDetailItem(label, value) {
     li.className = 'project-detail-item';
     li.innerHTML = `<strong>${label}:</strong> ${value}`;
     return li;
-} 
+}
+
+// Add event listener for the details group
+document.addEventListener('DOMContentLoaded', function() {
+    const detailsGroup = document.querySelector('.project__sidebar-group.details');
+    if (detailsGroup) {
+        console.log('Found details group, adding click listener');
+        detailsGroup.addEventListener('click', function(e) {
+            console.log('Details group clicked');
+            e.preventDefault();
+            showProjectDetailsModal();
+        });
+    } else {
+        console.error('Details group not found in DOM');
+    }
+}); 
