@@ -507,6 +507,7 @@ style.textContent = `
         background: white;
         border-radius: 16px;
         overflow: hidden;
+        padding: 0;
     }
 
     .cb-modal-header {
