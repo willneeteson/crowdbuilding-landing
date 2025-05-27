@@ -136,36 +136,37 @@ function showModal() {
 
             .cb-detail-item {
                 display: flex;
-                flex-direction: column;
-                gap: 12px;
+                gap: 16px;
+                align-items: baseline;
             }
 
-            .cb-detail-item strong {
-                color: #090F3F;
-                font-size: 14px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
+            .cb-detail-item h4 {
+                min-width: 140px;
+                margin: 0;
             }
 
             .cb-detail-item span {
                 color: #090F3F;
                 font-size: 18px;
                 line-height: 1.4;
+                flex: 1;
             }
 
             .cb-detail-item.full-width {
                 grid-column: 1 / -1;
-                margin-top: 8px;
                 padding-top: 32px;
                 border-top: 1px solid #E5E7F0;
+            }
+
+            .cb-detail-item.full-width:not(:first-child) {
+                margin-top: 32px;
             }
 
             .tags-list {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 12px;
-                margin-top: 8px;
+                flex: 1;
             }
 
             .tag {
@@ -178,7 +179,16 @@ function showModal() {
                 color: #090F3F;
             }
 
-            @media (max-width: 768px) {
+            @media (max-width: 991px) {
+                .cb-detail-item {
+                    flex-direction: column;
+                    gap: 8px;
+                }
+
+                .cb-detail-item h4 {
+                    min-width: unset;
+                }
+
                 .cb-details-grid {
                     grid-template-columns: 1fr;
                     padding: 24px;
@@ -231,44 +241,44 @@ function showModal() {
         ${styles}
         <div class="cb-details-grid">
             <div class="cb-detail-item">
-                <strong>Fase</strong>
+                <h4>Fase</h4>
                 <span>${data.phase?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Locatie</strong>
+                <h4>Locatie</h4>
                 <span>${data.location || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Ontwikkelvorm</strong>
+                <h4>Ontwikkelvorm</h4>
                 <span>${data.development_form?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Aantal Woningen</strong>
+                <h4>Aantal Woningen</h4>
                 <span>${data.number_of_homes || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Lidmaatschap Status</strong>
+                <h4>Lidmaatschap Status</h4>
                 <span>${data.member_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Bouwvergunning</strong>
+                <h4>Bouwvergunning</h4>
                 <span>${data.building_permit_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Bouwfinanciering</strong>
+                <h4>Bouwfinanciering</h4>
                 <span>${data.needs_construction_financing?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>Plankosten</strong>
+                <h4>Plankosten</h4>
                 <span>${data.needs_planning_costs_financing?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <strong>KvK Registratie</strong>
+                <h4>KvK Registratie</h4>
                 <span>${data.chamber_of_commerce_registration_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             ${data.housing_forms && data.housing_forms.length > 0 ? `
                 <div class="cb-detail-item full-width">
-                    <strong>Woonvormen</strong>
+                    <h4>Woonvormen</h4>
                     <div class="tags-list">
                         ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
                     </div>
@@ -276,7 +286,7 @@ function showModal() {
             ` : ''}
             ${data.target_audiences && data.target_audiences.length > 0 ? `
                 <div class="cb-detail-item full-width">
-                    <strong>Doelgroepen</strong>
+                    <h4>Doelgroepen</h4>
                     <div class="tags-list">
                         ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
                     </div>
@@ -284,7 +294,7 @@ function showModal() {
             ` : ''}
             ${data.interests && data.interests.length > 0 ? `
                 <div class="cb-detail-item full-width">
-                    <strong>Interesses</strong>
+                    <h4>Interesses</h4>
                     <div class="tags-list">
                         ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
                     </div>
