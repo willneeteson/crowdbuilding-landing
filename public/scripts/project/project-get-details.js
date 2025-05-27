@@ -125,59 +125,65 @@ function showModal() {
         <style>
             .cb-details-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 24px;
-                padding: 24px;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 32px;
+                padding: 32px;
             }
 
             .cb-detail-item {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 12px;
             }
 
             .cb-detail-item strong {
                 color: #090F3F;
                 font-size: 14px;
-                font-weight: 500;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
             }
 
             .cb-detail-item span {
                 color: #090F3F;
-                font-size: 16px;
+                font-size: 18px;
                 line-height: 1.4;
             }
 
             .cb-detail-item.full-width {
                 grid-column: 1 / -1;
+                margin-top: 8px;
+                padding-top: 32px;
+                border-top: 1px solid #E5E7F0;
             }
 
             .tags-list {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
-                margin-top: 4px;
+                gap: 12px;
+                margin-top: 8px;
             }
 
             .tag {
-                background: #f5f5f5;
-                padding: 6px 12px;
+                background: #F5F6FA;
+                padding: 8px 16px;
                 border-radius: 99px;
-                font-size: 14px;
+                font-weight: 600;
+                font-size: 16px;
+                line-height: 140%;
                 color: #090F3F;
-                white-space: nowrap;
             }
 
             @media (max-width: 768px) {
                 .cb-details-grid {
                     grid-template-columns: 1fr;
-                    padding: 16px;
-                    gap: 20px;
+                    padding: 24px;
+                    gap: 24px;
                 }
 
                 .cb-detail-item {
-                    padding-bottom: 16px;
-                    border-bottom: 1px solid #eee;
+                    padding-bottom: 24px;
+                    border-bottom: 1px solid #E5E7F0;
                 }
 
                 .cb-detail-item:last-child {
@@ -185,20 +191,32 @@ function showModal() {
                     padding-bottom: 0;
                 }
 
+                .cb-detail-item.full-width {
+                    margin-top: 0;
+                    padding-top: 24px;
+                }
+
                 .tags-list {
-                    margin-top: 8px;
+                    margin-top: 12px;
                 }
             }
 
             @media (max-width: 480px) {
                 .cb-details-grid {
-                    padding: 12px;
-                    gap: 16px;
+                    padding: 16px;
+                    gap: 20px;
+                }
+
+                .cb-detail-item {
+                    padding-bottom: 20px;
+                }
+
+                .cb-detail-item.full-width {
+                    padding-top: 20px;
                 }
 
                 .tag {
-                    padding: 4px 10px;
-                    font-size: 13px;
+                    padding: 6px 14px;
                 }
             }
         </style>

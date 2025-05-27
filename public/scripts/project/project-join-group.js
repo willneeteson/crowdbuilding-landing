@@ -680,5 +680,15 @@ style.textContent = `
     .email-visibility-label {
         color: #090F3F;
     }
+
+    .tag {
+        background: #F5F6FA;
+        padding: 8px 16px;
+        border-radius: 99px;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 140%;
+        color: #090F3F;
+    }
 `;
 document.head.appendChild(style);
