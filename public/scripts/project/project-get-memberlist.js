@@ -275,6 +275,14 @@ function populateProjectDetailsModal(data) {
     const detailsElement = document.querySelector('.project__sidebar-group details');
     if (!detailsElement) return;
 
+    // Create summary element if it doesn't exist
+    let summaryElement = detailsElement.querySelector('summary');
+    if (!summaryElement) {
+        summaryElement = document.createElement('summary');
+        summaryElement.textContent = 'Project Details';
+        detailsElement.insertBefore(summaryElement, detailsElement.firstChild);
+    }
+
     const detailsList = document.createElement('ul');
     detailsList.className = 'project-details-list';
 
@@ -323,8 +331,12 @@ function populateProjectDetailsModal(data) {
         detailsList.appendChild(createDetailItem('Target Audiences', audiencesList));
     }
 
-    // Clear existing content and add the new list
-    detailsElement.innerHTML = '';
+    // Remove any existing content after the summary
+    while (detailsElement.lastChild && detailsElement.lastChild !== summaryElement) {
+        detailsElement.removeChild(detailsElement.lastChild);
+    }
+
+    // Add the new list
     detailsElement.appendChild(detailsList);
 }
 

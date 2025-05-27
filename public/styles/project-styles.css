@@ -224,6 +224,7 @@
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin: 16px 0;
+    display: block;
 }
 
 .project__sidebar-group details summary {
@@ -234,6 +235,11 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    list-style: none;
+}
+
+.project__sidebar-group details summary::-webkit-details-marker {
+    display: none;
 }
 
 .project__sidebar-group details summary::after {
@@ -249,4 +255,8 @@
 
 .project__sidebar-group details[open] {
     padding-bottom: 16px;
+}
+
+.project__sidebar-group details .project-details-list {
+    padding: 0 16px;
 } 
