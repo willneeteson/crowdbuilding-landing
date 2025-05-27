@@ -95,12 +95,25 @@ async function getDynamicMarkers() {
   const DEFAULT_IMAGE = "https://cdn.prod.website-files.com/66dffceb975388322f140196/6834726b5dcff52c6de834fb_cb_group-image-placeholder.webp";
   
   try {
-    const response = await fetch('https://api.crowdbuilding.com/api/v1/groups/');
-    const data = await response.json();
+    let allGroups = [];
+    let currentPage = 1;
+    let hasMorePages = true;
+
+    // Fetch all pages
+    while (hasMorePages) {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups?page=${currentPage}`);
+      const data = await response.json();
+      
+      allGroups = allGroups.concat(data.data);
+      
+      // Check if there are more pages
+      hasMorePages = currentPage < data.meta.last_page;
+      currentPage++;
+    }
     
     return {
       type: "FeatureCollection",
-      features: data.data
+      features: allGroups
         .filter(group => group.latitude && group.longitude && group.location_found)
         .map(group => ({
           type: "Feature",
