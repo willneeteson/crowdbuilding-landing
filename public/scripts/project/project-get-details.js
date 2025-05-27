@@ -159,6 +159,30 @@ function showModal() {
                 <strong>KvK Registratie</strong>
                 <span>${data.chamber_of_commerce_registration_status?.name || 'Niet gespecificeerd'}</span>
             </div>
+            ${data.housing_forms && data.housing_forms.length > 0 ? `
+                <div class="cb-detail-item full-width">
+                    <strong>Woonvormen</strong>
+                    <div class="tags-list">
+                        ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            ${data.target_audiences && data.target_audiences.length > 0 ? `
+                <div class="cb-detail-item full-width">
+                    <strong>Doelgroepen</strong>
+                    <div class="tags-list">
+                        ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
+            ${data.interests && data.interests.length > 0 ? `
+                <div class="cb-detail-item full-width">
+                    <strong>Interesses</strong>
+                    <div class="tags-list">
+                        ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                    </div>
+                </div>
+            ` : ''}
         </div>
     `;
 
