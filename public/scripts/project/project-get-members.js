@@ -71,25 +71,25 @@ function populateProjectDetailsModal(data) {
     const modalContent = `
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Project Details</h3>
+                <h3>Project Kenmerken</h3>
                 <span class="close-modal" onclick="closeProjectDetailsModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="modal-section">
-                    <h4>Project Information</h4>
+                    <h4>Project Informatie</h4>
                     <div class="project-details">
-                        ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
-                        ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
-                        ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
-                        ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
-                        ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
-                        ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
+                        ${data.title ? `<div class="detail-item"><strong>Titel:</strong> ${data.title}</div>` : ''}
+                        ${data.subtitle ? `<div class="detail-item"><strong>Ondertitel:</strong> ${data.subtitle}</div>` : ''}
+                        ${data.location ? `<div class="detail-item"><strong>Locatie:</strong> ${data.location}</div>` : ''}
+                        ${data.phase?.name ? `<div class="detail-item"><strong>Fase:</strong> ${data.phase.name}</div>` : ''}
+                        ${data.development_form?.name ? `<div class="detail-item"><strong>Ontwikkelvorm:</strong> ${data.development_form.name}</div>` : ''}
+                        ${data.number_of_homes ? `<div class="detail-item"><strong>Aantal Woningen:</strong> ${data.number_of_homes}</div>` : ''}
                     </div>
                 </div>
 
                 ${data.housing_forms && data.housing_forms.length > 0 ? `
                     <div class="modal-section">
-                        <h4>Housing Forms</h4>
+                        <h4>Woonvormen</h4>
                         <div class="tags-list">
                             ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
                         </div>
@@ -98,7 +98,7 @@ function populateProjectDetailsModal(data) {
 
                 ${data.interests && data.interests.length > 0 ? `
                     <div class="modal-section">
-                        <h4>Interests</h4>
+                        <h4>Interesses</h4>
                         <div class="tags-list">
                             ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
                         </div>
@@ -107,7 +107,7 @@ function populateProjectDetailsModal(data) {
 
                 ${data.buy_budgets && data.buy_budgets.length > 0 ? `
                     <div class="modal-section">
-                        <h4>Buy Budgets</h4>
+                        <h4>Koopbudgetten</h4>
                         <div class="tags-list">
                             ${data.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
                         </div>
@@ -116,7 +116,7 @@ function populateProjectDetailsModal(data) {
 
                 ${data.target_audiences && data.target_audiences.length > 0 ? `
                     <div class="modal-section">
-                        <h4>Target Audiences</h4>
+                        <h4>Doelgroepen</h4>
                         <div class="tags-list">
                             ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
                         </div>
@@ -126,19 +126,19 @@ function populateProjectDetailsModal(data) {
                 <div class="modal-section">
                     <h4>Status</h4>
                     <div class="project-status">
-                        ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
-                        ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
-                        ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
-                        ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
+                        ${data.building_permit_status?.name ? `<div class="status-item"><strong>Bouwvergunning:</strong> ${data.building_permit_status.name}</div>` : ''}
+                        ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Bouwfinanciering:</strong> ${data.needs_construction_financing.name}</div>` : ''}
+                        ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Plankosten:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
+                        ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>KvK Registratie:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
                     </div>
                 </div>
 
                 ${data.contact_name || data.contact_email ? `
                     <div class="modal-section">
-                        <h4>Contact Information</h4>
+                        <h4>Contactgegevens</h4>
                         <div class="contact-info">
-                            ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
-                            ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+                            ${data.contact_name ? `<div class="contact-item"><strong>Naam:</strong> ${data.contact_name}</div>` : ''}
+                            ${data.contact_email ? `<div class="contact-item"><strong>E-mail:</strong> ${data.contact_email}</div>` : ''}
                         </div>
                     </div>
                 ` : ''}
@@ -230,7 +230,7 @@ async function populateMembersList(data) {
 
         // Wait for modal system and create the members modal
         const modalSystem = await window.waitForModalSystem();
-        modalSystem.createModal(`Members (${members.length})`, membersListContent, { id: 'membersModal' });
+        modalSystem.createModal(`Leden (${members.length})`, membersListContent, { id: 'membersModal' });
 
         // Add the compact view to the container
         membersContainer.innerHTML = compactViewHTML;
