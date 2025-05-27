@@ -61,7 +61,7 @@ function populateMembersList(data) {
             
             return `
                 <div class="w-embed">
-                    <a href="/profile/${member.id}" class="member-link">
+                    <a href="/user?id=${member.id}" class="member-link">
                         <div class="member-item">
                             <div class="member-avatar">
                                 <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
