@@ -232,12 +232,11 @@ async function joinGroup(answers = {}) {
 
         // Show completion modal
         const completionContent = `
-            <div class="modal-header">
-                <button class="close-button">&times;</button>
+            <div class="cb-modal-header">
                 <h3>Aanmelding verstuurd</h3>
-                <div class="modal-header-spacer"></div>
+                <span class="cb-modal-close">×</span>
             </div>
-            <div class="modal-body">
+            <div class="cb-modal-body">
                 <div class="completion-message">
                     <h3>Dank voor je aanmelding!</h3>
                     <p>We hebben je verzoek verstuurd. Je ontvangt een bericht als je bent toegelaten.</p>
@@ -435,12 +434,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Wait for modal system and create modal with form
                 const modalSystem = await window.waitForModalSystem();
                 const modalContent = `
-                    <div class="modal-header">
-                        <button class="close-button">&times;</button>
+                    <div class="cb-modal-header">
                         <h3>Aanmelden interesselijst</h3>
-                        <div class="modal-header-spacer"></div>
+                        <span class="cb-modal-close">×</span>
                     </div>
-                    <div class="modal-body">
+                    <div class="cb-modal-body">
                         ${form.outerHTML}
                     </div>
                 `;
@@ -508,132 +506,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Add some basic modal styles
 const style = document.createElement('style');
 style.textContent = `
-    .modal {
-        display: block;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.6);
-        animation: fadeIn 0.25s ease-out;
-        backdrop-filter: blur(3px);
-    }
-    
-    .modal-content {
-        background-color: #ffffff;
-        margin: 5% auto;
-        padding: 0;
-        border: none;
-        width: 90%;
-        max-width: 540px;
-        border-radius: 16px;
-        position: relative;
-        animation: slideIn 0.3s ease-out;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        display: flex;
-        flex-direction: column;
-        max-height: 90vh;
-        overflow: hidden;
-    }
-    
-    .modal-header {
-        padding: 0 24px;
-        background: white;
-        border-radius: 16px 16px 0 0;
-        z-index: 2;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 64px;
-        position: relative;
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .modal-header h3 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 600;
+    .group-join-info {
+        background-color: #f8f9fa;
+        padding: 20px;
+        margin: 0 0 28px;
+        border-radius: 12px;
+        border-left: 4px solid #FF5C54;
         color: #333;
+        font-size: 0.95em;
+        line-height: 1.6;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .completion-message {
         text-align: center;
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        padding: 40px 24px;
+        margin: 0;
     }
     
-    .modal-body {
-        padding: 24px;
-        overflow-y: auto;
-        flex: 1;
-        background: #fff;
+    .completion-message h3 {
+        color: #FF5C54;
+        margin-bottom: 16px;
+        font-size: 1.5em;
+        font-weight: 600;
     }
     
-    .close-button {
-        color: #666;
-        font-size: 24px;
-        font-weight: normal;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin-left: -8px;
-    }
-    
-    .close-button:hover {
+    .completion-message p {
         color: #333;
-        background: #f5f5f5;
+        font-size: 1.1em;
+        line-height: 1.6;
+        max-width: 400px;
+        margin: 0 auto;
     }
     
-    .submit-button {
-        background-color: #FF5C54;
-        color: white;
-        padding: 14px 24px;
-        border: none;
-        border-radius: 99px;
-        cursor: pointer;
-        width: 100%;
-        margin: 24px 0 0;
-        transition: all 0.2s ease;
-        font-size: 16px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-    }
-    
-    .submit-button:hover:not(:disabled) {
-        background-color: #ff4f47;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 92, 84, 0.2);
-    }
-    
-    .submit-button:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: none;
-    }
-    
-    .submit-button:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-        opacity: 0.8;
-    }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-    
-    @keyframes slideIn {
-        from { transform: translateY(-30px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-    }
-    
+    /* Question Form Styles */
     .question-container {
         margin-bottom: 24px;
         padding: 0;
@@ -704,88 +610,43 @@ style.textContent = `
         margin: 0;
     }
     
-    .group-join-info {
-        background-color: #f8f9fa;
-        padding: 20px;
-        margin: 0 0 28px;
-        border-radius: 12px;
-        border-left: 4px solid #FF5C54;
-        color: #333;
-        font-size: 0.95em;
-        line-height: 1.6;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    .submit-button {
+        background-color: #FF5C54;
+        color: white;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 99px;
+        cursor: pointer;
+        width: 100%;
+        margin: 24px 0 0;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
     }
     
-    .completion-message {
-        text-align: center;
-        padding: 40px 24px;
-        margin: 0;
+    .submit-button:hover:not(:disabled) {
+        background-color: #ff4f47;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 92, 84, 0.2);
     }
     
-    .completion-message h3 {
-        color: #FF5C54;
-        margin-bottom: 16px;
-        font-size: 1.5em;
-        font-weight: 600;
+    .submit-button:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
     }
     
-    .completion-message p {
-        color: #333;
-        font-size: 1.1em;
-        line-height: 1.6;
-        max-width: 400px;
-        margin: 0 auto;
+    .submit-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        opacity: 0.8;
     }
     
     /* Responsive adjustments */
     @media (max-width: 480px) {
-        .modal-content {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 0;
-            max-height: 100vh;
-        }
-        
-        .modal-header {
-            border-radius: 0;
-        }
-        
-        .modal-body {
-            padding: 24px;
-        }
-        
         .group-join-info {
             margin-top: 0;
         }
-    }
-    
-    /* Update the modal creation code to match Airbnb's modal pattern */
-    .modal-back-button {
-        color: #666;
-        font-size: 24px;
-        font-weight: normal;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin-left: -8px;
-    }
-
-    .modal-back-button:hover {
-        color: #333;
-        background: #f5f5f5;
-    }
-
-    .modal-header-spacer {
-        width: 32px;
     }
 `;
 document.head.appendChild(style);

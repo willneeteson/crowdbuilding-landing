@@ -564,3 +564,20 @@
     font-size: 0.9em;
     color: #666;
 }
+
+/* Tags */
+.tag, .remaining-count {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 14px;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.post-comments-count {
+    color: #666;
+    font-size: 14px;
+}
