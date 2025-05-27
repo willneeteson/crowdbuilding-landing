@@ -90,6 +90,8 @@ if (mapElement) {
 
 // Load Markers After Map is Fully Initialized
 function getDynamicMarkers() {
+  const DEFAULT_IMAGE = "https://cdn.prod.website-files.com/66dffceb975388322f140196/6834726b5dcff52c6de834fb_cb_group-image-placeholder.webp";
+  
   return {
     type: "FeatureCollection",
     features: Array.from(document.querySelectorAll(".marker__item"))
@@ -99,7 +101,7 @@ function getDynamicMarkers() {
         const title = item.querySelector(".marker.title")?.textContent;
         const link = item.querySelector(".marker.link")?.textContent;
         const description = item.querySelector(".marker.short-description")?.textContent;
-        const image = item.querySelector(".marker.image")?.src;
+        const image = item.querySelector(".marker.image")?.src || DEFAULT_IMAGE;
 
         return !isNaN(lat) && !isNaN(long)
           ? {
