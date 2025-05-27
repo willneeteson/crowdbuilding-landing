@@ -94,7 +94,6 @@ function updateArrayElement(selector, array, property) {
         container.innerHTML = displayItems.map(item => 
             `<div class="tag">${item[property]}</div>`
         ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
-        container.style.display = 'block';
     } else {
         container.style.display = 'none';
     }
