@@ -107,7 +107,12 @@ function getDynamicMarkers() {
           ? {
               type: "Feature",
               geometry: { type: "Point", coordinates: [long, lat] },
-              properties: { title, link, description, image },
+              properties: { 
+                title, 
+                link: link ? `groups/${link}` : link, 
+                description, 
+                image 
+              },
             }
           : null;
       })
