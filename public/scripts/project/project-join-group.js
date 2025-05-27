@@ -233,8 +233,9 @@ async function joinGroup(answers = {}) {
         // Show completion modal
         const completionContent = `
             <div class="modal-header">
-                <h3>Aanmelding verstuurd</h3>
                 <button class="close-button">&times;</button>
+                <h3>Aanmelding verstuurd</h3>
+                <div class="modal-header-spacer"></div>
             </div>
             <div class="modal-body">
                 <div class="completion-message">
@@ -435,8 +436,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const modalSystem = await window.waitForModalSystem();
                 const modalContent = `
                     <div class="modal-header">
-                        <h3>Aanmelden interesselijst</h3>
                         <button class="close-button">&times;</button>
+                        <h3>Aanmelden interesselijst</h3>
+                        <div class="modal-header-spacer"></div>
                     </div>
                     <div class="modal-body">
                         ${form.outerHTML}
@@ -537,16 +539,16 @@ style.textContent = `
     }
     
     .modal-header {
-        padding: 20px 24px;
-        border-bottom: 1px solid #e0e0e0;
+        padding: 0 24px;
         background: white;
         border-radius: 16px 16px 0 0;
         z-index: 2;
         display: flex;
         align-items: center;
-        justify-content: center;
-        min-height: 64px;
+        justify-content: space-between;
+        height: 64px;
         position: relative;
+        border-bottom: 1px solid #e0e0e0;
     }
     
     .modal-header h3 {
@@ -555,7 +557,9 @@ style.textContent = `
         font-weight: 600;
         color: #333;
         text-align: center;
-        flex: 1;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
     }
     
     .modal-body {
@@ -566,10 +570,6 @@ style.textContent = `
     }
     
     .close-button {
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
         color: #666;
         font-size: 24px;
         font-weight: normal;
@@ -584,6 +584,7 @@ style.textContent = `
         background: transparent;
         border: none;
         padding: 0;
+        margin-left: -8px;
     }
     
     .close-button:hover {
@@ -757,6 +758,34 @@ style.textContent = `
         .group-join-info {
             margin-top: 0;
         }
+    }
+    
+    /* Update the modal creation code to match Airbnb's modal pattern */
+    .modal-back-button {
+        color: #666;
+        font-size: 24px;
+        font-weight: normal;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin-left: -8px;
+    }
+
+    .modal-back-button:hover {
+        color: #333;
+        background: #f5f5f5;
+    }
+
+    .modal-header-spacer {
+        width: 32px;
     }
 `;
 document.head.appendChild(style);
