@@ -232,12 +232,18 @@ async function joinGroup(answers = {}) {
 
         // Show completion modal
         const completionContent = `
-            <div class="completion-message" style="text-align: center; padding: 20px;">
-                <h3 style="margin-bottom: 15px;">Dank voor je aanmelding!</h3>
-                <p>We hebben je verzoek verstuurd. Je ontvangt een bericht als je bent toegelaten.</p>
+            <div class="modal-header">
+                <button class="close-button">&times;</button>
+                <h3>Aanmelding verstuurd</h3>
+            </div>
+            <div class="modal-body">
+                <div class="completion-message">
+                    <h3>Dank voor je aanmelding!</h3>
+                    <p>We hebben je verzoek verstuurd. Je ontvangt een bericht als je bent toegelaten.</p>
+                </div>
             </div>
         `;
-        modalSystem.createModal('Aanmelding verstuurd', completionContent, { id: 'completionModal' });
+        modalSystem.createModal('', completionContent, { id: 'completionModal' });
         modalSystem.showModal('completionModal');
 
         // Update UI to reflect joined status
@@ -427,7 +433,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Wait for modal system and create modal with form
                 const modalSystem = await window.waitForModalSystem();
-                modalSystem.createModal('Aanmelden interesselijst', form.outerHTML, { id: 'joinGroupModal' });
+                const modalContent = `
+                    <div class="modal-header">
+                        <button class="close-button">&times;</button>
+                        <h3>Aanmelden interesselijst</h3>
+                    </div>
+                    <div class="modal-body">
+                        ${form.outerHTML}
+                    </div>
+                `;
+                modalSystem.createModal('', modalContent, { id: 'joinGroupModal' });
                 modalSystem.showModal('joinGroupModal');
 
                 // Set up form submission handler after modal is created
@@ -507,7 +522,7 @@ style.textContent = `
     .modal-content {
         background-color: #ffffff;
         margin: 5% auto;
-        padding: 32px;
+        padding: 0;
         border: none;
         width: 90%;
         max-width: 540px;
@@ -515,22 +530,41 @@ style.textContent = `
         position: relative;
         animation: slideIn 0.3s ease-out;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        display: flex;
+        flex-direction: column;
+        max-height: 90vh;
     }
     
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+    .modal-header {
+        padding: 24px 32px;
+        border-bottom: 1px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        background: white;
+        border-radius: 16px 16px 0 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
-    @keyframes slideIn {
-        from { transform: translateY(-30px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+    .modal-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .modal-body {
+        padding: 32px;
+        overflow-y: auto;
     }
     
     .close-button {
         position: absolute;
-        right: 16px;
-        top: 16px;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
         color: #666;
         font-size: 24px;
         font-weight: normal;
@@ -545,10 +579,46 @@ style.textContent = `
         background: #f5f5f5;
     }
     
-    .close-button:hover {
-        color: #333;
-        background: #eeeeee;
-        transform: scale(1.05);
+    .submit-button {
+        background-color: #FF5C54;
+        color: white;
+        padding: 14px 24px;
+        border: none;
+        border-radius: 99px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 24px;
+        transition: all 0.2s ease;
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+    
+    .submit-button:hover:not(:disabled) {
+        background-color: #ff4f47;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 92, 84, 0.2);
+    }
+    
+    .submit-button:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: none;
+    }
+    
+    .submit-button:disabled {
+        background-color: #cccccc;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateY(-30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
     
     .question-container {
@@ -616,93 +686,30 @@ style.textContent = `
         margin: 0;
     }
     
-    .submit-button {
-        background-color: #4CAF50;
-        color: white;
-        padding: 14px 24px;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        width: 100%;
-        margin-top: 24px;
-        transition: all 0.2s ease;
-        font-size: 16px;
-        font-weight: 500;
-        letter-spacing: 0.3px;
-    }
-    
-    .submit-button:hover:not(:disabled) {
-        background-color: #43a047;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
-    }
-    
-    .submit-button:active:not(:disabled) {
-        transform: translateY(0);
-        box-shadow: none;
-    }
-    
-    .submit-button:disabled {
-        background-color: #cccccc;
-        cursor: not-allowed;
-        opacity: 0.8;
-    }
-    
-    .required {
-        color: #ff4444;
-        margin-left: 4px;
-    }
-    
-    .notification {
-        position: fixed;
-        top: 24px;
-        right: 24px;
-        padding: 16px 24px;
-        border-radius: 12px;
-        color: white;
-        z-index: 1001;
-        animation: slideInRight 0.3s ease-out;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        max-width: 400px;
-    }
-    
-    .notification.success {
-        background-color: #4CAF50;
-    }
-    
-    .notification.error {
-        background-color: #ff4444;
-    }
-    
-    @keyframes slideInRight {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
     .group-join-info {
         background-color: #f5f7fa;
         padding: 20px;
         margin-bottom: 28px;
         border-radius: 12px;
-        border-left: 4px solid #4CAF50;
+        border-left: 4px solid #FF5C54;
         color: #333;
         font-size: 0.95em;
         line-height: 1.6;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
-
+    
     .completion-message {
         text-align: center;
         padding: 40px 24px;
     }
-
+    
     .completion-message h3 {
-        color: #4CAF50;
+        color: #FF5C54;
         margin-bottom: 16px;
         font-size: 1.5em;
         font-weight: 600;
     }
-
+    
     .completion-message p {
         color: #333;
         font-size: 1.1em;
@@ -710,7 +717,7 @@ style.textContent = `
         max-width: 400px;
         margin: 0 auto;
     }
-
+    
     /* Responsive adjustments */
     @media (max-width: 480px) {
         .modal-content {
@@ -718,19 +725,20 @@ style.textContent = `
             width: 100%;
             height: 100%;
             border-radius: 0;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
+            max-height: 100vh;
         }
-
+        
+        .modal-header {
+            border-radius: 0;
+        }
+        
+        .modal-body {
+            padding: 24px;
+        }
+        
         .submit-button {
             margin-top: auto;
             margin-bottom: 24px;
-        }
-
-        .close-button {
-            top: 24px;
-            right: 24px;
         }
     }
 `;
