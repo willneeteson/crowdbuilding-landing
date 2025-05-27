@@ -35,6 +35,12 @@ function createQuestionForm(questions) {
     
     const formContainer = document.createElement('div');
     formContainer.className = 'group-questions-form';
+
+    // Add informational text
+    const infoText = document.createElement('p');
+    infoText.className = 'group-join-info';
+    infoText.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
+    formContainer.appendChild(infoText);
     
     if (!Array.isArray(questions) || questions.length === 0) {
         console.log('No questions to display');
@@ -226,17 +232,22 @@ async function joinGroup(answers = {}) {
         const data = await response.json();
         console.log('Success response:', data);
 
-        // Handle successful join
-        if (data.message) {
-            showNotification('success', data.message);
-        }
-
-        // Update UI to reflect joined status
-        updateGroupUI(true);
-
         // Get modal system and close the join modal
         const modalSystem = await window.waitForModalSystem();
         modalSystem.closeModal('joinGroupModal');
+
+        // Show completion modal
+        const completionContent = `
+            <div class="completion-message" style="text-align: center; padding: 20px;">
+                <h3 style="margin-bottom: 15px;">Dank voor je aanmelding!</h3>
+                <p>We hebben je verzoek verstuurd. Je ontvangt een bericht als je bent toegelaten.</p>
+            </div>
+        `;
+        modalSystem.createModal('Aanmelding verstuurd', completionContent, { id: 'completionModal' });
+        modalSystem.showModal('completionModal');
+
+        // Update UI to reflect joined status
+        updateGroupUI(true);
 
         return data;
     } catch (error) {
@@ -446,7 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
-                submitButton.textContent = 'Submit';
+                submitButton.textContent = 'Verstuur';
                 submitButton.className = 'submit-button';
                 
                 form.appendChild(submitButton);
@@ -604,6 +615,34 @@ style.textContent = `
     @keyframes slideInRight {
         from { transform: translateX(100%); opacity: 0; }
         to { transform: translateX(0); opacity: 1; }
+    }
+
+    .group-join-info {
+        background-color: #f5f5f5;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        border-left: 4px solid #4CAF50;
+        color: #333;
+        font-size: 0.95em;
+        line-height: 1.5;
+    }
+
+    .completion-message {
+        text-align: center;
+        padding: 30px 20px;
+    }
+
+    .completion-message h3 {
+        color: #4CAF50;
+        margin-bottom: 15px;
+        font-size: 1.4em;
+    }
+
+    .completion-message p {
+        color: #333;
+        font-size: 1.1em;
+        line-height: 1.5;
     }
 `;
 document.head.appendChild(style);
