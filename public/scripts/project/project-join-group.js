@@ -231,7 +231,7 @@ function updateGroupUI(isJoined) {
             joinButton.classList.add('joined');
             joinButton.disabled = true;
         } else {
-            joinButton.textContent = 'Sluit je aan';
+            joinButton.textContent = 'Aanmelden interesselijst';
             joinButton.classList.remove('joined');
             joinButton.disabled = false;
         }
@@ -337,7 +337,7 @@ async function checkMembershipStatus() {
         if (!apiToken) {
             if (joinButton) {
                 joinButton.disabled = false;
-                joinButton.textContent = 'Sluit je aan';
+                joinButton.textContent = 'Aanmelden interesselijst';
             }
             return;
         }
@@ -404,11 +404,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeButton.onclick = () => {
                     modal.remove();
                     joinButton.disabled = false;
-                    joinButton.textContent = 'Sluit je aan';
+                    joinButton.textContent = 'Aanmelden interesselijst';
                 };
                 
                 const title = document.createElement('h2');
-                title.textContent = 'Sluit je aan';
+                title.textContent = 'Aanmelden interesselijst';
                 
                 const form = document.createElement('form');
                 form.onsubmit = async (e) => {
@@ -482,13 +482,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Reset join button state
                 joinButton.disabled = false;
-                joinButton.textContent = 'Sluit je aan';
+                joinButton.textContent = 'Aanmelden interesselijst';
                 
             } catch (error) {
                 console.error('Error:', error);
                 showNotification('error', error.message || 'Failed to load group questions');
                 joinButton.disabled = false;
-                joinButton.textContent = 'Sluit je aan';
+                joinButton.textContent = 'Aanmelden interesselijst';
             }
         });
     } else {
