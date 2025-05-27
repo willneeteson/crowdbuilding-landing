@@ -49,7 +49,7 @@ function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
     updateElement('.project-subtitle', data.subtitle);
-    updateElement('.project-intro', data.intro);
+    updateElement('.project-intro', data.intro, true);
     updateElement('.project-location', data.location);
     updateElement('.project-phase', data.phase?.name);
     updateElement('.project-development-form', data.development_form?.name);
@@ -72,10 +72,14 @@ function updatePageElements(data) {
     }
 }
 
-function updateElement(selector, value) {
+function updateElement(selector, value, isHTML = false) {
     const element = document.querySelector(selector);
     if (element && value) {
-        element.textContent = value;
+        if (isHTML) {
+            element.innerHTML = value;
+        } else {
+            element.textContent = value;
+        }
         element.style.display = 'block';
     } else if (element) {
         element.style.display = 'none';
