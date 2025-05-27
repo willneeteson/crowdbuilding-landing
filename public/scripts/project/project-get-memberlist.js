@@ -1,6 +1,24 @@
 // Function to populate project data in Webflow
 function populateProjectData(data) {
     try {
+        // Add modal HTML structure if it doesn't exist
+        if (!document.getElementById('projectDetailsModal')) {
+            const modalHTML = `
+                <div id="projectDetailsModal" class="members-modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Project Details</h3>
+                            <span class="close-modal" onclick="closeProjectDetailsModal()">×</span>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+
         // Basic project information
         const titleElement = document.querySelector('.project-title');
         if (titleElement) {
@@ -259,6 +277,14 @@ async function fetchProjectData() {
         
         if (data && data.data) {
             populateProjectData(data.data);
+            
+            // Add click handler for details group
+            const detailsGroup = document.querySelector('.project__sidebar-group.details');
+            if (detailsGroup) {
+                detailsGroup.addEventListener('click', () => {
+                    showProjectDetailsModal();
+                });
+            }
         } else {
             console.error('Invalid data format received from API');
         }

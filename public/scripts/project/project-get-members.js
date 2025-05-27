@@ -200,7 +200,6 @@ function populateMembersList(data) {
                     ${avatarsHTML}
                     ${remainingHTML}
                 </div>
-                <button class="details-button" onclick="showProjectDetailsModal()">View Details</button>
             </div>
         `;
 
