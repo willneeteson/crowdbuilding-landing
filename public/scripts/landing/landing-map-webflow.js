@@ -65,14 +65,12 @@ function initializeMap() {
   });
 
   // Ensure markers load after the map is fully initialized
-  map.on("load", async () => {
+  map.on("load", () => {
     console.log("Map is ready, loading markers...");
-    try {
-      const geojsonData = await getDynamicMarkers();
+    setTimeout(() => {
+      const geojsonData = getDynamicMarkers();
       geojsonData.features.forEach((feature) => createMarker(feature, map));
-    } catch (error) {
-      console.error('Error loading markers:', error);
-    }
+    }, 500); // Short delay to avoid race conditions
   });
 }
 
@@ -91,38 +89,35 @@ if (mapElement) {
 }
 
 // Load Markers After Map is Fully Initialized
-async function getDynamicMarkers() {
+function getDynamicMarkers() {
   const DEFAULT_IMAGE = "https://cdn.prod.website-files.com/66dffceb975388322f140196/6834726b5dcff52c6de834fb_cb_group-image-placeholder.webp";
   
-  try {
-    const response = await fetch('https://api.crowdbuilding.com/api/v1/groups/');
-    const data = await response.json();
-    
-    return {
-      type: "FeatureCollection",
-      features: data.data
-        .filter(group => group.latitude && group.longitude)
-        .map(group => ({
-          type: "Feature",
-          geometry: { 
-            type: "Point", 
-            coordinates: [group.longitude, group.latitude] 
-          },
-          properties: { 
-            title: group.title,
-            link: `https://app.crowdbuilding.com/groups/${group.id}`,
-            description: group.subtitle || group.intro?.replace(/<[^>]*>/g, '') || '',
-            image: group.image?.conversions?.thumb?.url || group.image?.original_url || DEFAULT_IMAGE
-          },
-        })),
-    };
-  } catch (error) {
-    console.error('Error fetching groups:', error);
-    return {
-      type: "FeatureCollection",
-      features: []
-    };
-  }
+  return {
+    type: "FeatureCollection",
+    features: Array.from(document.querySelectorAll(".marker__item"))
+      .map((item) => {
+        const lat = parseFloat(item.querySelector(".marker.lat")?.textContent);
+        const long = parseFloat(item.querySelector(".marker.long")?.textContent);
+        const title = item.querySelector(".marker.title")?.textContent;
+        const link = item.querySelector(".marker.link")?.textContent;
+        const description = item.querySelector(".marker.short-description")?.textContent;
+        const image = item.querySelector(".marker.image")?.src || DEFAULT_IMAGE;
+
+        return !isNaN(lat) && !isNaN(long)
+          ? {
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [long, lat] },
+              properties: { 
+                title, 
+                link: link ? `https://app.crowdbuilding.com/groups/${link}` : link, 
+                description, 
+                image 
+              },
+            }
+          : null;
+      })
+      .filter(Boolean),
+  };
 }
 
 function createMarker(feature, map) {
