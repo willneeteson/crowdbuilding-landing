@@ -307,7 +307,7 @@ async function fetchProjectData() {
 
 // Function to show project details modal
 function showProjectDetailsModal() {
-    console.log('Attempting to show modal...');
+    console.log('Attempting to show modal with all API data...');
     console.log('Current project data:', window.projectData);
     
     if (!window.projectData) {
@@ -342,80 +342,93 @@ function showProjectDetailsModal() {
         return;
     }
 
-    // Create content
+    // Helper function to create a section if data exists
+    const createSection = (title, data, formatter) => {
+        if (!data) return '';
+        const formattedData = formatter(data);
+        if (!formattedData) return '';
+        return `
+            <div class="modal-section">
+                <h4>${title}</h4>
+                ${formattedData}
+            </div>
+        `;
+    };
+
+    // Helper function to format object properties
+    const formatObjectProperties = (obj) => {
+        if (!obj || typeof obj !== 'object') return '';
+        return Object.entries(obj)
+            .filter(([key, value]) => value !== null && value !== undefined && key !== 'pivot')
+            .map(([key, value]) => {
+                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                if (typeof value === 'object' && value !== null) {
+                    if (value.name) {
+                        return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value.name}</div>`;
+                    } else if (value.title) {
+                        return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value.title}</div>`;
+                    }
+                }
+                return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value}</div>`;
+            })
+            .join('');
+    };
+
+    // Helper function to format array of objects
+    const formatArrayOfObjects = (arr) => {
+        if (!Array.isArray(arr) || arr.length === 0) return '';
+        return `
+            <div class="tags-list">
+                ${arr.map(item => `
+                    <div class="tag">
+                        ${item.name || item.title || formatObjectProperties(item)}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    };
+
+    // Create content sections for all available data
     const content = `
-        <div class="modal-section">
-            <h4>Project Information</h4>
+        ${createSection('Basic Information', window.projectData, (data) => `
             <div class="project-details">
-                ${window.projectData.title ? `<div class="detail-item"><strong>Title:</strong> ${window.projectData.title}</div>` : ''}
-                ${window.projectData.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${window.projectData.subtitle}</div>` : ''}
-                ${window.projectData.location ? `<div class="detail-item"><strong>Location:</strong> ${window.projectData.location}</div>` : ''}
-                ${window.projectData.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${window.projectData.phase.name}</div>` : ''}
-                ${window.projectData.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${window.projectData.development_form.name}</div>` : ''}
-                ${window.projectData.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${window.projectData.number_of_homes}</div>` : ''}
-                ${window.projectData.member_status?.name ? `<div class="detail-item"><strong>Member Status:</strong> ${window.projectData.member_status.name}</div>` : ''}
+                ${formatObjectProperties(data)}
             </div>
-        </div>
+        `)}
 
-        ${window.projectData.housing_forms && window.projectData.housing_forms.length > 0 ? `
-            <div class="modal-section">
-                <h4>Housing Forms</h4>
-                <div class="tags-list">
-                    ${window.projectData.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
-                </div>
-            </div>
-        ` : ''}
+        ${createSection('Housing Forms', window.projectData.housing_forms, formatArrayOfObjects)}
+        
+        ${createSection('Interests', window.projectData.interests, formatArrayOfObjects)}
+        
+        ${createSection('Buy Budgets', window.projectData.buy_budgets, formatArrayOfObjects)}
+        
+        ${createSection('Target Audiences', window.projectData.target_audiences, formatArrayOfObjects)}
+        
+        ${createSection('Project Status', {
+            building_permit_status: window.projectData.building_permit_status,
+            needs_construction_financing: window.projectData.needs_construction_financing,
+            needs_planning_costs_financing: window.projectData.needs_planning_costs_financing,
+            chamber_of_commerce_registration_status: window.projectData.chamber_of_commerce_registration_status
+        }, formatObjectProperties)}
+        
+        ${createSection('Contact Information', {
+            contact_name: window.projectData.contact_name,
+            contact_email: window.projectData.contact_email
+        }, formatObjectProperties)}
 
-        ${window.projectData.interests && window.projectData.interests.length > 0 ? `
-            <div class="modal-section">
-                <h4>Interests</h4>
-                <div class="tags-list">
-                    ${window.projectData.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
-                </div>
-            </div>
-        ` : ''}
-
-        ${window.projectData.buy_budgets && window.projectData.buy_budgets.length > 0 ? `
-            <div class="modal-section">
-                <h4>Buy Budgets</h4>
-                <div class="tags-list">
-                    ${window.projectData.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
-                </div>
-            </div>
-        ` : ''}
-
-        ${window.projectData.target_audiences && window.projectData.target_audiences.length > 0 ? `
-            <div class="modal-section">
-                <h4>Target Audiences</h4>
-                <div class="tags-list">
-                    ${window.projectData.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
-                </div>
-            </div>
-        ` : ''}
-
-        <div class="modal-section">
-            <h4>Status</h4>
-            <div class="project-status">
-                ${window.projectData.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${window.projectData.building_permit_status.name}</div>` : ''}
-                ${window.projectData.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${window.projectData.needs_construction_financing.name}</div>` : ''}
-                ${window.projectData.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${window.projectData.needs_planning_costs_financing.name}</div>` : ''}
-                ${window.projectData.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${window.projectData.chamber_of_commerce_registration_status.name}</div>` : ''}
-            </div>
-        </div>
-
-        <div class="modal-section">
-            <h4>Contact Information</h4>
-            <div class="contact-info">
-                ${window.projectData.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${window.projectData.contact_name}</div>` : ''}
-                ${window.projectData.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${window.projectData.contact_email}</div>` : ''}
-            </div>
-        </div>
+        ${createSection('Additional Information', {
+            created_at: window.projectData.created_at,
+            updated_at: window.projectData.updated_at,
+            deleted_at: window.projectData.deleted_at,
+            id: window.projectData.id,
+            slug: window.projectData.slug
+        }, formatObjectProperties)}
     `;
 
     // Set content and show modal
     modalBody.innerHTML = content;
     modal.style.display = 'flex';
-    console.log('Modal content set and displayed');
+    console.log('Modal content set and displayed with all API data');
 }
 
 // Function to close project details modal
