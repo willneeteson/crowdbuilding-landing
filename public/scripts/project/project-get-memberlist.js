@@ -268,4 +268,70 @@ async function fetchProjectData() {
 }
 
 // Call the function when the page loads
-document.addEventListener('DOMContentLoaded', fetchProjectData); 
+document.addEventListener('DOMContentLoaded', fetchProjectData);
+
+// Function to populate project details modal
+function populateProjectDetailsModal(data) {
+    const detailsElement = document.querySelector('.project__sidebar-group details');
+    if (!detailsElement) return;
+
+    const detailsList = document.createElement('ul');
+    detailsList.className = 'project-details-list';
+
+    // Add each detail item if it exists
+    if (data.location) {
+        detailsList.appendChild(createDetailItem('Location', data.location));
+    }
+
+    if (data.phase?.name) {
+        detailsList.appendChild(createDetailItem('Phase', data.phase.name));
+    }
+
+    if (data.development_form?.name) {
+        detailsList.appendChild(createDetailItem('Development Form', data.development_form.name));
+    }
+
+    if (data.number_of_homes) {
+        detailsList.appendChild(createDetailItem('Number of Homes', data.number_of_homes));
+    }
+
+    if (data.contact_name) {
+        detailsList.appendChild(createDetailItem('Contact Name', data.contact_name));
+    }
+
+    if (data.contact_email) {
+        detailsList.appendChild(createDetailItem('Contact Email', data.contact_email));
+    }
+
+    if (data.housing_forms && data.housing_forms.length > 0) {
+        const formsList = data.housing_forms.map(form => form.title).join(', ');
+        detailsList.appendChild(createDetailItem('Housing Forms', formsList));
+    }
+
+    if (data.interests && data.interests.length > 0) {
+        const interestsList = data.interests.map(interest => interest.name).join(', ');
+        detailsList.appendChild(createDetailItem('Interests', interestsList));
+    }
+
+    if (data.buy_budgets && data.buy_budgets.length > 0) {
+        const budgetsList = data.buy_budgets.map(budget => budget.name).join(', ');
+        detailsList.appendChild(createDetailItem('Buy Budgets', budgetsList));
+    }
+
+    if (data.target_audiences && data.target_audiences.length > 0) {
+        const audiencesList = data.target_audiences.map(audience => audience.name).join(', ');
+        detailsList.appendChild(createDetailItem('Target Audiences', audiencesList));
+    }
+
+    // Clear existing content and add the new list
+    detailsElement.innerHTML = '';
+    detailsElement.appendChild(detailsList);
+}
+
+// Helper function to create a detail item
+function createDetailItem(label, value) {
+    const li = document.createElement('li');
+    li.className = 'project-detail-item';
+    li.innerHTML = `<strong>${label}:</strong> ${value}`;
+    return li;
+} 
