@@ -28,8 +28,8 @@ function initializeMap() {
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq",
-    center: [5.97536322, 51.52702596], // Venray coordinates
-    zoom: 8.5, // Adjusted zoom level to better show the area
+    center: [5.2, 52.55], // Back to original center
+    zoom: 7.5, // Back to original zoom
     minZoom: 6,
     maxZoom: 10,
     pitchWithRotate: false,
