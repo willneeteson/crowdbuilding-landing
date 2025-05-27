@@ -3,6 +3,7 @@ function populateProjectData(data) {
     try {
         // Store the full project data for later use
         window.projectData = data;
+        console.log('Stored project data:', window.projectData);
 
         // Add modal HTML structure if it doesn't exist
         if (!document.getElementById('projectDetailsModal')) {
@@ -20,6 +21,9 @@ function populateProjectData(data) {
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHTML);
+            
+            // Populate the modal content immediately after creating it
+            populateProjectDetailsModal(data);
         }
 
         // Basic project information
@@ -248,11 +252,6 @@ function populateProjectData(data) {
         }
 
         console.log('Project data populated successfully');
-
-        // Populate the project details modal
-        if (typeof populateProjectDetailsModal === 'function') {
-            populateProjectDetailsModal(data);
-        }
     } catch (error) {
         console.error('Error populating project data:', error);
     }
@@ -303,10 +302,7 @@ document.addEventListener('DOMContentLoaded', fetchProjectData);
 function showProjectDetailsModal() {
     const modal = document.getElementById('projectDetailsModal');
     if (modal && window.projectData) {
-        // Log the stored data
-        console.log('Stored project data:', window.projectData);
-        
-        // Use the stored full project data
+        // Make sure the modal content is up to date
         populateProjectDetailsModal(window.projectData);
         modal.style.display = 'flex';
     } else {
@@ -324,11 +320,12 @@ window.closeProjectDetailsModal = function() {
 
 // Function to populate project details modal
 function populateProjectDetailsModal(data) {
-    const modalBody = document.querySelector('#projectDetailsModal .modal-body');
-    if (!modalBody) return;
-
-    // Log the data to see what we're working with
     console.log('Populating modal with data:', data);
+    const modalBody = document.querySelector('#projectDetailsModal .modal-body');
+    if (!modalBody) {
+        console.error('Modal body not found');
+        return;
+    }
 
     const modalContent = `
         <div class="modal-section">
@@ -401,6 +398,7 @@ function populateProjectDetailsModal(data) {
     `;
 
     modalBody.innerHTML = modalContent;
+    console.log('Modal content populated');
 }
 
 // Helper function to create a detail item
