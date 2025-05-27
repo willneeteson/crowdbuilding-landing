@@ -28,6 +28,25 @@ function showPermissionMessage() {
     `;
 }
 
+// Function to show loading state
+function showLoadingState() {
+    const membersContainer = document.getElementById('projectMembers');
+    if (!membersContainer) return;
+
+    // Create 5 greyed out avatars for loading state
+    const loadingHTML = `
+        <div class="members-compact-view loading">
+            ${Array(5).fill(`
+                <div class="member-avatar loading">
+                    <div class="loading-placeholder"></div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    membersContainer.innerHTML = loadingHTML;
+}
+
 // Function to populate members list in Webflow
 function populateMembersList(data) {
     try {
@@ -199,6 +218,31 @@ function populateMembersList(data) {
                 color: inherit;
                 width: 100%;
             }
+            /* Loading state styles */
+            .members-compact-view.loading {
+                cursor: default;
+            }
+            .member-avatar.loading {
+                background: #f0f0f0;
+                animation: pulse 1.5s infinite;
+            }
+            .loading-placeholder {
+                width: 100%;
+                height: 100%;
+                background: #e0e0e0;
+                border-radius: 50%;
+            }
+            @keyframes pulse {
+                0% {
+                    opacity: 0.6;
+                }
+                50% {
+                    opacity: 0.8;
+                }
+                100% {
+                    opacity: 0.6;
+                }
+            }
         `;
         document.head.appendChild(styleElement);
 
@@ -236,6 +280,9 @@ document.addEventListener('click', (event) => {
 async function fetchMembersData() {
     try {
         console.log('Starting to fetch members data...');
+        
+        // Show loading state immediately
+        showLoadingState();
         
         // Check if user is logged in first
         const isLoggedIn = await window.auth.isUserLoggedIn();
