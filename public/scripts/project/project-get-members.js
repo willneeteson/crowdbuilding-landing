@@ -61,15 +61,17 @@ function populateMembersList(data) {
             
             return `
                 <div class="w-embed">
-                    <div class="member-item">
-                        <div class="member-avatar">
-                            <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                    <a href="/profile/${member.id}" class="member-link">
+                        <div class="member-item">
+                            <div class="member-avatar">
+                                <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">${member.name}</div>
+                                <div class="member-role">${member.role_label || 'Member'}</div>
+                            </div>
                         </div>
-                        <div class="member-info">
-                            <div class="member-name">${member.name}</div>
-                            <div class="member-role">${member.role_label || 'Member'}</div>
-                        </div>
-                    </div>
+                    </a>
                 </div>
             `;
         }).join('');
