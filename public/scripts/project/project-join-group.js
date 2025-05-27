@@ -35,12 +35,6 @@ function createQuestionForm(questions) {
     
     const formContainer = document.createElement('div');
     formContainer.className = 'group-questions-form';
-
-    // Add informational text
-    const infoText = document.createElement('p');
-    infoText.className = 'group-join-info';
-    infoText.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
-    formContainer.appendChild(infoText);
     
     if (!Array.isArray(questions) || questions.length === 0) {
         console.log('No questions to display');
@@ -445,8 +439,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                         showNotification('error', error.message || 'Failed to submit form');
                     }
                 };
+
+                // Add informational text
+                const infoText = document.createElement('p');
+                infoText.className = 'group-join-info';
+                infoText.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
+                form.appendChild(infoText);
                 
-                // Add questions to form
+                // Add questions to form if they exist
                 if (groupData.questions && groupData.questions.length > 0) {
                     console.log('Creating questions form with questions:', groupData.questions);
                     const questionsForm = createQuestionForm(groupData.questions);
