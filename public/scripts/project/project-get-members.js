@@ -143,12 +143,14 @@ function populateMembersList(data) {
                 align-items: center;
                 gap: 8px;
                 cursor: pointer;
+                height: 40px; /* Fixed height to prevent layout shift */
             }
             .member-avatar {
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
                 overflow: hidden;
+                flex-shrink: 0; /* Prevent avatar from shrinking */
             }
             .member-image {
                 width: 100%;
@@ -162,6 +164,7 @@ function populateMembersList(data) {
                 justify-content: center;
                 font-weight: bold;
                 color: #666;
+                flex-shrink: 0; /* Prevent count from shrinking */
             }
             .members-modal {
                 position: fixed;
@@ -229,7 +232,7 @@ function populateMembersList(data) {
             .loading-placeholder {
                 width: 100%;
                 height: 100%;
-                background: #e0e0e0;
+                background: rgba(0, 0, 0, 0.1);
                 border-radius: 50%;
             }
             @keyframes pulse {
