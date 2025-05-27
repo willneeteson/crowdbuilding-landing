@@ -303,9 +303,14 @@ document.addEventListener('DOMContentLoaded', fetchProjectData);
 function showProjectDetailsModal() {
     const modal = document.getElementById('projectDetailsModal');
     if (modal && window.projectData) {
+        // Log the stored data
+        console.log('Stored project data:', window.projectData);
+        
         // Use the stored full project data
         populateProjectDetailsModal(window.projectData);
         modal.style.display = 'flex';
+    } else {
+        console.error('Modal or project data not found:', { modal, projectData: window.projectData });
     }
 }
 
@@ -321,6 +326,9 @@ window.closeProjectDetailsModal = function() {
 function populateProjectDetailsModal(data) {
     const modalBody = document.querySelector('#projectDetailsModal .modal-body');
     if (!modalBody) return;
+
+    // Log the data to see what we're working with
+    console.log('Populating modal with data:', data);
 
     const modalContent = `
         <div class="modal-section">
