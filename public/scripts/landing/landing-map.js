@@ -109,7 +109,7 @@ function getDynamicMarkers() {
               geometry: { type: "Point", coordinates: [long, lat] },
               properties: { 
                 title, 
-                link: link ? `groups/${link}` : link, 
+                link: link ? `https://app.crowdbuilding.com/groups/${link}` : link, 
                 description, 
                 image 
               },
