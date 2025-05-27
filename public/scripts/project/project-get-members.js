@@ -49,24 +49,17 @@ function showLoadingState() {
 
 // Function to show project details modal
 function showProjectDetailsModal() {
-    const detailsElement = document.querySelector('.project__sidebar-group details');
-    if (detailsElement) {
-        // Create summary if it doesn't exist
-        let summaryElement = detailsElement.querySelector('summary');
-        if (!summaryElement) {
-            summaryElement = document.createElement('summary');
-            summaryElement.textContent = 'Project Details';
-            detailsElement.insertBefore(summaryElement, detailsElement.firstChild);
-        }
-        detailsElement.setAttribute('open', '');
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'flex';
     }
 }
 
 // Function to close project details modal
 function closeProjectDetailsModal() {
-    const detailsElement = document.querySelector('.project__sidebar-group details');
-    if (detailsElement) {
-        detailsElement.removeAttribute('open');
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
     }
 }
 

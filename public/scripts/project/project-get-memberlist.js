@@ -270,84 +270,98 @@ async function fetchProjectData() {
 // Call the function when the page loads
 document.addEventListener('DOMContentLoaded', fetchProjectData);
 
+// Function to show project details modal
+function showProjectDetailsModal() {
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Function to close project details modal
+function closeProjectDetailsModal() {
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 // Function to populate project details modal
 function populateProjectDetailsModal(data) {
-    const detailsElement = document.querySelector('.project__sidebar-group details');
-    if (!detailsElement) return;
+    const modalBody = document.querySelector('#projectDetailsModal .modal-body');
+    if (!modalBody) return;
 
-    // Create summary element if it doesn't exist
-    let summaryElement = detailsElement.querySelector('summary');
-    if (!summaryElement) {
-        summaryElement = document.createElement('summary');
-        summaryElement.textContent = 'Project Details';
-        detailsElement.insertBefore(summaryElement, detailsElement.firstChild);
-    }
+    const modalContent = `
+        <div class="modal-section">
+            <h4>Project Information</h4>
+            <div class="project-details">
+                ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
+                ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
+                ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
+                ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
+                ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
+                ${data.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${data.number_of_homes}</div>` : ''}
+            </div>
+        </div>
 
-    const detailsList = document.createElement('ul');
-    detailsList.className = 'project-details-list';
+        ${data.housing_forms && data.housing_forms.length > 0 ? `
+            <div class="modal-section">
+                <h4>Housing Forms</h4>
+                <div class="tags-list">
+                    ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
 
-    // Add each detail item if it exists
-    if (data.location) {
-        detailsList.appendChild(createDetailItem('Location', data.location));
-    }
+        ${data.interests && data.interests.length > 0 ? `
+            <div class="modal-section">
+                <h4>Interests</h4>
+                <div class="tags-list">
+                    ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
 
-    if (data.phase?.name) {
-        detailsList.appendChild(createDetailItem('Phase', data.phase.name));
-    }
+        ${data.buy_budgets && data.buy_budgets.length > 0 ? `
+            <div class="modal-section">
+                <h4>Buy Budgets</h4>
+                <div class="tags-list">
+                    ${data.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
 
-    if (data.development_form?.name) {
-        detailsList.appendChild(createDetailItem('Development Form', data.development_form.name));
-    }
+        ${data.target_audiences && data.target_audiences.length > 0 ? `
+            <div class="modal-section">
+                <h4>Target Audiences</h4>
+                <div class="tags-list">
+                    ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
 
-    if (data.number_of_homes) {
-        detailsList.appendChild(createDetailItem('Number of Homes', data.number_of_homes));
-    }
+        <div class="modal-section">
+            <h4>Status</h4>
+            <div class="project-status">
+                ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
+                ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
+                ${data.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${data.needs_planning_costs_financing.name}</div>` : ''}
+                ${data.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${data.chamber_of_commerce_registration_status.name}</div>` : ''}
+            </div>
+        </div>
 
-    if (data.contact_name) {
-        detailsList.appendChild(createDetailItem('Contact Name', data.contact_name));
-    }
+        ${data.contact_name || data.contact_email ? `
+            <div class="modal-section">
+                <h4>Contact Information</h4>
+                <div class="contact-info">
+                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
+                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+                </div>
+            </div>
+        ` : ''}
+    `;
 
-    if (data.contact_email) {
-        detailsList.appendChild(createDetailItem('Contact Email', data.contact_email));
-    }
-
-    if (data.housing_forms && data.housing_forms.length > 0) {
-        const formsList = data.housing_forms.map(form => form.title).join(', ');
-        detailsList.appendChild(createDetailItem('Housing Forms', formsList));
-    }
-
-    if (data.interests && data.interests.length > 0) {
-        const interestsList = data.interests.map(interest => interest.name).join(', ');
-        detailsList.appendChild(createDetailItem('Interests', interestsList));
-    }
-
-    if (data.buy_budgets && data.buy_budgets.length > 0) {
-        const budgetsList = data.buy_budgets.map(budget => budget.name).join(', ');
-        detailsList.appendChild(createDetailItem('Buy Budgets', budgetsList));
-    }
-
-    if (data.target_audiences && data.target_audiences.length > 0) {
-        const audiencesList = data.target_audiences.map(audience => audience.name).join(', ');
-        detailsList.appendChild(createDetailItem('Target Audiences', audiencesList));
-    }
-
-    // Remove any existing content after the summary
-    while (detailsElement.lastChild && detailsElement.lastChild !== summaryElement) {
-        detailsElement.removeChild(detailsElement.lastChild);
-    }
-
-    // Add the new list
-    detailsElement.appendChild(detailsList);
-
-    // Add click event listener to the summary
-    summaryElement.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (detailsElement.hasAttribute('open')) {
-            detailsElement.removeAttribute('open');
-        } else {
-            detailsElement.setAttribute('open', '');
-        }
-    });
+    modalBody.innerHTML = modalContent;
 }
 
 // Helper function to create a detail item
