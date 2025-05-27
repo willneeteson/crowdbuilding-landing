@@ -51,46 +51,186 @@ function populateMembersList(data) {
 
         console.log('Number of members to display:', members.length);
 
-        // Create HTML for members
-        const membersHTML = members.map(member => {
-            console.log('Processing member:', member);
-            // Ensure avatar_url is a complete URL
+        // Create compact avatar view (max 5 avatars + remaining count)
+        const maxAvatars = 5;
+        const remainingCount = Math.max(0, members.length - maxAvatars);
+        
+        const avatarsHTML = members.slice(0, maxAvatars).map(member => {
             const avatarUrl = member.avatar_url 
                 ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
                 : 'https://api.crowdbuilding.com/storage/default-avatar.png';
             
             return `
-                <div class="member-wrapper">
-                    <a href="/user?id=${member.id}" class="member-link">
-                        <div class="member-item">
-                            <div class="member-avatar">
-                                <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
-                            </div>
-                            <div class="member-info">
-                                <div class="member-name">${member.name}</div>
-                                <div class="member-role">${member.role_label || 'Member'}</div>
-                            </div>
-                        </div>
-                    </a>
+                <div class="member-avatar">
+                    <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
                 </div>
             `;
         }).join('');
 
-        // Add members count to the heading if it exists
-        const headingElement = membersContainer.previousElementSibling;
-        if (headingElement && headingElement.tagName === 'H3') {
-            headingElement.textContent = `Members (${members.length})`;
-        }
+        // Add remaining count if there are more members
+        const remainingHTML = remainingCount > 0 
+            ? `<div class="member-avatar remaining-count">+${remainingCount}</div>`
+            : '';
 
-        // Update the container with members list
-        console.log('Generated HTML:', membersHTML);
-        membersContainer.innerHTML = membersHTML;
+        // Create the compact view container
+        const compactViewHTML = `
+            <div class="members-compact-view" onclick="showMembersModal()">
+                ${avatarsHTML}
+                ${remainingHTML}
+            </div>
+        `;
+
+        // Create the modal HTML
+        const modalHTML = `
+            <div id="membersModal" class="members-modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Members (${members.length})</h3>
+                        <span class="close-modal" onclick="closeMembersModal()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        ${members.map(member => {
+                            const avatarUrl = member.avatar_url 
+                                ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
+                                : 'https://api.crowdbuilding.com/storage/default-avatar.png';
+                            
+                            return `
+                                <div class="member-item">
+                                    <a href="/user?id=${member.id}" class="member-link">
+                                        <div class="member-avatar">
+                                            <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                                        </div>
+                                        <div class="member-info">
+                                            <div class="member-name">${member.name}</div>
+                                            <div class="member-role">${member.role_label || 'Member'}</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add the compact view and modal to the container
+        membersContainer.innerHTML = compactViewHTML + modalHTML;
+
+        // Add the modal styles
+        const styleElement = document.createElement('style');
+        styleElement.textContent = `
+            .members-compact-view {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                cursor: pointer;
+            }
+            .member-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                overflow: hidden;
+            }
+            .member-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .remaining-count {
+                background: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                color: #666;
+            }
+            .members-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+            }
+            .modal-content {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 500px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .close-modal {
+                cursor: pointer;
+                font-size: 24px;
+            }
+            .modal-body {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+            }
+            .member-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 8px;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+            }
+            .member-item:hover {
+                background-color: #f5f5f5;
+            }
+            .member-link {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                text-decoration: none;
+                color: inherit;
+                width: 100%;
+            }
+        `;
+        document.head.appendChild(styleElement);
 
         console.log('Members list populated successfully');
     } catch (error) {
         console.error('Error populating members list:', error);
     }
 }
+
+// Function to show the members modal
+function showMembersModal() {
+    const modal = document.getElementById('membersModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+// Function to close the members modal
+function closeMembersModal() {
+    const modal = document.getElementById('membersModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', (event) => {
+    const modal = document.getElementById('membersModal');
+    if (modal && event.target === modal) {
+        closeMembersModal();
+    }
+});
 
 // Function to fetch members data
 async function fetchMembersData() {
