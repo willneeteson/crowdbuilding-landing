@@ -278,14 +278,24 @@ async function fetchProjectData() {
         console.log('Fetched project data:', data);
         
         if (data && data.data) {
+            // Store the data globally
+            window.projectData = data.data;
+            console.log('Stored project data:', window.projectData);
+            
+            // Populate the main page content
             populateProjectData(data.data);
             
             // Add click handler for details group
             const detailsGroup = document.querySelector('.project__sidebar-group.details');
             if (detailsGroup) {
-                detailsGroup.addEventListener('click', () => {
+                console.log('Found details group, adding click listener');
+                detailsGroup.addEventListener('click', function(e) {
+                    console.log('Details group clicked');
+                    e.preventDefault();
                     showProjectDetailsModal();
                 });
+            } else {
+                console.error('Details group not found in DOM');
             }
         } else {
             console.error('Invalid data format received from API');
@@ -295,29 +305,20 @@ async function fetchProjectData() {
     }
 }
 
-// Call the function when the page loads
-document.addEventListener('DOMContentLoaded', fetchProjectData);
-
 // Function to show project details modal
 function showProjectDetailsModal() {
     console.log('Attempting to show modal...');
-    const modal = document.getElementById('projectDetailsModal');
-    console.log('Modal element:', modal);
-    console.log('Project data:', window.projectData);
-    
-    if (!modal) {
-        console.error('Modal element not found in DOM');
-        return;
-    }
+    console.log('Current project data:', window.projectData);
     
     if (!window.projectData) {
         console.error('No project data available');
         return;
     }
 
-    // Ensure modal exists in DOM
-    if (!document.body.contains(modal)) {
-        console.log('Modal not in DOM, creating it...');
+    // Create or get modal
+    let modal = document.getElementById('projectDetailsModal');
+    if (!modal) {
+        console.log('Creating new modal...');
         const modalHTML = `
             <div id="projectDetailsModal" class="members-modal" style="display: none;">
                 <div class="modal-content">
@@ -326,27 +327,95 @@ function showProjectDetailsModal() {
                         <span class="close-modal" onclick="closeProjectDetailsModal()">×</span>
                     </div>
                     <div class="modal-body">
-                        <!-- Content will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        modal = document.getElementById('projectDetailsModal');
     }
 
-    // Get the modal again after potential creation
-    const updatedModal = document.getElementById('projectDetailsModal');
-    if (!updatedModal) {
-        console.error('Failed to create modal');
+    // Populate modal content
+    const modalBody = modal.querySelector('.modal-body');
+    if (!modalBody) {
+        console.error('Modal body not found');
         return;
     }
 
-    // Populate the modal content
-    populateProjectDetailsModal(window.projectData);
-    
-    // Show the modal
-    updatedModal.style.display = 'flex';
-    console.log('Modal should now be visible');
+    // Create content
+    const content = `
+        <div class="modal-section">
+            <h4>Project Information</h4>
+            <div class="project-details">
+                ${window.projectData.title ? `<div class="detail-item"><strong>Title:</strong> ${window.projectData.title}</div>` : ''}
+                ${window.projectData.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${window.projectData.subtitle}</div>` : ''}
+                ${window.projectData.location ? `<div class="detail-item"><strong>Location:</strong> ${window.projectData.location}</div>` : ''}
+                ${window.projectData.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${window.projectData.phase.name}</div>` : ''}
+                ${window.projectData.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${window.projectData.development_form.name}</div>` : ''}
+                ${window.projectData.number_of_homes ? `<div class="detail-item"><strong>Number of Homes:</strong> ${window.projectData.number_of_homes}</div>` : ''}
+                ${window.projectData.member_status?.name ? `<div class="detail-item"><strong>Member Status:</strong> ${window.projectData.member_status.name}</div>` : ''}
+            </div>
+        </div>
+
+        ${window.projectData.housing_forms && window.projectData.housing_forms.length > 0 ? `
+            <div class="modal-section">
+                <h4>Housing Forms</h4>
+                <div class="tags-list">
+                    ${window.projectData.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        ${window.projectData.interests && window.projectData.interests.length > 0 ? `
+            <div class="modal-section">
+                <h4>Interests</h4>
+                <div class="tags-list">
+                    ${window.projectData.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        ${window.projectData.buy_budgets && window.projectData.buy_budgets.length > 0 ? `
+            <div class="modal-section">
+                <h4>Buy Budgets</h4>
+                <div class="tags-list">
+                    ${window.projectData.buy_budgets.map(budget => `<div class="tag">${budget.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        ${window.projectData.target_audiences && window.projectData.target_audiences.length > 0 ? `
+            <div class="modal-section">
+                <h4>Target Audiences</h4>
+                <div class="tags-list">
+                    ${window.projectData.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                </div>
+            </div>
+        ` : ''}
+
+        <div class="modal-section">
+            <h4>Status</h4>
+            <div class="project-status">
+                ${window.projectData.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${window.projectData.building_permit_status.name}</div>` : ''}
+                ${window.projectData.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${window.projectData.needs_construction_financing.name}</div>` : ''}
+                ${window.projectData.needs_planning_costs_financing?.name ? `<div class="status-item"><strong>Planning Costs:</strong> ${window.projectData.needs_planning_costs_financing.name}</div>` : ''}
+                ${window.projectData.chamber_of_commerce_registration_status?.name ? `<div class="status-item"><strong>Chamber Registration:</strong> ${window.projectData.chamber_of_commerce_registration_status.name}</div>` : ''}
+            </div>
+        </div>
+
+        <div class="modal-section">
+            <h4>Contact Information</h4>
+            <div class="contact-info">
+                ${window.projectData.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${window.projectData.contact_name}</div>` : ''}
+                ${window.projectData.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${window.projectData.contact_email}</div>` : ''}
+            </div>
+        </div>
+    `;
+
+    // Set content and show modal
+    modalBody.innerHTML = content;
+    modal.style.display = 'flex';
+    console.log('Modal content set and displayed');
 }
 
 // Function to close project details modal
@@ -450,17 +519,5 @@ function createDetailItem(label, value) {
     return li;
 }
 
-// Add event listener for the details group
-document.addEventListener('DOMContentLoaded', function() {
-    const detailsGroup = document.querySelector('.project__sidebar-group.details');
-    if (detailsGroup) {
-        console.log('Found details group, adding click listener');
-        detailsGroup.addEventListener('click', function(e) {
-            console.log('Details group clicked');
-            e.preventDefault();
-            showProjectDetailsModal();
-        });
-    } else {
-        console.error('Details group not found in DOM');
-    }
-}); 
+// Call the function when the page loads
+document.addEventListener('DOMContentLoaded', fetchProjectData); 
