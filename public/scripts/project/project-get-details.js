@@ -5,7 +5,7 @@ function populateProjectData(data) {
         window.projectData = data;
         console.log('Stored project data:', window.projectData);
 
-        // Add modal HTML structure if it doesn't exist
+        // Create modal if it doesn't exist
         if (!document.getElementById('projectDetailsModal')) {
             const modalHTML = `
                 <div id="projectDetailsModal" class="members-modal" style="display: none;">
@@ -15,15 +15,34 @@ function populateProjectData(data) {
                             <span class="close-modal" onclick="closeProjectDetailsModal()">×</span>
                         </div>
                         <div class="modal-body">
-                            <!-- Content will be populated by JavaScript -->
                         </div>
                     </div>
                 </div>
             `;
             document.body.insertAdjacentHTML('beforeend', modalHTML);
             
-            // Populate the modal content immediately after creating it
-            populateProjectDetailsModal(data);
+            // Add event listeners for modal
+            const modal = document.getElementById('projectDetailsModal');
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeProjectDetailsModal();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal.style.display === 'flex') {
+                    closeProjectDetailsModal();
+                }
+            });
+        }
+
+        // Add click handler for details group
+        const detailsGroup = document.querySelector('.project__sidebar-group.details');
+        if (detailsGroup) {
+            detailsGroup.addEventListener('click', function(e) {
+                e.preventDefault();
+                showProjectDetailsModal();
+            });
         }
 
         // Basic project information
@@ -307,8 +326,7 @@ async function fetchProjectData() {
 
 // Function to show project details modal
 function showProjectDetailsModal() {
-    console.log('Attempting to show modal with all API data...');
-    console.log('Current project data:', window.projectData);
+    console.log('Showing modal with project data:', window.projectData);
     
     if (!window.projectData) {
         console.error('No project data available');
@@ -316,42 +334,13 @@ function showProjectDetailsModal() {
     }
 
     const data = window.projectData;
-
-    // Create or get modal
-    let modal = document.getElementById('projectDetailsModal');
+    const modal = document.getElementById('projectDetailsModal');
+    
     if (!modal) {
-        console.log('Creating new modal...');
-        const modalHTML = `
-            <div id="projectDetailsModal" class="members-modal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Project Details</h3>
-                        <span class="close-modal" onclick="closeProjectDetailsModal()">×</span>
-                    </div>
-                    <div class="modal-body">
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        modal = document.getElementById('projectDetailsModal');
-        
-        // Add click outside listener
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeProjectDetailsModal();
-            }
-        });
-
-        // Add escape key listener
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && modal.style.display === 'flex') {
-                closeProjectDetailsModal();
-            }
-        });
+        console.error('Modal element not found');
+        return;
     }
 
-    // Populate modal content
     const modalBody = modal.querySelector('.modal-body');
     if (!modalBody) {
         console.error('Modal body not found');
@@ -447,7 +436,7 @@ function showProjectDetailsModal() {
     // Set content and show modal
     modalBody.innerHTML = modalContent;
     modal.style.display = 'flex';
-    console.log('Modal content set and displayed');
+    console.log('Modal content set:', modalBody.innerHTML);
 }
 
 // Function to close project details modal
