@@ -76,18 +76,18 @@ class ModalSystem {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 12px 15px;
-                background: #f8f9fa;
-                border-radius: 8px;
-                transition: background-color 0.2s;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid #eee;
             }
 
-            .cb-detail-item:hover {
-                background: #f0f2f5;
+            .cb-detail-item:last-child {
+                border-bottom: none;
             }
 
             .cb-detail-item strong {
-                color: #090F3F;
+                color: #666;
+                font-weight: 600;
+                min-width: 140px;
             }
 
             .cb-members-list {
