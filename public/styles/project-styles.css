@@ -3,7 +3,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
-    height: 40px; /* Fixed height to prevent layout shift */
+    height: 40px;
 }
 
 .members-avatars {
@@ -18,7 +18,7 @@
     height: 40px;
     border-radius: 50%;
     overflow: hidden;
-    flex-shrink: 0; /* Prevent avatar from shrinking */
+    flex-shrink: 0;
 }
 
 .member-image {
@@ -34,9 +34,10 @@
     justify-content: center;
     font-weight: bold;
     color: #666;
-    flex-shrink: 0; /* Prevent count from shrinking */
+    flex-shrink: 0;
 }
 
+/* Global Button Styles */
 .details-button {
     padding: 6px 12px;
     background: #f0f0f0;
@@ -50,6 +51,171 @@
 
 .details-button:hover {
     background: #e0e0e0;
+}
+
+/* Project Details Modal */
+#projectDetailsModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+#projectDetailsModal .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 10000;
+}
+
+#projectDetailsModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+#projectDetailsModal .modal-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+#projectDetailsModal .close-modal {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.2s;
+}
+
+#projectDetailsModal .close-modal:hover {
+    color: #333;
+}
+
+/* Global Form Styles */
+.question-container {
+    margin-bottom: 1.5rem;
+}
+
+.question-container label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.question-explanation {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.question-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.required {
+    color: red;
+}
+
+/* Global Button Styles */
+.submit-button {
+    background-color: #FF5C54;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.submit-button:hover {
+    background-color: #FF291F;
+}
+
+.join-group-button {
+    background-color: #FF5C54;
+    color: white;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 99px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    margin: 10px 0;
+}
+
+.join-group-button:hover:not(:disabled):not(.joined) {
+    background-color: #FF291F;
+}
+
+.join-group-button:disabled,
+.join-group-button.joined {
+    background-color: var(--_color---color-neutral-black-100);
+    color: #fff;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Image Gallery Styles */
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.image-gallery img {
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    object-fit: cover;
+}
+
+/* Project Tag Styles */
+.project-housing-forms div, 
+.project-interests div, 
+.project-target-audiences div {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 6px 12px;
+    border-radius: 99px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    #projectDetailsModal .modal-content {
+        max-height: 85vh;
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    #projectDetailsModal .detail-item,
+    #projectDetailsModal .status-item,
+    #projectDetailsModal .contact-item {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    #projectDetailsModal .detail-item strong,
+    #projectDetailsModal .status-item strong,
+    #projectDetailsModal .contact-item strong {
+        min-width: auto;
+    }
 }
 
 /* Modal styles */
@@ -265,59 +431,6 @@
     cursor: default;
 }
 
-/* Project Details Modal */
-#projectDetailsModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 9999; /* Ensure it's above other content */
-    justify-content: center;
-    align-items: center;
-}
-
-#projectDetailsModal .modal-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    max-width: 800px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    position: relative; /* For proper stacking context */
-    z-index: 10000; /* Above the overlay */
-}
-
-#projectDetailsModal .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #eee;
-}
-
-#projectDetailsModal .modal-header h3 {
-    margin: 0;
-    font-size: 1.5rem;
-    color: #333;
-}
-
-#projectDetailsModal .close-modal {
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #666;
-    transition: color 0.2s;
-}
-
-#projectDetailsModal .close-modal:hover {
-    color: #333;
-}
-
 #projectDetailsModal .modal-section {
     margin-bottom: 2rem;
     padding-bottom: 2rem;
@@ -402,24 +515,122 @@
     transform: scale(1.05);
 }
 
-/* Ensure modal content scrolls properly on mobile */
-@media (max-width: 768px) {
-    #projectDetailsModal .modal-content {
-        max-height: 85vh;
-        padding: 1.5rem;
-        margin: 1rem;
-    }
+/* Group Posts and Related Components */
+.group-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem 0;
+}
 
-    #projectDetailsModal .detail-item,
-    #projectDetailsModal .status-item,
-    #projectDetailsModal .contact-item {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
+.post-item {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
 
-    #projectDetailsModal .detail-item strong,
-    #projectDetailsModal .status-item strong,
-    #projectDetailsModal .contact-item strong {
-        min-width: auto;
-    }
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.post-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-meta h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333333;
+}
+
+.post-meta time {
+    font-size: 0.875rem;
+    color: #777777;
+}
+
+.post-body p {
+    margin: 0;
+    font-size: 1rem;
+    color: #444444;
+    line-height: 1.5;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #555555;
+}
+
+.post-likes, .post-comments {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.like-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.post-image {
+    margin-top: 1rem;
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.post-modal-content .post-item {
+    background: none;
+    border: none;
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+button.post-menu-item.delete {
+    background: white;
+    border: 1px solid #00000020;
+    border-radius: 8px;
 } 
