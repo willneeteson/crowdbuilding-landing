@@ -380,10 +380,17 @@
 
 .tag {
     padding: 6px 12px;
-    background: #f0f0f0;
-    border-radius: 16px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: 99px;
     font-size: 14px;
-    color: #666;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tag:hover {
+    background: rgba(0, 0, 0, 0.12);
 }
 
 .members-list {
@@ -494,17 +501,18 @@
 }
 
 #projectDetailsModal .tag {
-    background-color: #f0f7ff;
-    color: #0066cc;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    background: rgba(0, 0, 0, 0.08);
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 14px;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #projectDetailsModal .tag:hover {
-    background-color: #e1f0ff;
+    background: rgba(0, 0, 0, 0.12);
 }
 
 #projectDetailsModal .project-images {
