@@ -1,74 +1,5 @@
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Add modal styles
-    const modalStyles = `
-        .members-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .members-modal .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .members-modal .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .members-modal .close-modal {
-            cursor: pointer;
-            font-size: 24px;
-            padding: 5px;
-        }
-        .members-modal .details-grid {
-            display: grid;
-            gap: 15px;
-        }
-        .members-modal .detail-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #f5f5f5;
-            border-radius: 4px;
-        }
-    `;
-
-    const styleSheet = document.createElement('style');
-    styleSheet.textContent = modalStyles;
-    document.head.appendChild(styleSheet);
-
-    // Create modal if it doesn't exist
-    if (!document.getElementById('projectDetailsModal')) {
-        const modalHTML = `
-            <div id="projectDetailsModal" class="members-modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Project Details</h3>
-                        <span class="close-modal">×</span>
-                    </div>
-                    <div class="modal-body">
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-    }
-
     // Get project ID from URL
     const pathParts = window.location.pathname.split('/');
     const projectId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
@@ -77,6 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('No project ID found in URL');
         return;
     }
+
+    // Create the project details modal
+    window.modalSystem.createModal('Project Details', '', { id: 'projectDetailsModal' });
 
     // Fetch project data
     fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}`)
@@ -170,32 +104,6 @@ function setupModalHandler() {
             showModal();
         }
     });
-
-    // Add close handlers
-    const closeButtons = document.querySelectorAll('.close-modal');
-    closeButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            closeModal();
-        });
-    });
-
-    // Close modal when clicking outside
-    const modal = document.getElementById('projectDetailsModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Add escape key handler
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                closeModal();
-            }
-        });
-    }
 }
 
 function showModal() {
@@ -206,67 +114,49 @@ function showModal() {
         return;
     }
 
-    const modal = document.getElementById('projectDetailsModal');
-    const modalBody = modal?.querySelector('.modal-body');
-    
-    if (!modal || !modalBody) {
-        console.error('Modal elements not found');
-        return;
-    }
-
-    console.log('Showing modal with data:', data);
-
     // Create modal content
     const content = `
-        <div class="details-grid">
-            <div class="detail-item">
-                <strong>Phase:</strong>
+        <div class="cb-details-grid">
+            <div class="cb-detail-item">
+                <strong>Phase</strong>
                 <span>${data.phase?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Location:</strong>
+            <div class="cb-detail-item">
+                <strong>Location</strong>
                 <span>${data.location || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Development Form:</strong>
+            <div class="cb-detail-item">
+                <strong>Development Form</strong>
                 <span>${data.development_form?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Number of Homes:</strong>
+            <div class="cb-detail-item">
+                <strong>Number of Homes</strong>
                 <span>${data.number_of_homes || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Member Status:</strong>
+            <div class="cb-detail-item">
+                <strong>Member Status</strong>
                 <span>${data.member_status?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Building Permit:</strong>
+            <div class="cb-detail-item">
+                <strong>Building Permit</strong>
                 <span>${data.building_permit_status?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Construction Financing:</strong>
+            <div class="cb-detail-item">
+                <strong>Construction Financing</strong>
                 <span>${data.needs_construction_financing?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Planning Costs:</strong>
+            <div class="cb-detail-item">
+                <strong>Planning Costs</strong>
                 <span>${data.needs_planning_costs_financing?.name || 'Not specified'}</span>
             </div>
-            <div class="detail-item">
-                <strong>Chamber Registration:</strong>
+            <div class="cb-detail-item">
+                <strong>Chamber Registration</strong>
                 <span>${data.chamber_of_commerce_registration_status?.name || 'Not specified'}</span>
             </div>
         </div>
     `;
 
-    // Update modal and show it
-    modalBody.innerHTML = content;
-    modal.style.display = 'flex';
-    console.log('Modal should be visible now');
-}
-
-function closeModal() {
-    const modal = document.getElementById('projectDetailsModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    // Update modal content and show it
+    window.modalSystem.updateModalContent('projectDetailsModal', content);
+    window.modalSystem.showModal('projectDetailsModal');
 } 

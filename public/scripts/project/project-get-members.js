@@ -193,7 +193,7 @@ function populateMembersList(data) {
             ? `<div class="member-avatar remaining-count">+${remainingCount}</div>`
             : '';
 
-        // Create the compact view container with two click handlers
+        // Create the compact view container with click handler
         const compactViewHTML = `
             <div class="members-compact-view">
                 <div class="members-avatars" onclick="showMembersModal()">
@@ -203,43 +203,36 @@ function populateMembersList(data) {
             </div>
         `;
 
-        // Create the members modal HTML
-        const membersModalHTML = `
-            <div id="membersModal" class="members-modal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3>Members (${members.length})</h3>
-                        <span class="close-modal" onclick="closeMembersModal()">&times;</span>
-                    </div>
-                    <div class="modal-body">
-                        <div class="members-list">
-                            ${members.map(member => {
-                                const avatarUrl = member.avatar_url 
-                                    ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
-                                    : 'https://api.crowdbuilding.com/storage/default-avatar.png';
-                                
-                                return `
-                                    <div class="member-item">
-                                        <a href="/user?id=${member.id}" class="member-link">
-                                            <div class="member-avatar">
-                                                <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
-                                            </div>
-                                            <div class="member-info">
-                                                <div class="member-name">${member.name}</div>
-                                                <div class="member-role">${member.role_label || 'Member'}</div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                `;
-                            }).join('')}
+        // Create members list content for modal
+        const membersListContent = `
+            <div class="cb-members-list">
+                ${members.map(member => {
+                    const avatarUrl = member.avatar_url 
+                        ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
+                        : 'https://api.crowdbuilding.com/storage/default-avatar.png';
+                    
+                    return `
+                        <div class="cb-member-item">
+                            <a href="/user?id=${member.id}" class="cb-member-link">
+                                <div class="cb-member-avatar">
+                                    <img src="${avatarUrl}" alt="${member.name}" class="member-image" onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'">
+                                </div>
+                                <div class="cb-member-info">
+                                    <div class="cb-member-name">${member.name}</div>
+                                    <div class="cb-member-role">${member.role_label || 'Member'}</div>
+                                </div>
+                            </a>
                         </div>
-                    </div>
-                </div>
+                    `;
+                }).join('')}
             </div>
         `;
 
-        // Add the compact view and members modal to the container
-        membersContainer.innerHTML = compactViewHTML + membersModalHTML;
+        // Create the members modal
+        window.modalSystem.createModal(`Members (${members.length})`, membersListContent, { id: 'membersModal' });
+
+        // Add the compact view to the container
+        membersContainer.innerHTML = compactViewHTML;
 
         console.log('Members list populated successfully');
     } catch (error) {
@@ -249,27 +242,8 @@ function populateMembersList(data) {
 
 // Function to show the members modal
 function showMembersModal() {
-    const modal = document.getElementById('membersModal');
-    if (modal) {
-        modal.style.display = 'flex';
-    }
+    window.modalSystem.showModal('membersModal');
 }
-
-// Function to close the members modal
-function closeMembersModal() {
-    const modal = document.getElementById('membersModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Close modal when clicking outside
-document.addEventListener('click', (event) => {
-    const modal = document.getElementById('membersModal');
-    if (modal && event.target === modal) {
-        closeMembersModal();
-    }
-});
 
 // Function to fetch members data
 async function fetchMembersData() {

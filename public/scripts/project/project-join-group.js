@@ -134,6 +134,28 @@ function setLoading(isLoading) {
     }
 }
 
+// Function to show notifications
+function showNotification(type, message) {
+    // Create notification container if it doesn't exist
+    let notificationContainer = document.querySelector('.notification-container');
+    if (!notificationContainer) {
+        notificationContainer = document.createElement('div');
+        notificationContainer.className = 'notification-container';
+        document.body.appendChild(notificationContainer);
+    }
+
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+
+    notificationContainer.appendChild(notification);
+
+    // Remove notification after 5 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+}
+
 // Function to handle joining a group
 async function joinGroup(answers = {}) {
     try {
@@ -212,6 +234,9 @@ async function joinGroup(answers = {}) {
         // Update UI to reflect joined status
         updateGroupUI(true);
 
+        // Close the join modal
+        window.modalSystem.closeModal('joinGroupModal');
+
         return data;
     } catch (error) {
         console.error('Error joining group:', error);
@@ -236,28 +261,6 @@ function updateGroupUI(isJoined) {
             joinButton.disabled = false;
         }
     }
-}
-
-// Function to show notifications
-function showNotification(type, message) {
-    // Create notification container if it doesn't exist
-    let notificationContainer = document.querySelector('.notification-container');
-    if (!notificationContainer) {
-        notificationContainer = document.createElement('div');
-        notificationContainer.className = 'notification-container';
-        document.body.appendChild(notificationContainer);
-    }
-
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-
-    notificationContainer.appendChild(notification);
-
-    // Remove notification after 5 seconds
-    setTimeout(() => {
-        notification.remove();
-    }, 5000);
 }
 
 // Function to fetch group data and questions
@@ -391,25 +394,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const groupData = await fetchGroupData();
                 console.log('Fetched group data:', groupData);
                 
-                // Create modal
-                const modal = document.createElement('div');
-                modal.className = 'modal';
-                
-                const modalContent = document.createElement('div');
-                modalContent.className = 'modal-content';
-                
-                const closeButton = document.createElement('span');
-                closeButton.className = 'close-button';
-                closeButton.innerHTML = '&times;';
-                closeButton.onclick = () => {
-                    modal.remove();
-                    joinButton.disabled = false;
-                    joinButton.textContent = 'Aanmelden interesselijst';
-                };
-                
-                const title = document.createElement('h2');
-                title.textContent = 'Aanmelden interesselijst';
-                
+                // Create form
                 const form = document.createElement('form');
                 form.onsubmit = async (e) => {
                     e.preventDefault();
@@ -443,15 +428,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         });
                         // Submit join request
                         await joinGroup(answers);
-                        // Show success step in modal
-                        modalContent.innerHTML = `
-                            <span class="close-button" style="float:right;cursor:pointer;font-size:28px;">&times;</span>
-                            <h2>Success!</h2>
-                            <p>You have successfully joined the group.</p>
-                            <button class="close-modal-btn" style="margin-top:20px;">Close</button>
-                        `;
-                        modalContent.querySelector('.close-button').onclick = () => modal.remove();
-                        modalContent.querySelector('.close-modal-btn').onclick = () => modal.remove();
                     } catch (error) {
                         console.error('Form submission error:', error);
                         showNotification('error', error.message || 'Failed to submit form');
@@ -474,11 +450,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 form.appendChild(submitButton);
                 
-                modalContent.appendChild(closeButton);
-                modalContent.appendChild(title);
-                modalContent.appendChild(form);
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
+                // Create modal with form
+                window.modalSystem.createModal('Aanmelden interesselijst', form.outerHTML, { id: 'joinGroupModal' });
+                window.modalSystem.showModal('joinGroupModal');
                 
                 // Reset join button state
                 joinButton.disabled = false;
