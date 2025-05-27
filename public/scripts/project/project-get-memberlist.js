@@ -3,89 +3,212 @@ function populateProjectData(data) {
     try {
         // Basic project information
         const titleElement = document.querySelector('.project-title');
-        if (titleElement) titleElement.textContent = data.title;
+        if (titleElement) {
+            if (data.title) {
+                titleElement.textContent = data.title;
+                titleElement.style.display = 'block';
+            } else {
+                titleElement.style.display = 'none';
+            }
+        }
 
         const subtitleElement = document.querySelector('.project-subtitle');
-        if (subtitleElement) subtitleElement.textContent = data.subtitle;
+        if (subtitleElement) {
+            if (data.subtitle) {
+                subtitleElement.textContent = data.subtitle;
+                subtitleElement.style.display = 'block';
+            } else {
+                subtitleElement.style.display = 'none';
+            }
+        }
 
         const introElement = document.querySelector('.project-intro');
-        if (introElement) introElement.innerHTML = data.intro;
+        if (introElement) {
+            if (data.intro) {
+                introElement.innerHTML = data.intro;
+                introElement.style.display = 'block';
+            } else {
+                introElement.style.display = 'none';
+            }
+        }
 
         const locationElement = document.querySelector('.project-location');
-        if (locationElement) locationElement.textContent = data.location;
+        if (locationElement) {
+            if (data.location) {
+                locationElement.textContent = data.location;
+                locationElement.style.display = 'block';
+            } else {
+                locationElement.style.display = 'none';
+            }
+        }
         
         // Project details
         const phaseElement = document.querySelector('.project-phase');
-        if (phaseElement) phaseElement.textContent = data.phase?.name || '';
+        if (phaseElement) {
+            if (data.phase?.name) {
+                phaseElement.textContent = data.phase.name;
+                phaseElement.style.display = 'block';
+            } else {
+                phaseElement.style.display = 'none';
+            }
+        }
 
         const developmentFormElement = document.querySelector('.project-development-form');
-        if (developmentFormElement) developmentFormElement.textContent = data.development_form?.name || '';
+        if (developmentFormElement) {
+            if (data.development_form?.name) {
+                developmentFormElement.textContent = data.development_form.name;
+                developmentFormElement.style.display = 'block';
+            } else {
+                developmentFormElement.style.display = 'none';
+            }
+        }
 
         const homesCountElement = document.querySelector('.project-homes-count');
-        if (homesCountElement) homesCountElement.textContent = data.number_of_homes || '';
+        if (homesCountElement) {
+            if (data.number_of_homes) {
+                homesCountElement.textContent = data.number_of_homes;
+                homesCountElement.style.display = 'block';
+            } else {
+                homesCountElement.style.display = 'none';
+            }
+        }
 
         const memberStatusElement = document.querySelector('.project-member-status');
-        if (memberStatusElement) memberStatusElement.textContent = data.member_status?.name || '';
+        if (memberStatusElement) {
+            if (data.member_status?.name) {
+                memberStatusElement.textContent = data.member_status.name;
+                memberStatusElement.style.display = 'block';
+            } else {
+                memberStatusElement.style.display = 'none';
+            }
+        }
         
         // Contact information
         const contactNameElement = document.querySelector('.project-contact-name');
-        if (contactNameElement) contactNameElement.textContent = data.contact_name;
+        if (contactNameElement) {
+            if (data.contact_name) {
+                contactNameElement.textContent = data.contact_name;
+                contactNameElement.style.display = 'block';
+            } else {
+                contactNameElement.style.display = 'none';
+            }
+        }
 
         const contactEmailElement = document.querySelector('.project-contact-email');
-        if (contactEmailElement) contactEmailElement.textContent = data.contact_email;
+        if (contactEmailElement) {
+            if (data.contact_email) {
+                contactEmailElement.textContent = data.contact_email;
+                contactEmailElement.style.display = 'block';
+            } else {
+                contactEmailElement.style.display = 'none';
+            }
+        }
         
         // Housing forms
         const housingFormsContainer = document.querySelector('.project-housing-forms');
-        if (housingFormsContainer && data.housing_forms) {
-            housingFormsContainer.innerHTML = data.housing_forms.map(form => 
-                `<div class="housing-form">${form.title}</div>`
-            ).join('');
+        if (housingFormsContainer) {
+            if (data.housing_forms && data.housing_forms.length > 0) {
+                housingFormsContainer.innerHTML = data.housing_forms.map(form => 
+                    `<div class="housing-form">${form.title}</div>`
+                ).join('');
+                housingFormsContainer.style.display = 'block';
+            } else {
+                housingFormsContainer.style.display = 'none';
+            }
         }
         
         // Interests
         const interestsContainer = document.querySelector('.project-interests');
-        if (interestsContainer && data.interests) {
-            interestsContainer.innerHTML = data.interests.map(interest => 
-                `<div class="interest-tag">${interest.name}</div>`
-            ).join('');
+        if (interestsContainer) {
+            if (data.interests && data.interests.length > 0) {
+                interestsContainer.innerHTML = data.interests.map(interest => 
+                    `<div class="interest-tag">${interest.name}</div>`
+                ).join('');
+                interestsContainer.style.display = 'block';
+            } else {
+                interestsContainer.style.display = 'none';
+            }
         }
         
         // Buy budgets
         const buyBudgetsContainer = document.querySelector('.project-buy-budgets');
-        if (buyBudgetsContainer && data.buy_budgets) {
-            buyBudgetsContainer.innerHTML = data.buy_budgets.map(budget => 
-                `<div class="budget-tag">${budget.name}</div>`
-            ).join('');
+        if (buyBudgetsContainer) {
+            if (data.buy_budgets && data.buy_budgets.length > 0) {
+                buyBudgetsContainer.innerHTML = data.buy_budgets.map(budget => 
+                    `<div class="budget-tag">${budget.name}</div>`
+                ).join('');
+                buyBudgetsContainer.style.display = 'block';
+            } else {
+                buyBudgetsContainer.style.display = 'none';
+            }
         }
         
         // Target audiences
         const targetAudiencesContainer = document.querySelector('.project-target-audiences');
-        if (targetAudiencesContainer && data.target_audiences) {
-            targetAudiencesContainer.innerHTML = data.target_audiences.map(audience => 
-                `<div class="audience-tag">${audience.name}</div>`
-            ).join('');
+        if (targetAudiencesContainer) {
+            if (data.target_audiences && data.target_audiences.length > 0) {
+                targetAudiencesContainer.innerHTML = data.target_audiences.map(audience => 
+                    `<div class="audience-tag">${audience.name}</div>`
+                ).join('');
+                targetAudiencesContainer.style.display = 'block';
+            } else {
+                targetAudiencesContainer.style.display = 'none';
+            }
         }
         
         // Project images
         const imagesContainer = document.getElementById('gallery');
-        if (imagesContainer && data.images && data.images.length > 0) {
-            imagesContainer.innerHTML = data.images.map(image => 
-                `<img src="${image.conversions?.thumb?.url || image.original_url}" alt="${image.name}" class="project-image">`
-            ).join('');
+        if (imagesContainer) {
+            if (data.images && data.images.length > 0) {
+                imagesContainer.innerHTML = data.images.map(image => 
+                    `<img src="${image.conversions?.thumb?.url || image.original_url}" alt="${image.name}" class="project-image">`
+                ).join('');
+                imagesContainer.style.display = 'block';
+            } else {
+                imagesContainer.style.display = 'none';
+            }
         }
         
         // Project status indicators
         const buildingPermitElement = document.querySelector('.project-building-permit');
-        if (buildingPermitElement) buildingPermitElement.textContent = data.building_permit_status?.name || '';
+        if (buildingPermitElement) {
+            if (data.building_permit_status?.name) {
+                buildingPermitElement.textContent = data.building_permit_status.name;
+                buildingPermitElement.style.display = 'block';
+            } else {
+                buildingPermitElement.style.display = 'none';
+            }
+        }
 
         const constructionFinancingElement = document.querySelector('.project-construction-financing');
-        if (constructionFinancingElement) constructionFinancingElement.textContent = data.needs_construction_financing?.name || '';
+        if (constructionFinancingElement) {
+            if (data.needs_construction_financing?.name) {
+                constructionFinancingElement.textContent = data.needs_construction_financing.name;
+                constructionFinancingElement.style.display = 'block';
+            } else {
+                constructionFinancingElement.style.display = 'none';
+            }
+        }
 
         const planningCostsElement = document.querySelector('.project-planning-costs');
-        if (planningCostsElement) planningCostsElement.textContent = data.needs_planning_costs_financing?.name || '';
+        if (planningCostsElement) {
+            if (data.needs_planning_costs_financing?.name) {
+                planningCostsElement.textContent = data.needs_planning_costs_financing.name;
+                planningCostsElement.style.display = 'block';
+            } else {
+                planningCostsElement.style.display = 'none';
+            }
+        }
 
         const chamberRegistrationElement = document.querySelector('.project-chamber-registration');
-        if (chamberRegistrationElement) chamberRegistrationElement.textContent = data.chamber_of_commerce_registration_status?.name || '';
+        if (chamberRegistrationElement) {
+            if (data.chamber_of_commerce_registration_status?.name) {
+                chamberRegistrationElement.textContent = data.chamber_of_commerce_registration_status.name;
+                chamberRegistrationElement.style.display = 'block';
+            } else {
+                chamberRegistrationElement.style.display = 'none';
+            }
+        }
 
         console.log('Project data populated successfully');
     } catch (error) {
