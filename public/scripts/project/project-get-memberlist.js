@@ -301,10 +301,14 @@ document.addEventListener('DOMContentLoaded', fetchProjectData);
 // Function to show project details modal
 function showProjectDetailsModal() {
     const modal = document.getElementById('projectDetailsModal');
+    console.log('Showing modal:', modal);
+    console.log('Current project data:', window.projectData);
+    
     if (modal && window.projectData) {
         // Make sure the modal content is up to date
         populateProjectDetailsModal(window.projectData);
         modal.style.display = 'flex';
+        console.log('Modal display set to flex');
     } else {
         console.error('Modal or project data not found:', { modal, projectData: window.projectData });
     }
@@ -321,6 +325,11 @@ window.closeProjectDetailsModal = function() {
 // Function to populate project details modal
 function populateProjectDetailsModal(data) {
     console.log('Populating modal with data:', data);
+    console.log('Development form:', data.development_form);
+    console.log('Number of homes:', data.number_of_homes);
+    console.log('Contact info:', { name: data.contact_name, email: data.contact_email });
+    console.log('Interests:', data.interests);
+    
     const modalBody = document.querySelector('#projectDetailsModal .modal-body');
     if (!modalBody) {
         console.error('Modal body not found');
