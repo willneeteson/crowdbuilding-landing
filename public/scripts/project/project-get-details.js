@@ -315,6 +315,8 @@ function showProjectDetailsModal() {
         return;
     }
 
+    const data = window.projectData;
+
     // Create or get modal
     let modal = document.getElementById('projectDetailsModal');
     if (!modal) {
@@ -333,6 +335,20 @@ function showProjectDetailsModal() {
         `;
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         modal = document.getElementById('projectDetailsModal');
+        
+        // Add click outside listener
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeProjectDetailsModal();
+            }
+        });
+
+        // Add escape key listener
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal.style.display === 'flex') {
+                closeProjectDetailsModal();
+            }
+        });
     }
 
     // Populate modal content
@@ -342,120 +358,14 @@ function showProjectDetailsModal() {
         return;
     }
 
-    // Helper function to create a section if data exists
-    const createSection = (title, data, formatter) => {
-        if (!data) return '';
-        const formattedData = formatter(data);
-        if (!formattedData) return '';
-        return `
-            <div class="modal-section">
-                <h4>${title}</h4>
-                ${formattedData}
-            </div>
-        `;
-    };
-
-    // Helper function to format object properties
-    const formatObjectProperties = (obj) => {
-        if (!obj || typeof obj !== 'object') return '';
-        return Object.entries(obj)
-            .filter(([key, value]) => value !== null && value !== undefined && key !== 'pivot')
-            .map(([key, value]) => {
-                const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-                if (typeof value === 'object' && value !== null) {
-                    if (value.name) {
-                        return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value.name}</div>`;
-                    } else if (value.title) {
-                        return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value.title}</div>`;
-                    }
-                }
-                return `<div class="detail-item"><strong>${formattedKey}:</strong> ${value}</div>`;
-            })
-            .join('');
-    };
-
-    // Helper function to format array of objects
-    const formatArrayOfObjects = (arr) => {
-        if (!Array.isArray(arr) || arr.length === 0) return '';
-        return `
-            <div class="tags-list">
-                ${arr.map(item => `
-                    <div class="tag">
-                        ${item.name || item.title || formatObjectProperties(item)}
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    };
-
-    // Create content sections for all available data
-    const content = `
-        ${createSection('Basic Information', window.projectData, (data) => `
-            <div class="project-details">
-                ${formatObjectProperties(data)}
-            </div>
-        `)}
-
-        ${createSection('Housing Forms', window.projectData.housing_forms, formatArrayOfObjects)}
-        
-        ${createSection('Interests', window.projectData.interests, formatArrayOfObjects)}
-        
-        ${createSection('Buy Budgets', window.projectData.buy_budgets, formatArrayOfObjects)}
-        
-        ${createSection('Target Audiences', window.projectData.target_audiences, formatArrayOfObjects)}
-        
-        ${createSection('Project Status', {
-            building_permit_status: window.projectData.building_permit_status,
-            needs_construction_financing: window.projectData.needs_construction_financing,
-            needs_planning_costs_financing: window.projectData.needs_planning_costs_financing,
-            chamber_of_commerce_registration_status: window.projectData.chamber_of_commerce_registration_status
-        }, formatObjectProperties)}
-        
-        ${createSection('Contact Information', {
-            contact_name: window.projectData.contact_name,
-            contact_email: window.projectData.contact_email
-        }, formatObjectProperties)}
-
-        ${createSection('Additional Information', {
-            created_at: window.projectData.created_at,
-            updated_at: window.projectData.updated_at,
-            deleted_at: window.projectData.deleted_at,
-            id: window.projectData.id,
-            slug: window.projectData.slug
-        }, formatObjectProperties)}
-    `;
-
-    // Set content and show modal
-    modalBody.innerHTML = content;
-    modal.style.display = 'flex';
-    console.log('Modal content set and displayed with all API data');
-}
-
-// Function to close project details modal
-window.closeProjectDetailsModal = function() {
-    const modal = document.getElementById('projectDetailsModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Function to populate project details modal
-function populateProjectDetailsModal(data) {
-    console.log('Populating modal with data:', data);
-    const modalBody = document.querySelector('#projectDetailsModal .modal-body');
-    
-    if (!modalBody) {
-        console.error('Modal body element not found');
-        return;
-    }
-
-    // Create the content
+    // Create the content sections
     const modalContent = `
         <div class="modal-section">
             <h4>Project Information</h4>
             <div class="project-details">
                 ${data.title ? `<div class="detail-item"><strong>Title:</strong> ${data.title}</div>` : ''}
                 ${data.subtitle ? `<div class="detail-item"><strong>Subtitle:</strong> ${data.subtitle}</div>` : ''}
+                ${data.intro ? `<div class="detail-item"><strong>Introduction:</strong> ${data.intro}</div>` : ''}
                 ${data.location ? `<div class="detail-item"><strong>Location:</strong> ${data.location}</div>` : ''}
                 ${data.phase?.name ? `<div class="detail-item"><strong>Phase:</strong> ${data.phase.name}</div>` : ''}
                 ${data.development_form?.name ? `<div class="detail-item"><strong>Development Form:</strong> ${data.development_form.name}</div>` : ''}
@@ -501,7 +411,7 @@ function populateProjectDetailsModal(data) {
         ` : ''}
 
         <div class="modal-section">
-            <h4>Status</h4>
+            <h4>Project Status</h4>
             <div class="project-status">
                 ${data.building_permit_status?.name ? `<div class="status-item"><strong>Building Permit:</strong> ${data.building_permit_status.name}</div>` : ''}
                 ${data.needs_construction_financing?.name ? `<div class="status-item"><strong>Construction Financing:</strong> ${data.needs_construction_financing.name}</div>` : ''}
@@ -510,18 +420,42 @@ function populateProjectDetailsModal(data) {
             </div>
         </div>
 
-        <div class="modal-section">
-            <h4>Contact Information</h4>
-            <div class="contact-info">
-                ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
-                ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+        ${(data.contact_name || data.contact_email) ? `
+            <div class="modal-section">
+                <h4>Contact Information</h4>
+                <div class="contact-info">
+                    ${data.contact_name ? `<div class="contact-item"><strong>Name:</strong> ${data.contact_name}</div>` : ''}
+                    ${data.contact_email ? `<div class="contact-item"><strong>Email:</strong> ${data.contact_email}</div>` : ''}
+                </div>
             </div>
-        </div>
+        ` : ''}
+
+        ${data.images && data.images.length > 0 ? `
+            <div class="modal-section">
+                <h4>Project Images</h4>
+                <div class="project-images">
+                    ${data.images.map(image => `
+                        <img src="${image.conversions?.thumb?.url || image.original_url}" 
+                             alt="${image.name}" 
+                             class="project-image">
+                    `).join('')}
+                </div>
+            </div>
+        ` : ''}
     `;
 
-    // Set the content
+    // Set content and show modal
     modalBody.innerHTML = modalContent;
-    console.log('Modal content set:', modalBody.innerHTML);
+    modal.style.display = 'flex';
+    console.log('Modal content set and displayed');
+}
+
+// Function to close project details modal
+window.closeProjectDetailsModal = function() {
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
 }
 
 // Helper function to create a detail item
