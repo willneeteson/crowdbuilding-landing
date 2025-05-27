@@ -41,15 +41,18 @@ function populateMembersList(data) {
             return;
         }
 
-        if (!data.members || !Array.isArray(data.members)) {
-            console.error('No members array in data:', data);
+        // Handle both array and object data structures
+        const members = Array.isArray(data) ? data : (data.members || []);
+        
+        if (!Array.isArray(members)) {
+            console.error('No valid members array found in data:', data);
             return;
         }
 
-        console.log('Number of members to display:', data.members.length);
+        console.log('Number of members to display:', members.length);
 
         // Create HTML for members
-        const membersHTML = data.members.map(member => {
+        const membersHTML = members.map(member => {
             console.log('Processing member:', member);
             // Ensure avatar_url is a complete URL
             const avatarUrl = member.avatar_url 
@@ -74,7 +77,7 @@ function populateMembersList(data) {
         // Add members count to the heading if it exists
         const headingElement = membersContainer.previousElementSibling;
         if (headingElement && headingElement.tagName === 'H3') {
-            headingElement.textContent = `Members (${data.members_count || 0})`;
+            headingElement.textContent = `Members (${members.length})`;
         }
 
         // Update the container with members list
@@ -113,7 +116,7 @@ async function fetchMembersData() {
             return;
         }
 
-        const projectId = 'tiny-house-alkmaar';
+        const projectId = 'will-s-farm';
         console.log('Fetching members for project:', projectId);
         
         const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
