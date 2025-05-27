@@ -402,44 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Create form
                 const form = document.createElement('form');
-                form.onsubmit = async (e) => {
-                    e.preventDefault();
-                    try {
-                        // Validate required fields
-                        const requiredInputs = form.querySelectorAll('[required]');
-                        let isValid = true;
-                        requiredInputs.forEach(input => {
-                            if (!input.value.trim()) {
-                                isValid = false;
-                                input.classList.add('error');
-                            } else {
-                                input.classList.remove('error');
-                            }
-                        });
-                        if (!isValid) {
-                            showNotification('error', 'Please fill in all required fields');
-                            return;
-                        }
-                        // Collect answers
-                        const answers = {};
-                        const inputs = form.querySelectorAll('input, select, textarea');
-                        inputs.forEach(input => {
-                            if (input.name) {
-                                if (input.type === 'checkbox') {
-                                    answers[input.name] = input.checked ? 'on' : 'off';
-                                } else {
-                                    answers[input.name] = input.value.trim();
-                                }
-                            }
-                        });
-                        // Submit join request
-                        await joinGroup(answers);
-                    } catch (error) {
-                        console.error('Form submission error:', error);
-                        showNotification('error', error.message || 'Failed to submit form');
-                    }
-                };
-
+                
                 // Add informational text
                 const infoText = document.createElement('p');
                 infoText.className = 'group-join-info';
@@ -466,6 +429,48 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const modalSystem = await window.waitForModalSystem();
                 modalSystem.createModal('Aanmelden interesselijst', form.outerHTML, { id: 'joinGroupModal' });
                 modalSystem.showModal('joinGroupModal');
+
+                // Set up form submission handler after modal is created
+                const modalForm = document.querySelector('#joinGroupModal form');
+                if (modalForm) {
+                    modalForm.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        try {
+                            // Validate required fields
+                            const requiredInputs = modalForm.querySelectorAll('[required]');
+                            let isValid = true;
+                            requiredInputs.forEach(input => {
+                                if (!input.value.trim()) {
+                                    isValid = false;
+                                    input.classList.add('error');
+                                } else {
+                                    input.classList.remove('error');
+                                }
+                            });
+                            if (!isValid) {
+                                showNotification('error', 'Please fill in all required fields');
+                                return;
+                            }
+                            // Collect answers
+                            const answers = {};
+                            const inputs = modalForm.querySelectorAll('input, select, textarea');
+                            inputs.forEach(input => {
+                                if (input.name) {
+                                    if (input.type === 'checkbox') {
+                                        answers[input.name] = input.checked ? 'on' : 'off';
+                                    } else {
+                                        answers[input.name] = input.value.trim();
+                                    }
+                                }
+                            });
+                            // Submit join request
+                            await joinGroup(answers);
+                        } catch (error) {
+                            console.error('Form submission error:', error);
+                            showNotification('error', error.message || 'Failed to submit form');
+                        }
+                    });
+                }
                 
                 // Reset join button state
                 joinButton.disabled = false;
