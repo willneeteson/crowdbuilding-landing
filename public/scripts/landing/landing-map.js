@@ -28,8 +28,8 @@ function initializeMap() {
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq",
-    center: [5.2, 52.55],
-    zoom: 7.5,
+    center: [5.97536322, 51.52702596], // Venray coordinates
+    zoom: 8.5, // Adjusted zoom level to better show the area
     minZoom: 6,
     maxZoom: 10,
     pitchWithRotate: false,
@@ -101,7 +101,7 @@ async function getDynamicMarkers() {
     return {
       type: "FeatureCollection",
       features: data.data
-        .filter(group => group.latitude && group.longitude)
+        .filter(group => group.latitude && group.longitude && group.location_found)
         .map(group => ({
           type: "Feature",
           geometry: { 
@@ -112,7 +112,8 @@ async function getDynamicMarkers() {
             title: group.title,
             link: `https://app.crowdbuilding.com/groups/${group.id}`,
             description: group.subtitle || group.intro?.replace(/<[^>]*>/g, '') || '',
-            image: group.image?.conversions?.thumb?.url || group.image?.original_url || DEFAULT_IMAGE
+            image: group.image?.conversions?.thumb?.url || group.image?.original_url || DEFAULT_IMAGE,
+            location: group.location
           },
         })),
     };
