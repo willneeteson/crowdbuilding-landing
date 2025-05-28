@@ -429,11 +429,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Wait for modal system and create modal with form
                 const modalSystem = await window.waitForModalSystem();
-                const modalContent = `
-                    <div class="cb-modal-body">
-                        ${form.outerHTML}
-                    </div>
-                `;
+                const modalContent = `${form.outerHTML}`;
                 modalSystem.createModal('Aanmelden interesselijst', modalContent, { id: 'joinGroupModal' });
                 modalSystem.showModal('joinGroupModal');
 
