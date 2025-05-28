@@ -124,121 +124,8 @@ function showModal() {
         return;
     }
 
-    // Add styles for the details modal
-    const styles = `
-        <style>
-            .cb-details-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 32px;
-                padding: 32px;
-            }
-
-            .cb-detail-item {
-                display: flex;
-                gap: 16px;
-                align-items: baseline;
-            }
-
-            .cb-detail-item h4 {
-                min-width: 140px;
-                margin: 0;
-            }
-
-            .cb-detail-item span {
-                color: #090F3F;
-                font-size: 18px;
-                line-height: 1.4;
-                flex: 1;
-            }
-
-            .cb-detail-item.full-width {
-                grid-column: 1 / -1;
-                padding-top: 32px;
-                border-top: 1px solid #E5E7F0;
-            }
-
-            .cb-detail-item.full-width:not(:first-child) {
-                margin-top: 32px;
-            }
-
-            .tags-list {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-                flex: 1;
-            }
-
-            .tag {
-                background: #F5F6FA;
-                padding: 8px 16px;
-                border-radius: 99px;
-                font-weight: 600;
-                font-size: 16px;
-                line-height: 140%;
-                color: #090F3F;
-            }
-
-            @media (max-width: 991px) {
-                .cb-detail-item {
-                    flex-direction: column;
-                    gap: 8px;
-                }
-
-                .cb-detail-item h4 {
-                    min-width: unset;
-                }
-
-                .cb-details-grid {
-                    grid-template-columns: 1fr;
-                    padding: 24px;
-                    gap: 24px;
-                }
-
-                .cb-detail-item {
-                    padding-bottom: 24px;
-                    border-bottom: 1px solid #E5E7F0;
-                }
-
-                .cb-detail-item:last-child {
-                    border-bottom: none;
-                    padding-bottom: 0;
-                }
-
-                .cb-detail-item.full-width {
-                    margin-top: 0;
-                    padding-top: 24px;
-                }
-
-                .tags-list {
-                    margin-top: 12px;
-                }
-            }
-
-            @media (max-width: 480px) {
-                .cb-details-grid {
-                    padding: 16px;
-                    gap: 20px;
-                }
-
-                .cb-detail-item {
-                    padding-bottom: 20px;
-                }
-
-                .cb-detail-item.full-width {
-                    padding-top: 20px;
-                }
-
-                .tag {
-                    padding: 6px 14px;
-                }
-            }
-        </style>
-    `;
-
     // Create modal content
     const content = `
-        ${styles}
         <div class="cb-details-grid">
             <div class="cb-detail-item">
                 <h4>Fase</h4>
@@ -302,6 +189,12 @@ function showModal() {
             ` : ''}
         </div>
     `;
+
+    // Get the modal element and add the project-details-modal class
+    const modal = document.getElementById('projectDetailsModal');
+    if (modal) {
+        modal.classList.add('project-details-modal');
+    }
 
     // Update modal content and show it
     window.modalSystem.updateModalContent('projectDetailsModal', content);
