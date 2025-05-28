@@ -33,6 +33,18 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    // Get the current page slug from the URL
+    const pathParts = window.location.pathname.split('/');
+    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    
+    if (!groupSlug) {
+      console.error('No group slug found in URL');
+      alert('Error: Could not determine group. Please try again.');
+      submitButton.disabled = originalButtonState;
+      submitButton.textContent = originalButtonText;
+      return;
+    }
+
     const formData = new FormData();
     formData.append('body', body);
 
@@ -72,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-      const response = await fetch('https://api.crowdbuilding.com/api/v1/groups/will-s-farm/posts', {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData
