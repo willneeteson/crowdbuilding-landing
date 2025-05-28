@@ -522,7 +522,6 @@ style.textContent = `
     .cb-modal-body {
         flex: 1;
         overflow-y: auto;
-        padding: 24px;
         -webkit-overflow-scrolling: touch;
     }
 
