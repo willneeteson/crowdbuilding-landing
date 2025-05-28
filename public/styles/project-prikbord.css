@@ -18,7 +18,7 @@
     gap: 1rem;
     cursor: pointer;
     transition: transform 0.2s ease;
-    display: relative;
+    position: relative;
 }
 
 .post-header {
@@ -89,8 +89,8 @@
     width: 40px;
     height: 40px;
     margin: 0 auto 1rem;
-    border: 3px solid #f3f3f3;
-    border-top: 3px solid #3498db;
+    border: 3px solid #F2F0EA;
+    border-top: 3px solid #00000010;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
