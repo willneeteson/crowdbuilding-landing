@@ -148,8 +148,9 @@
     font-size: 1.1em;
 }
 
-.submit-button :disabled {
-opacity: 0.4;
+button[disabled], html input[disabled] {
+    cursor: default;
+    opacity: 0.3;
 }
 
 .submit-button:hover {
@@ -944,10 +945,10 @@ button.post-menu-item.delete {
 
 .cb-modal-close {
     cursor: pointer;
-    font-size: 24px;
-    color: #666;
+    font-size: 32px;
+    color: #090F3F;
     transition: color 0.2s;
-    padding: 5px;
+    padding: 0px;
     line-height: 1;
 }
 
