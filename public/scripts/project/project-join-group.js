@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 const emailLabel = document.createElement('label');
                 emailLabel.htmlFor = 'email_visibility';
-                emailLabel.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
+                emailLabel.textContent = 'Ja, ik meld me aan voor deze groep, de groepschat en updates over dit project. Ik ga ermee akkoord dat initiatiefnemers contact met me kunnen opnemen en mijn contactgegevens en publieke informatie kunnen bekijken.';
                 emailLabel.className = 'email-visibility-label';
                 
                 emailVisibilityDiv.appendChild(emailCheckbox);
@@ -434,9 +434,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const modalSubmitButton = modalForm.querySelector('.submit-button');
                     const modalCheckbox = modalForm.querySelector('#email_visibility');
                     
+                    // Ensure submit button starts disabled
+                    if (modalSubmitButton) {
+                        modalSubmitButton.disabled = true;
+                    }
+                    
                     // Add checkbox listener to control submit button
                     modalCheckbox.addEventListener('change', (e) => {
-                        modalSubmitButton.disabled = !e.target.checked;
+                        if (modalSubmitButton) {
+                            modalSubmitButton.disabled = !e.target.checked;
+                        }
                     });
 
                     modalForm.addEventListener('submit', async (e) => {
