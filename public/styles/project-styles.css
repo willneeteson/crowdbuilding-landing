@@ -1129,15 +1129,6 @@ button.post-menu-item.delete {
     line-height: 1.4;
 }
 
-/* Project wrapper styles */
-#projectMemberWrapper,
-#projectAdminWrapper {
-    transition: background-color 0.2s ease;
-    border-radius: 8px;
-    padding: 8px;
-    margin: -8px;
-}
-
 #projectMemberWrapper:hover,
 #projectAdminWrapper:hover {
     background-color: rgba(0, 0, 0, 0.03);
