@@ -104,7 +104,7 @@ async function populateAdminsList(data) {
         // Create the compact view container with click handler
         const compactViewHTML = `
             <div class="members-compact-view">
-                <div class="members-avatars" onclick="showAdminsModal()">
+                <div class="members-avatars">
                     ${avatarsHTML}
                     ${remainingHTML}
                 </div>
@@ -142,6 +142,13 @@ async function populateAdminsList(data) {
 
         // Add the compact view to the container
         adminsContainer.innerHTML = compactViewHTML;
+
+        // Add click handler to the wrapper div
+        const wrapper = document.getElementById('projectAdminWrapper');
+        if (wrapper) {
+            wrapper.style.cursor = 'pointer';
+            wrapper.addEventListener('click', showAdminsModal);
+        }
 
         console.log('Admins list populated successfully');
     } catch (error) {
