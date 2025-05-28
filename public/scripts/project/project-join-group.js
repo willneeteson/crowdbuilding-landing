@@ -101,26 +101,6 @@ function createQuestionForm(questions) {
         questionDiv.appendChild(input);
         formContainer.appendChild(questionDiv);
     });
-
-    // Add email visibility checkbox
-    const emailVisibilityDiv = document.createElement('div');
-    emailVisibilityDiv.className = 'email-visibility-container';
-    
-    const emailCheckbox = document.createElement('input');
-    emailCheckbox.type = 'checkbox';
-    emailCheckbox.id = 'email_visibility';
-    emailCheckbox.name = 'email_visibility';
-    emailCheckbox.required = true;
-    emailCheckbox.className = 'email-visibility-checkbox';
-    
-    const emailLabel = document.createElement('label');
-    emailLabel.htmlFor = 'email_visibility';
-    emailLabel.textContent = 'Admin can see your email';
-    emailLabel.className = 'email-visibility-label';
-    
-    emailVisibilityDiv.appendChild(emailCheckbox);
-    emailVisibilityDiv.appendChild(emailLabel);
-    formContainer.appendChild(emailVisibilityDiv);
     
     return formContainer;
 }
@@ -405,12 +385,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Create form
                 const form = document.createElement('form');
                 
-                // Add informational text
-                const infoText = document.createElement('p');
-                infoText.className = 'group-join-info';
-                infoText.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
-                form.appendChild(infoText);
-                
                 // Add questions to form if they exist
                 if (groupData.questions && groupData.questions.length > 0) {
                     console.log('Creating questions form with questions:', groupData.questions);
@@ -419,23 +393,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } else {
                     console.log('No questions found in group data');
                 }
+
+                // Add email visibility container after questions
+                const emailVisibilityDiv = document.createElement('div');
+                emailVisibilityDiv.className = 'email-visibility-container';
+                
+                const emailCheckbox = document.createElement('input');
+                emailCheckbox.type = 'checkbox';
+                emailCheckbox.id = 'email_visibility';
+                emailCheckbox.name = 'email_visibility';
+                emailCheckbox.required = true;
+                emailCheckbox.className = 'email-visibility-checkbox';
+                
+                const emailLabel = document.createElement('label');
+                emailLabel.htmlFor = 'email_visibility';
+                emailLabel.textContent = 'Door je aan te melden wordt je toegevoegd aan de groepschat en ontvang je updates over dit project. Initiatiefnemers kunnen contact met je opnemen en je contactgegevens en publieke informatie bekijken.';
+                emailLabel.className = 'email-visibility-label';
+                
+                emailVisibilityDiv.appendChild(emailCheckbox);
+                emailVisibilityDiv.appendChild(emailLabel);
+                form.appendChild(emailVisibilityDiv);
                 
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
                 submitButton.textContent = 'Verstuur';
                 submitButton.className = 'submit-button';
+                submitButton.disabled = true; // Start disabled
                 
                 form.appendChild(submitButton);
-                
+
                 // Wait for modal system and create modal with form
                 const modalSystem = await window.waitForModalSystem();
                 const modalContent = `${form.outerHTML}`;
                 modalSystem.createModal('Aanmelden interesselijst', modalContent, { id: 'joinGroupModal' });
                 modalSystem.showModal('joinGroupModal');
 
-                // Set up form submission handler after modal is created
+                // Set up form submission handler and checkbox listener after modal is created
                 const modalForm = document.querySelector('#joinGroupModal form');
                 if (modalForm) {
+                    const modalSubmitButton = modalForm.querySelector('.submit-button');
+                    const modalCheckbox = modalForm.querySelector('#email_visibility');
+                    
+                    // Add checkbox listener to control submit button
+                    modalCheckbox.addEventListener('change', (e) => {
+                        modalSubmitButton.disabled = !e.target.checked;
+                    });
+
                     modalForm.addEventListener('submit', async (e) => {
                         e.preventDefault();
                         try {
@@ -443,7 +446,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                             const requiredInputs = modalForm.querySelectorAll('[required]');
                             let isValid = true;
                             requiredInputs.forEach(input => {
-                                if (!input.value.trim()) {
+                                if (!input.value.trim() && input.type !== 'checkbox') {
+                                    isValid = false;
+                                    input.classList.add('error');
+                                } else if (input.type === 'checkbox' && !input.checked) {
                                     isValid = false;
                                     input.classList.add('error');
                                 } else {
