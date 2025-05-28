@@ -31,6 +31,8 @@
     background: rgba(0, 0, 0, 0.08);
     padding: 6px 12px;
     border-radius: 99px;
+    color: #090f3f;
+    font-weight: bold;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -92,18 +94,17 @@
 #projectDetailsModal .modal-header h3 {
     margin: 0;
     font-size: 1.5rem;
-    color: #333;
 }
 
 #projectDetailsModal .close-modal {
     font-size: 1.5rem;
     cursor: pointer;
-    color: #666;
+    color: #090F3F;
     transition: color 0.2s;
 }
 
 #projectDetailsModal .close-modal:hover {
-    color: #333;
+    color: #090F3F;
 }
 
 /* Global Form Styles */
@@ -335,7 +336,7 @@
 .modal-section h4 {
     margin-bottom: 12px;
     font-size: 18px;
-    color: #333;
+    color: #090F3F;
 }
 
 .project-details,
@@ -435,7 +436,7 @@
     padding: 16px;
     cursor: pointer;
     font-weight: 500;
-    color: #333;
+    color: #090F3F;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -482,7 +483,7 @@
 
 #projectDetailsModal .modal-section h4 {
     margin: 0 0 1rem 0;
-    color: #333;
+    color: #090F3F;
     font-size: 1.2rem;
 }
 
@@ -505,7 +506,7 @@
     padding: 6px 12px;
     border-radius: 99px;
     font-size: 14px;
-    color: #333;
+    color: #090F3F;
     display: inline-flex;
     align-items: center;
     justify-content: center;
