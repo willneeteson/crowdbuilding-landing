@@ -31,12 +31,9 @@
     background: rgba(0, 0, 0, 0.08);
     padding: 6px 12px;
     border-radius: 99px;
-    font-size: 14px;
-    color: #333;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
     flex-shrink: 0;
 }
 
@@ -141,11 +138,13 @@
 .submit-button {
     background-color: #FF5C54;
     color: white;
-    padding: 0.5rem 1rem;
+    padding: 12px 28px;
     border: none;
-    border-radius: 4px;
+    width: 100%;
+    border-radius: 99px;
     cursor: pointer;
     margin-top: 1rem;
+    font-size: 1.1em;
 }
 
 .submit-button:hover {
@@ -205,7 +204,6 @@
     padding: 6px 12px;
     border-radius: 99px;
     font-size: 14px;
-    color: #090f3f;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -383,7 +381,8 @@
     background: rgba(0, 0, 0, 0.08);
     border-radius: 99px;
     font-size: 14px;
-    color: #333;
+    color: #090f3f;
+    font-weight: bold;
     display: inline-flex;
     align-items: center;
     justify-content: center;
