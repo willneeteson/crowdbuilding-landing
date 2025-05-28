@@ -1,3 +1,346 @@
+/* ==========================================================================
+   Table of Contents:
+   1. Global Variables
+   2. Layout & Grid
+   3. Typography
+   4. Buttons & Interactive Elements
+   5. Forms & Inputs
+   6. Modals & Overlays
+   7. Components
+   8. Animations
+   9. Media Queries
+   ========================================================================== */
+
+/* 1. Global Variables
+   ========================================================================== */
+:root {
+    --color-primary: #FF5C54;
+    --color-primary-dark: #FF291F;
+    --color-text: #090F3F;
+    --color-text-light: #666666;
+    --color-border: #e0e0e0;
+    --color-background: #ffffff;
+    --color-background-light: #f8f9fa;
+    --color-error: #ff4444;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+    --border-radius-full: 99px;
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+}
+
+/* 2. Layout & Grid
+   ========================================================================== */
+.members-compact-view {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    height: 40px;
+}
+
+.members-avatars {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+}
+
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+/* 3. Typography
+   ========================================================================== */
+.cb-modal-header h3 {
+    margin: 0;
+    font-size: 1.5em;
+    color: var(--color-text);
+}
+
+.cb-member-name {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.cb-member-role {
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+/* 4. Buttons & Interactive Elements
+   ========================================================================== */
+.submit-button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 28px;
+    border: none;
+    width: 100%;
+    border-radius: var(--border-radius-full);
+    cursor: pointer;
+    margin-top: 1rem;
+    font-size: 1.1em;
+    transition: all 0.2s ease;
+}
+
+.submit-button:hover:not(:disabled) {
+    background-color: var(--color-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 92, 84, 0.2);
+}
+
+.submit-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.submit-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.join-group-button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--border-radius-full);
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+    margin: 10px 0;
+}
+
+.join-group-button:hover:not(:disabled):not(.joined) {
+    background-color: var(--color-primary-dark);
+}
+
+.join-group-button:disabled,
+.join-group-button.joined {
+    background-color: var(--_color---color-neutral-black-100);
+    color: #fff;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* 5. Forms & Inputs
+   ========================================================================== */
+.group-questions-form .question-container {
+    margin-bottom: var(--spacing-lg);
+    padding: 0;
+}
+
+.group-questions-form .question-container:last-child {
+    margin-bottom: 0;
+}
+
+.group-questions-form .question-container label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.group-questions-form .question-input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    transition: all 0.2s ease;
+    font-size: 15px;
+}
+
+.group-questions-form .question-input:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.group-questions-form .question-input.error {
+    border-color: var(--color-error);
+    background-color: #fff8f8;
+}
+
+.email-visibility-container {
+    margin: var(--spacing-lg) 0;
+    display: flex;
+    padding: var(--spacing-md);
+    gap: var(--spacing-sm);
+    background-color: var(--color-background-light);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.email-visibility-container label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.email-visibility-checkbox {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+}
+
+/* 6. Modals & Overlays
+   ========================================================================== */
+.cb-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: cbFadeIn 0.3s ease-in-out;
+}
+
+.cb-modal-content {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-background);
+    border-radius: var(--border-radius-xl);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+    animation: cbSlideIn 0.3s ease-in-out;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.cb-modal-header {
+    position: sticky;
+    top: 0;
+    background: var(--color-background);
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.cb-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    color: var(--color-text);
+    padding: var(--spacing-lg);
+}
+
+/* 7. Components
+   ========================================================================== */
+.member-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.member-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tag {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 6px 12px;
+    border-radius: var(--border-radius-full);
+    font-size: 14px;
+    color: var(--color-text);
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+}
+
+/* 8. Animations
+   ========================================================================== */
+@keyframes cbFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes cbSlideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.6; }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* 9. Media Queries
+   ========================================================================== */
+@media (max-width: 991px) {
+    .project-details-modal .cb-detail-item {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .project-details-modal .cb-details-grid {
+        gap: var(--spacing-lg);
+    }
+
+    .project-details-modal .cb-detail-item {
+        padding-bottom: var(--spacing-lg);
+        border-bottom: 1px solid var(--color-border);
+    }
+}
+
+@media (max-width: 480px) {
+    .cb-modal-content {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .cb-modal-body {
+        padding: var(--spacing-lg);
+    }
+
+    .project-details-modal .cb-details-grid {
+        padding: var(--spacing-md);
+        gap: 20px;
+    }
+
+    .project-details-modal .tag {
+        padding: 6px 14px;
+    }
+}
+
 /* Members compact view styles */
 .members-compact-view {
     display: flex;
@@ -136,38 +479,8 @@
 }
 
 /* Global Button Styles */
-.submit-button {
-    background-color: #FF5C54;
-    color: white;
-    padding: 12px 28px;
-    border: none;
-    width: 100%;
-    border-radius: 99px;
-    cursor: pointer;
-    margin-top: 1rem;
-    font-size: 1.1em;
-}
-
-button[disabled], html input[disabled] {
-    cursor: default;
-    opacity: 0.3;
-}
-
 .submit-button:hover {
     background-color: #FF291F;
-}
-
-.join-group-button {
-    background-color: #FF5C54;
-    color: white;
-    padding: 12px 28px;
-    border: none;
-    border-radius: 99px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-    margin: 10px 0;
 }
 
 .join-group-button:hover:not(:disabled):not(.joined) {
@@ -183,12 +496,6 @@ button[disabled], html input[disabled] {
 }
 
 /* Image Gallery Styles */
-.image-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
 .image-gallery img {
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -407,18 +714,6 @@ button[disabled], html input[disabled] {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-}
-
-.tag {
-    padding: 6px 12px;
-    background: rgba(0, 0, 0, 0.08);
-    border-radius: 99px;
-    font-size: 14px;
-    color: #090f3f;
-    font-weight: bold;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .tag:hover {
@@ -770,28 +1065,11 @@ button.post-menu-item.delete {
     margin-bottom: 0;
 }
 
-.group-questions-form .question-container label {
-    display: block;
-    margin-bottom: 8px;
-    color: #090F3F;
-    font-weight: 500;
-}
-
 .group-questions-form .question-explanation {
     color: #090F3F;
     margin: 8px 0 12px;
     font-size: 0.9em;
     line-height: 1.5;
-}
-
-.group-questions-form .question-input {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: 1.5px solid #e0e0e0;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-size: 15px;
 }
 
 .group-questions-form .question-input:focus {
@@ -800,40 +1078,11 @@ button.post-menu-item.delete {
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
-.group-questions-form .question-input.error {
-    border-color: #ff4444;
-    background-color: #fff8f8;
-}
-
 .group-questions-form .question-input.error:focus {
     box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
 }
 
-.email-visibility-container {
-    margin: 24px 0;
-    display: flex;
-    padding: 16px;
-    gap: 8px;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-    border: 1px solid #e0e0e0;
-}
-
 .email-visibility-container label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.email-visibility-checkbox {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-}
-
-.email-visibility-label {
     color: #090F3F;
 }
 
@@ -884,189 +1133,6 @@ button.post-menu-item.delete {
     .group-join-info {
         margin-top: 0;
     }
-}
-
-/* Modal System Styles */
-.cb-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    animation: cbFadeIn 0.3s ease-in-out;
-}
-
-.cb-modal-content {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 12px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow: hidden;
-    position: relative;
-    animation: cbSlideIn 0.3s ease-in-out;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.cb-modal-header {
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 24px;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.cb-modal-header h3 {
-    margin: 0;
-    font-size: 1.5em;
-    color: #090F3F;
-}
-
-.cb-modal-close {
-    cursor: pointer;
-    font-size: 32px;
-    color: #090F3F;
-    transition: color 0.2s;
-    padding: 0px;
-    line-height: 1;
-}
-
-.cb-modal-close:hover {
-    color: #090F3F;
-}
-
-.cb-modal-body {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    color: #090F3F;
-    padding: 24px;
-}
-
-.cb-details-grid {
-    display: flex;
-    gap: 16px;
-    flex-direction: column;
-    padding: 16px;
-}
-
-.cb-detail-item {
-    display: flex;
-    gap: 16px;
-    align-items: baseline;
-}
-
-.cb-detail-item h4 {
-    min-width: 140px;
-    margin: 0;
-    font-weight: 600;
-}
-
-.cb-detail-item span {
-    color: #090F3F;
-    font-size: 18px;
-    line-height: 1.4;
-    flex: 1;
-    text-align: right;
-}
-
-.cb-detail-item.full-width {
-    width: 100%;
-}
-
-.project-details-modal .tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    flex: 1;
-}
-
-.project-details-modal .tag {
-    background: #F5F6FA;
-    padding: 8px 16px;
-    border-radius: 99px;
-    font-weight: 600;
-    font-size: 16px;
-    line-height: 140%;
-    color: #090F3F;
-}
-
-@media (max-width: 991px) {
-    .project-details-modal .cb-detail-item {
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .project-details-modal .cb-detail-item h4 {
-        min-width: unset;
-    }
-
-    .project-details-modal .cb-details-grid {
-        gap: 24px;
-    }
-
-    .project-details-modal .cb-detail-item {
-        padding-bottom: 24px;
-        border-bottom: 1px solid #E5E7F0;
-    }
-
-    .project-details-modal .cb-detail-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .project-details-modal .cb-detail-item.full-width {
-        margin-top: 0;
-        padding-top: 24px;
-    }
-
-    .project-details-modal .tags-list {
-        margin-top: 12px;
-    }
-}
-
-@media (max-width: 480px) {
-    .project-details-modal .cb-details-grid {
-        padding: 16px;
-        gap: 20px;
-    }
-
-    .project-details-modal .cb-detail-item {
-        padding-bottom: 20px;
-    }
-
-    .project-details-modal .cb-detail-item.full-width {
-        padding-top: 20px;
-    }
-
-    .project-details-modal .tag {
-        padding: 6px 14px;
-    }
-
-    .group-join-info {
-        margin-top: 0;
-    }
-}
-
-@keyframes cbFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes cbSlideIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
 }
 
 /* Members List Styles */
