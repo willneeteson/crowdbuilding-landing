@@ -946,7 +946,6 @@ button.post-menu-item.delete {
 .cb-detail-item h4 {
     min-width: 140px;
     margin: 0;
-    color: #666;
     font-weight: 600;
 }
 
@@ -1059,13 +1058,13 @@ button.post-menu-item.delete {
 }
 
 .cb-member-item {
-    background: #F5F6FA;
+    background: #00000008;
     border-radius: 12px;
     transition: background-color 0.2s ease;
 }
 
 .cb-member-item:hover {
-    background: #EBEDF2;
+    background: #00000012;
 }
 
 .cb-member-link {
@@ -1107,7 +1106,6 @@ button.post-menu-item.delete {
 }
 
 .cb-member-role {
-    color: #666;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
 } 
