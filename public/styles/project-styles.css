@@ -878,23 +878,29 @@ button.post-menu-item.delete {
 }
 
 .cb-modal-content {
+    display: flex;
+    flex-direction: column;
     background: white;
     border-radius: 12px;
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: hidden;
     position: relative;
     animation: cbSlideIn 0.3s ease-in-out;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .cb-modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 .cb-modal-header h3 {
@@ -917,6 +923,9 @@ button.post-menu-item.delete {
 }
 
 .cb-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     color: #333;
 }
 
@@ -936,6 +945,8 @@ button.post-menu-item.delete {
 .cb-detail-item h4 {
     min-width: 140px;
     margin: 0;
+    color: #666;
+    font-weight: 600;
 }
 
 .cb-detail-item span {
@@ -1024,6 +1035,10 @@ button.post-menu-item.delete {
 
     .project-details-modal .tag {
         padding: 6px 14px;
+    }
+
+    .group-join-info {
+        margin-top: 0;
     }
 }
 
