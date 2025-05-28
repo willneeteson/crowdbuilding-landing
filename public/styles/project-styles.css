@@ -148,6 +148,10 @@
     font-size: 1.1em;
 }
 
+.submit-button :disabled {
+opacity: 0.4;
+}
+
 .submit-button:hover {
     background-color: #FF291F;
 }
@@ -816,10 +820,12 @@ button.post-menu-item.delete {
 
 .email-visibility-container {
     margin: 24px 0;
+    display: flex;
     padding: 16px;
+    gap: 8px;
     background-color: #f8f9fa;
     border-radius: 12px;
-    border: 1.5px solid #e0e0e0;
+    border: 1px solid #e0e0e0;
 }
 
 .email-visibility-container label {

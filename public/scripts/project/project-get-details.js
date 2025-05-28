@@ -149,7 +149,7 @@ function showModal() {
                 <span>${data.number_of_homes || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <h4>Lidmaatschap Status</h4>
+                <h4>Status</h4>
                 <span>${data.member_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
@@ -165,7 +165,7 @@ function showModal() {
                 <span>${data.needs_planning_costs_financing?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <h4>KvK Registratie</h4>
+                <h4>KVK-registratie</h4>
                 <span>${data.chamber_of_commerce_registration_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             ${data.housing_forms && data.housing_forms.length > 0 ? `
