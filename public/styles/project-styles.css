@@ -454,16 +454,6 @@ button[disabled], html input[disabled] {
     margin-right: 8px;
 }
 
-/* Details element styles */
-.project__sidebar-group details {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    margin: 16px 0;
-    display: block;
-    cursor: pointer;
-}
-
 .project__sidebar-group details summary {
     padding: 16px;
     cursor: pointer;
