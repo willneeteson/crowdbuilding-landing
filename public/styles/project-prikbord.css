@@ -171,7 +171,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #333;
+    color: #090F3F;
     text-decoration: none;
     transition: background-color 0.2s;
 }
@@ -374,7 +374,7 @@
 
 .load-more-button {
     background-color: transparent;
-    color: #333;
+    color: #090F3F;
     border: none;
     padding: 10px 20px;
     border-radius: 4px;
@@ -441,7 +441,7 @@
 .post-modal-title {
     font-size: 1.1rem;
     font-weight: 500;
-    color: #333;
+    color: #090F3F
 }
 
 .post-modal-close {
@@ -572,7 +572,7 @@
     padding: 6px 12px;
     border-radius: 99px;
     font-size: 14px;
-    color: #333;
+    color: #090F3F;
     display: inline-flex;
     align-items: center;
     justify-content: center;

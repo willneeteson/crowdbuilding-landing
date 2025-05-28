@@ -94,7 +94,7 @@ style.textContent = `
     .tooltip {
         position: absolute;
         display: none;
-        background: #333;
+        background: #090F3F;
         color: white;
         padding: 8px 12px;
         border-radius: 4px;
@@ -115,28 +115,28 @@ style.textContent = `
         bottom: -12px;
         left: 50%;
         transform: translateX(-50%);
-        border-top-color: #333;
+        border-top-color: #090F3F;
     }
 
     .tooltip-bottom::after {
         top: -12px;
         left: 50%;
         transform: translateX(-50%);
-        border-bottom-color: #333;
+        border-bottom-color: #090F3F;
     }
 
     .tooltip-left::after {
         right: -12px;
         top: 50%;
         transform: translateY(-50%);
-        border-left-color: #333;
+        border-left-color: #090F3F;
     }
 
     .tooltip-right::after {
         left: -12px;
         top: 50%;
         transform: translateY(-50%);
-        border-right-color: #333;
+        border-right-color: #090F3F;
     }
 `;
 document.head.appendChild(style);
