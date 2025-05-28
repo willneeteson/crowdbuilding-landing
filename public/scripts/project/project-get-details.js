@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                 // Add click handler for modal
                 setupModalHandler();
+
+                // Initialize admin display
+                if (typeof window.fetchAdminsData === 'function') {
+                    window.fetchAdminsData();
+                }
             })
             .catch(error => {
                 console.error('Error fetching project data:', error);
