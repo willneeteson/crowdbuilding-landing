@@ -981,16 +981,11 @@ button.post-menu-item.delete {
     font-size: 18px;
     line-height: 1.4;
     flex: 1;
+    text-align: right;
 }
 
 .cb-detail-item.full-width {
     width: 100%;
-    padding-top: 32px;
-    border-top: 1px solid #E5E7F0;
-}
-
-.cb-detail-item.full-width:not(:first-child) {
-    margin-top: 32px;
 }
 
 .project-details-modal .tags-list {
@@ -1150,3 +1145,12 @@ button.post-menu-item.delete {
 #projectAdminWrapper:hover {
     background-color: rgba(0, 0, 0, 0.03);
 } 
+
+.comment-form textarea {
+    margin: 0;
+}
+
+.comment-form button {
+    background-color: #FF291F;
+    border-radius: 99px;
+}
