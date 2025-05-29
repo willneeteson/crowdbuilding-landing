@@ -35,7 +35,7 @@ function showErrorState(container, message) {
     container.innerHTML = `
         <div class="post-item error">
             <p>${message}</p>
-            <button onclick="window.location.reload()">Try Again</button>
+            <button onclick="window.location.reload()">Probeer het opnieuw</button>
         </div>
     `;
 }
