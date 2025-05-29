@@ -92,11 +92,11 @@ async function fetchGroupPosts(groupSlug, cursor = null) {
     } catch (error) {
         console.error('Error fetching group posts:', error);
         if (!isLoadingMore) {
-            showErrorState(container, 'Failed to load posts. Please try again.');
+            showErrorState(container, 'Berichten laden mislukt. Probeer het opnieuw.');
         } else {
             const loadMoreButton = document.getElementById('loadMoreButton');
             if (loadMoreButton) {
-                loadMoreButton.innerText = 'Error loading more posts. Try again.';
+                loadMoreButton.innerText = 'Fout bij het laden van meer berichten. Probeer het opnieuw.';
                 loadMoreButton.disabled = false;
             }
         }
@@ -1001,7 +1001,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             .load-more-button {
                 background-color: #f0f0f0;
-                color: #333;
+                color: #090F3F;
                 border: none;
                 padding: 10px 20px;
                 border-radius: 4px;
@@ -1125,14 +1125,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.warn('No user ID found, post fetching skipped');
             const container = document.getElementById('groupPosts');
             if (container) {
-                container.innerHTML = '<div class="post-item">Please log in to view posts.</div>';
+                container.innerHTML = '<div class="post-item">Log in of meld je aan om berichten te lezen.</div>';
             }
         }
     } catch (error) {
         console.error('Error during initialization:', error);
         const container = document.getElementById('groupPosts');
         if (container) {
-            container.innerHTML = '<div class="post-item">Error loading posts. Please try again later.</div>';
+            container.innerHTML = '<div class="post-item">Fout bij het laden van meer berichten. Probeer het opnieuw.</div>';
         }
     }
 });
