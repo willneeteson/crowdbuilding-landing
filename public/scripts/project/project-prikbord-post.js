@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const token = await window.auth.getApiToken();
     if (!token) {
-      alert('You are not signed in.');
+      alert('U bent niet aangemeld.');
       // Restore button state
       submitButton.disabled = originalButtonState;
       submitButton.textContent = originalButtonText;
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!groupSlug) {
       console.error('No group slug found in URL');
-      alert('Error: Could not determine group. Please try again.');
+      alert('Error: groep kon niet worden bepaald. Probeer het opnieuw.');
       submitButton.disabled = originalButtonState;
       submitButton.textContent = originalButtonText;
       return;
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('images[]', compressedFile);
       } catch (error) {
         console.error('Error compressing image:', error);
-        alert('Failed to process image. Please try again.');
+        alert('Afbeelding verwerken is mislukt. Probeer het opnieuw.');
         submitButton.disabled = originalButtonState;
         submitButton.textContent = originalButtonText;
         return;
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     } catch (error) {
       console.error('Error creating new post:', error);
-      alert('Failed to create post.');
+      alert('Bericht aanmaken mislukt.');
     } finally {
       // Restore button state
       submitButton.disabled = originalButtonState;
