@@ -7,7 +7,6 @@ function showLoginMessage() {
         <div class="w-embed">
             <div class="login-message">
                 <p>Log in om de beheerders te bekijken</p>
-                <a href="#" class="button authsigninbtn w-button">Inloggen</a>
             </div>
         </div>
     `;
