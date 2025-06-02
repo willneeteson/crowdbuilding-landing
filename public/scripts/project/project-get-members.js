@@ -297,40 +297,60 @@ async function fetchMembersData() {
         }
 
         console.log('Fetching members for project:', projectId);
-        
-        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${projectId}/members`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log('API Response status:', response.status);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('API Error:', errorText);
+
+        // Initialize array to store all members
+        let allMembers = [];
+        let nextPageUrl = `https://api.crowdbuilding.com/api/v1/groups/${projectId}/members?page=1`;
+
+        // Fetch all pages
+        while (nextPageUrl) {
+            console.log('Fetching page:', nextPageUrl);
             
-            // Check if user is not authenticated
-            if (response.status === 403) {
-                console.log('User needs to be a member of the group');
-                showPermissionMessage();
-                return;
+            const response = await fetch(nextPageUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            console.log('API Response status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API Error:', errorText);
+                
+                // Check if user is not authenticated
+                if (response.status === 403) {
+                    console.log('User needs to be a member of the group');
+                    showPermissionMessage();
+                    return;
+                }
+                
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
             
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            console.log('Fetched page data:', data);
+
+            if (data && data.data) {
+                // Add members from this page to our collection
+                allMembers = allMembers.concat(data.data);
+                
+                // Get next page URL from the links
+                nextPageUrl = data.links && data.links.next;
+            } else {
+                console.error('Invalid data format received from API:', data);
+                break;
+            }
         }
+
+        console.log('Total members fetched:', allMembers.length);
         
-        const data = await response.json();
-        console.log('Fetched members data:', data);
+        // Now populate the members list with all members
+        populateMembersList(allMembers);
         
-        if (data && data.data) {
-            populateMembersList(data.data);
-        } else {
-            console.error('Invalid data format received from API:', data);
-        }
     } catch (error) {
         console.error('Error fetching members data:', error);
         showPermissionMessage();
