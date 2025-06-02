@@ -1208,3 +1208,50 @@ button.post-menu-item.delete {
     background-color: #FF291F;
     border-radius: 99px;
 }
+
+/* Project descriptions styles */
+.project-descriptions {
+    margin: 2rem 0;
+}
+
+.description-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.description-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.description-section h3 {
+    margin: 0 0 1rem 0;
+    color: #090F3F;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.description-content {
+    color: #444;
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.description-content p {
+    margin: 0 0 1rem 0;
+}
+
+.description-content p:last-child {
+    margin-bottom: 0;
+}
+
+.description-content a {
+    color: #FF291F;
+    text-decoration: none;
+}
+
+.description-content a:hover {
+    text-decoration: underline;
+}

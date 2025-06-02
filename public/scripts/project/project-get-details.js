@@ -50,6 +50,23 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
+function updateDescriptions(descriptions) {
+    const container = document.querySelector('.project-descriptions');
+    if (!container) return;
+
+    if (descriptions && descriptions.length > 0) {
+        container.innerHTML = descriptions.map(desc => `
+            <div class="description-section">
+                <h3>${desc.title}</h3>
+                <div class="description-content">${desc.text}</div>
+            </div>
+        `).join('');
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
 function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
@@ -60,6 +77,11 @@ function updatePageElements(data) {
     updateElement('.project-development-form', data.development_form?.name);
     updateElement('.project-homes-count', data.number_of_homes);
     updateElement('.project-member-status', data.member_status?.name);
+
+    // Update descriptions if they exist
+    if (data.info) {
+        updateDescriptions(data.info);
+    }
 
     // Update arrays with max items
     updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
