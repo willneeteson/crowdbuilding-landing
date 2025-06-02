@@ -154,50 +154,33 @@ function showModal() {
     // Create modal content
     const content = `
         <div class="cb-details-grid">
-            <div class="cb-detail-item">
-                <h4>Fase</h4>
-                <span>${data.phase?.name || 'Niet gespecificeerd'}</span>
+            <div class="section-header">
+                <h3>KENMERKEN</h3>
             </div>
             <div class="cb-detail-item">
-                <h4>Locatie</h4>
+                <h4>Plaats</h4>
                 <span>${data.location || 'Niet gespecificeerd'}</span>
+            </div>
+            <div class="cb-detail-item">
+                <h4>Projectfase</h4>
+                <span>${data.phase?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
                 <h4>Ontwikkelvorm</h4>
                 <span>${data.development_form?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <h4>Aantal Woningen</h4>
-                <span>${data.number_of_homes || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
                 <h4>Status</h4>
                 <span>${data.member_status?.name || 'Niet gespecificeerd'}</span>
             </div>
             <div class="cb-detail-item">
-                <h4>Bouwvergunning</h4>
-                <span>${data.building_permit_status?.name || 'Niet gespecificeerd'}</span>
+                <h4>Grootte</h4>
+                <span>${data.number_of_homes || 'Niet gespecificeerd'} woningen</span>
             </div>
             <div class="cb-detail-item">
-                <h4>Bouwfinanciering</h4>
-                <span>${data.needs_construction_financing?.name || 'Niet gespecificeerd'}</span>
+                <h4>Woonmilieu</h4>
+                <span>${data.living_environment?.name || 'Niet gespecificeerd'}</span>
             </div>
-            <div class="cb-detail-item">
-                <h4>Plankosten</h4>
-                <span>${data.needs_planning_costs_financing?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>KVK-registratie</h4>
-                <span>${data.chamber_of_commerce_registration_status?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            ${data.housing_forms && data.housing_forms.length > 0 ? `
-                <div class="cb-detail-item full-width">
-                    <h4>Woonvormen</h4>
-                    <div class="tags-list">
-                        ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
-                    </div>
-                </div>
-            ` : ''}
             ${data.target_audiences && data.target_audiences.length > 0 ? `
                 <div class="cb-detail-item full-width">
                     <h4>Doelgroepen</h4>
@@ -206,14 +189,30 @@ function showModal() {
                     </div>
                 </div>
             ` : ''}
-            ${data.interests && data.interests.length > 0 ? `
+            ${data.housing_forms && data.housing_forms.length > 0 ? `
                 <div class="cb-detail-item full-width">
-                    <h4>Interesses</h4>
+                    <h4>Woonvormen</h4>
                     <div class="tags-list">
-                        ${data.interests.map(interest => `<div class="tag">${interest.name}</div>`).join('')}
+                        ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
                     </div>
                 </div>
             ` : ''}
+
+            <div class="section-header">
+                <h3>CONTACT INFORMATIE</h3>
+            </div>
+            <div class="cb-detail-item">
+                <h4>Naam contact persoon</h4>
+                <span>${data.contact_person || 'Niet gespecificeerd'}</span>
+            </div>
+            <div class="cb-detail-item">
+                <h4>E-mail adres</h4>
+                <span>${data.contact_email || 'Niet gespecificeerd'}</span>
+            </div>
+            <div class="cb-detail-item">
+                <h4>Website</h4>
+                <span>${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Niet gespecificeerd'}</span>
+            </div>
         </div>
     `;
 
