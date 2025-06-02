@@ -105,7 +105,7 @@ const imageUrl =
                                 <p class="group-card__intro">${group.intro || ""}</p>
                             </div>
                         </div>
-                        <a class="card__link" href="https://app.crowdbuilding.com/groups/${group.slug}" target="_blank"></a>
+                        <a class="card__link" href="https://crowdbuilding.com/groups/${group.slug}" target="_blank"></a>
                     </div>
                 `;
 
