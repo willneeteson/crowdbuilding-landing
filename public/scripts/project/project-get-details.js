@@ -155,63 +155,71 @@ function showModal() {
     const content = `
         <div class="cb-details-grid">
             <div class="section-header">
-                <h3>KENMERKEN</h3>
+                <h3>Kenmerken</h3>
             </div>
-            <div class="cb-detail-item">
-                <h4>Plaats</h4>
-                <span>${data.location || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Projectfase</h4>
-                <span>${data.phase?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Ontwikkelvorm</h4>
-                <span>${data.development_form?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Status</h4>
-                <span>${data.member_status?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Grootte</h4>
-                <span>${data.number_of_homes || 'Niet gespecificeerd'} woningen</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Woonmilieu</h4>
-                <span>${data.living_environment?.name || 'Niet gespecificeerd'}</span>
-            </div>
-            ${data.target_audiences && data.target_audiences.length > 0 ? `
-                <div class="cb-detail-item full-width">
-                    <h4>Doelgroepen</h4>
-                    <div class="tags-list">
-                        ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
-                    </div>
+            <div class="cb-detail-items">
+                <div class="cb-detail-item">
+                    <div class="detail-label">Plaats</div>
+                    <div class="detail-value">${data.location || 'Niet gespecificeerd'}</div>
                 </div>
-            ` : ''}
-            ${data.housing_forms && data.housing_forms.length > 0 ? `
-                <div class="cb-detail-item full-width">
-                    <h4>Woonvormen</h4>
-                    <div class="tags-list">
-                        ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
-                    </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">Projectfase</div>
+                    <div class="detail-value">${data.phase?.name || 'Niet gespecificeerd'}</div>
                 </div>
-            ` : ''}
+                <div class="cb-detail-item">
+                    <div class="detail-label">Ontwikkelvorm</div>
+                    <div class="detail-value">${data.development_form?.name || 'Niet gespecificeerd'}</div>
+                </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">${data.member_status?.name || 'Niet gespecificeerd'}</div>
+                </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">Grootte</div>
+                    <div class="detail-value">${data.number_of_homes || 'Niet gespecificeerd'} woningen</div>
+                </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">Woonmilieu</div>
+                    <div class="detail-value">${data.living_environment?.name || 'Niet gespecificeerd'}</div>
+                </div>
+                ${data.target_audiences && data.target_audiences.length > 0 ? `
+                    <div class="cb-detail-item">
+                        <div class="detail-label">Doelgroepen</div>
+                        <div class="detail-value">
+                            <div class="tags-list">
+                                ${data.target_audiences.map(audience => `<div class="tag">${audience.name}</div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                ${data.housing_forms && data.housing_forms.length > 0 ? `
+                    <div class="cb-detail-item">
+                        <div class="detail-label">Woonvormen</div>
+                        <div class="detail-value">
+                            <div class="tags-list">
+                                ${data.housing_forms.map(form => `<div class="tag">${form.title}</div>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
 
             <div class="section-header">
-                <h3>CONTACT INFORMATIE</h3>
+                <h3>Contact informatie</h3>
             </div>
-            <div class="cb-detail-item">
-                <h4>Naam contact persoon</h4>
-                <span>${data.contact_person || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>E-mail adres</h4>
-                <span>${data.contact_email || 'Niet gespecificeerd'}</span>
-            </div>
-            <div class="cb-detail-item">
-                <h4>Website</h4>
-                <span>${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Niet gespecificeerd'}</span>
+            <div class="cb-detail-items">
+                <div class="cb-detail-item">
+                    <div class="detail-label">Naam contact persoon</div>
+                    <div class="detail-value">${data.contact_person || 'Niet gespecificeerd'}</div>
+                </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">E-mail adres</div>
+                    <div class="detail-value">${data.contact_email || 'Niet gespecificeerd'}</div>
+                </div>
+                <div class="cb-detail-item">
+                    <div class="detail-label">Website</div>
+                    <div class="detail-value">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Niet gespecificeerd'}</div>
+                </div>
             </div>
         </div>
     `;

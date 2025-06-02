@@ -1256,3 +1256,80 @@ button.post-menu-item.delete {
 .description-content a:hover {
     text-decoration: underline;
 }
+
+.project-details-modal .cb-details-grid {
+    padding: 20px;
+}
+
+.project-details-modal .section-header {
+    margin-bottom: 20px;
+}
+
+.project-details-modal .section-header h3 {
+    font-size: 1.5em;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.project-details-modal .cb-detail-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.project-details-modal .cb-detail-item {
+    display: flex;
+    flex-direction: column;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.project-details-modal .detail-label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.project-details-modal .detail-value {
+    color: #333;
+}
+
+.project-details-modal .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.project-details-modal .tag {
+    background: #f5f5f5;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+@media (min-width: 768px) {
+    .project-details-modal .cb-detail-item {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 15px 0;
+    }
+
+    .project-details-modal .detail-label {
+        flex: 0 0 200px;
+        margin-bottom: 0;
+        padding-right: 20px;
+    }
+
+    .project-details-modal .detail-value {
+        flex: 1;
+        text-align: right;
+    }
+
+    .project-details-modal .detail-value .tags-list {
+        justify-content: flex-end;
+    }
+}
