@@ -144,7 +144,7 @@ async function joinGroup(answers = {}) {
         // Get API token from auth module
         const apiToken = await window.auth.getApiToken();
         if (!apiToken) {
-            throw new Error('Authentication required. Please log in to continue.');
+            throw new Error('Authenticatie vereist. Log in om verder te gaan.');
         }
 
         // Get group ID from URL
@@ -257,7 +257,7 @@ async function fetchGroupData() {
         // Get API token from auth module
         const apiToken = await window.auth.getApiToken();
         if (!apiToken) {
-            throw new Error('Authentication required. Please log in to continue.');
+            return null; // Return null instead of throwing error
         }
 
         // Get group ID from URL
@@ -380,6 +380,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Fetch group data and questions
                 const groupData = await fetchGroupData();
+                if (!groupData) {
+                    throw new Error('Authenticatie vereist. Log in om verder te gaan.');
+                }
                 console.log('Fetched group data:', groupData);
                 
                 // Create form
