@@ -725,7 +725,7 @@ async function deletePost(postId) {
     const token = await window.auth.getApiToken();
 
     if (!token) {
-        alert('You are not signed in.');
+        alert('U bent niet aangemeld.');
         postElement.innerHTML = originalContent;
         return;
     }

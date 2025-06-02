@@ -123,7 +123,7 @@ async function getDynamicMarkers() {
           },
           properties: { 
             title: group.title,
-            link: `https://app.crowdbuilding.com/groups/${group.id}`,
+            link: `https://crowdbuilding.com/groups/${group.id}`,
             description: group.subtitle || group.intro?.replace(/<[^>]*>/g, '') || '',
             image: group.image?.conversions?.thumb?.url || group.image?.original_url || DEFAULT_IMAGE,
             location: group.location
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Redirect to new page with the search query
-      window.location.href = `https://app.crowdbuilding.com/discover?search=${searchQuery}&per_page=12#groups`;
+      window.location.href = `https://crowdbuilding.com/discover?location%2C+name_contain={searchQuery}`;
     });
 
     console.log("✅ Search bar initialized successfully.");
