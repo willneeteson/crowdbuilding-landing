@@ -111,12 +111,16 @@ class LikeButton {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'X-Requested-With': 'XMLHttpRequest'  // Add this header for Laravel Sanctum
+        },
+        credentials: 'include'  // Include cookies
       });
 
       console.log('Follow API response status:', response.status);
       if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
         throw new Error(`Network response was not ok: ${response.status}`);
       }
 
