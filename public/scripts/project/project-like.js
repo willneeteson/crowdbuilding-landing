@@ -100,19 +100,40 @@ class LikeButton {
       }
 
       const data = await response.json();
-      console.log('Raw API response:', data);
+      console.log('Raw API response for follow status:', data);
+      console.log('API response data structure:', {
+        hasData: 'data' in data,
+        dataType: typeof data.data,
+        properties: data.data ? Object.keys(data.data) : [],
+        followStatus: data.data ? data.data.is_following : undefined,
+        followStatusType: data.data ? typeof data.data.is_following : undefined
+      });
       
       // Ensure we're accessing the correct property path
-      const isFollowing = data.data && data.data.is_following;
-      const followersCount = data.data && data.data.followers_count;
+      const isFollowing = data.data && (
+        // Try different possible property names
+        data.data.is_following !== undefined ? data.data.is_following :
+        data.data.following !== undefined ? data.data.following :
+        data.data.isFollowing !== undefined ? data.data.isFollowing :
+        false
+      );
+      
+      const followersCount = data.data && (
+        data.data.followers_count !== undefined ? data.data.followers_count :
+        data.data.followersCount !== undefined ? data.data.followersCount :
+        data.data.followerCount !== undefined ? data.data.followerCount :
+        0
+      );
       
       console.log('Parsed follow status:', {
         isFollowing: isFollowing,
-        followersCount: followersCount
+        followersCount: followersCount,
+        rawIsFollowing: data.data ? data.data.is_following : undefined,
+        rawFollowersCount: data.data ? data.data.followers_count : undefined
       });
       
       // Update initial state based on API response
-      this.isLiked = Boolean(isFollowing); // Ensure boolean value
+      this.isLiked = Boolean(isFollowing);
       console.log('Updated like state from API:', this.isLiked);
       this.updateUI(followersCount || 0);
       
