@@ -27,8 +27,17 @@ class LikeButton {
     this.button.dataset.groupId = this.groupId;
     
     // Initialize click handler
-    this.button.addEventListener('click', (e) => {
+    this.button.addEventListener('click', async (e) => {
       e.preventDefault();
+      
+      // Check if user is logged in
+      const isLoggedIn = await window.auth.isUserLoggedIn();
+      if (!isLoggedIn) {
+        // Trigger login modal or redirect to login page
+        console.log('User needs to login first');
+        return;
+      }
+      
       if (!this.button.classList.contains('loading')) {
         this.toggleLike();
       }
@@ -72,11 +81,18 @@ class LikeButton {
       // Add loading state
       this.button.classList.add('loading');
       
+      // Get API token
+      const token = await window.auth.getApiToken();
+      if (!token) {
+        throw new Error('No API token available');
+      }
+      
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}/follow`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
 
