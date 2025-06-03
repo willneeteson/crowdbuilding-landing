@@ -144,11 +144,24 @@ class LikeButton {
       const data = await response.json();
       console.log('Follow API response data:', data);
       
+      // Get the updated group data to ensure we have the correct count
+      const groupResponse = await fetch(`${API_URL}/api/v1/groups/${this.groupId}`, {
+        method: 'GET',
+        headers: headers
+      });
+
+      if (!groupResponse.ok) {
+        throw new Error('Failed to get updated group data');
+      }
+
+      const groupData = await groupResponse.json();
+      console.log('Updated group data:', groupData);
+      
       // Update state based on API response
-      this.isLiked = data.is_following;
+      this.isLiked = groupData.data.is_following;
       
       // Update UI with the count from the API response
-      this.updateUI(data.followers_count);
+      this.updateUI(groupData.data.followers_count);
       
     } catch (error) {
       console.error('Error toggling like:', error);
