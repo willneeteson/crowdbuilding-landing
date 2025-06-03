@@ -100,36 +100,15 @@ class LikeButton {
       }
 
       const data = await response.json();
-      console.log('Raw API response for follow status:', data);
-      console.log('API response data structure:', {
-        hasData: 'data' in data,
-        dataType: typeof data.data,
-        properties: data.data ? Object.keys(data.data) : [],
-        followStatus: data.data ? data.data.is_following : undefined,
-        followStatusType: data.data ? typeof data.data.is_following : undefined
-      });
+      console.log('Raw API response:', data);
       
-      // Ensure we're accessing the correct property path
-      const isFollowing = data.data && (
-        // Try different possible property names
-        data.data.is_following !== undefined ? data.data.is_following :
-        data.data.following !== undefined ? data.data.following :
-        data.data.isFollowing !== undefined ? data.data.isFollowing :
-        false
-      );
-      
-      const followersCount = data.data && (
-        data.data.followers_count !== undefined ? data.data.followers_count :
-        data.data.followersCount !== undefined ? data.data.followersCount :
-        data.data.followerCount !== undefined ? data.data.followerCount :
-        0
-      );
+      // Use is_member to determine follow status, matching project-join-group.js
+      const isFollowing = data.data && data.data.is_member;
+      const followersCount = data.data && data.data.followers_count;
       
       console.log('Parsed follow status:', {
         isFollowing: isFollowing,
-        followersCount: followersCount,
-        rawIsFollowing: data.data ? data.data.is_following : undefined,
-        rawFollowersCount: data.data ? data.data.followers_count : undefined
+        followersCount: followersCount
       });
       
       // Update initial state based on API response
@@ -187,11 +166,8 @@ class LikeButton {
       if (response.status === 403) {
         const errorData = await response.json();
         console.error('Permission error:', errorData);
-        // If we get a 403 on follow, we might already be following
-        if (!this.isLiked) {
-          console.log('Got 403 while trying to follow - checking if we are already following');
-          await this.checkFollowStatus();
-        }
+        // If we get a 403, refresh our state
+        await this.checkFollowStatus();
         return;
       }
       
@@ -217,9 +193,8 @@ class LikeButton {
       const groupData = await groupResponse.json();
       console.log('Updated group data:', groupData);
       
-      // Update state based on API response
-      const newIsFollowing = groupData.data && groupData.data.is_following;
-      this.isLiked = Boolean(newIsFollowing);
+      // Update state based on API response using is_member
+      this.isLiked = Boolean(groupData.data && groupData.data.is_member);
       console.log('Updated like state after toggle:', this.isLiked);
       
       // Update UI with the count from the API response
