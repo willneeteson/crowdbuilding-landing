@@ -1,4 +1,6 @@
 // Like Button Handler
+const API_BASE_URL = 'https://api.crowdbuilding.com';
+
 class LikeButton {
   constructor(button) {
     this.button = button;
@@ -67,11 +69,19 @@ class LikeButton {
   async checkFollowStatus() {
     console.log('Checking follow status for group:', this.groupId);
     try {
-      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}`, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        }
+      const apiToken = await window.auth.getApiToken();
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      };
+
+      if (apiToken) {
+        headers['Authorization'] = `Bearer ${apiToken}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/groups/${this.groupId}`, {
+        method: 'GET',
+        headers: headers
       });
 
       if (!response.ok) {
@@ -98,23 +108,26 @@ class LikeButton {
       
       // Get API token
       console.log('Getting API token');
-      const token = await window.auth.getApiToken();
-      console.log('API token received:', token ? 'Yes' : 'No');
+      const apiToken = await window.auth.getApiToken();
+      console.log('API token received:', apiToken ? 'Yes' : 'No');
       
-      if (!token) {
+      if (!apiToken) {
         throw new Error('No API token available');
       }
+
+      const headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiToken}`
+      };
       
       console.log('Making follow API request');
-      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}/follow`, {
+      console.log('Request URL:', `${API_BASE_URL}/api/v1/groups/${this.groupId}/follow`);
+      console.log('Request headers:', headers);
+
+      const response = await fetch(`${API_BASE_URL}/api/v1/groups/${this.groupId}/follow`, {
         method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'X-Requested-With': 'XMLHttpRequest'  // Add this header for Laravel Sanctum
-        },
-        credentials: 'include'  // Include cookies
+        headers: headers
       });
 
       console.log('Follow API response status:', response.status);
