@@ -1,16 +1,19 @@
-// Like Button Handler
-/*
-CSS classes for styling:
-.project__like-btn.liked - The liked state of the button
-.project__like-btn.loading - The loading state while API call is in progress
-.project__like-btn.error - Shown briefly when an error occurs
-.project__like-heart.liked - The liked state of the heart icon
-.project__like-btn.shimmer - Shows shimmer effect while loading initial state
-*/
+/**
+ * Project Like Button Handler
+ * Manages the like/follow functionality for project pages.
+ * Uses the following API endpoints:
+ * - GET /api/v1/groups/:id - Get group details and follow status
+ * - POST /api/v1/groups/:id/follow - Follow a group
+ * - POST /api/v1/groups/:id/unfollow - Unfollow a group
+ */
 
 const API_URL = window.API_BASE_URL || 'https://api.crowdbuilding.com';
 
 class LikeButton {
+  /**
+   * Initialize a new like button instance
+   * @param {HTMLElement} button - The like button element
+   */
   constructor(button) {
     this.button = button;
     if (!this.button) {
@@ -18,55 +21,58 @@ class LikeButton {
       return;
     }
     
-    console.log('Initializing like button:', this.button);
     this.heartIcon = this.button.querySelector('.project__like-heart');
     this.counter = this.button.querySelector('.project__like-counter');
-    
-    // Hide the counter initially and add shimmer effect
-    this.counter.style.visibility = 'hidden';
-    this.button.classList.add('shimmer');
-    
-    // Initialize state as null until we get it from the API
     this.isLiked = null;
-    console.log('Initial like state set to null until API response');
     
+    // Initialize button state
+    this.setLoadingState(true);
     this.init();
   }
 
+  /**
+   * Set the loading state of the button
+   * @param {boolean} isLoading - Whether the button is in loading state
+   */
+  setLoadingState(isLoading) {
+    if (isLoading) {
+      this.counter.style.visibility = 'hidden';
+      this.button.classList.add('shimmer');
+    } else {
+      this.counter.style.visibility = 'visible';
+      this.button.classList.remove('shimmer');
+    }
+  }
+
+  /**
+   * Initialize the button functionality
+   */
   init() {
-    // Get project ID from URL using the same logic as project-get-details.js
+    // Get project ID from URL
     const pathParts = window.location.pathname.split('/');
     this.groupId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-    console.log('Group ID from URL:', this.groupId);
     
     if (!this.groupId) {
       console.error('No project ID found in URL');
+      this.setLoadingState(false);
       return;
     }
     
-    // Store group ID in button's data attribute for reference
+    // Store group ID in button's data attribute
     this.button.dataset.groupId = this.groupId;
     
     // Initialize click handler
     this.button.addEventListener('click', async (e) => {
-      console.log('Like button clicked');
       e.preventDefault();
       
-      // Check if user is logged in
       const isLoggedIn = await window.auth.isUserLoggedIn();
-      console.log('User logged in status:', isLoggedIn);
-      
       if (!isLoggedIn) {
-        // Trigger login modal or redirect to login page
         console.log('User needs to login first');
         return;
       }
       
       if (!this.button.classList.contains('loading')) {
-        console.log('Initiating like toggle');
         this.toggleLike();
-      } else {
-        console.log('Button is in loading state, ignoring click');
       }
     });
 
@@ -74,174 +80,109 @@ class LikeButton {
     this.checkFollowStatus();
   }
 
+  /**
+   * Make an authenticated API request
+   * @param {string} endpoint - API endpoint
+   * @param {Object} options - Fetch options
+   * @returns {Promise<Object>} API response
+   */
+  async makeRequest(endpoint, options = {}) {
+    const apiToken = await window.auth.getApiToken();
+    if (!apiToken) {
+      throw new Error('No API token available');
+    }
+
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiToken}`
+    };
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: {
+        ...headers,
+        ...options.headers
+      }
+    });
+
+    if (response.status === 403) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Permission denied');
+    }
+
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Check the current follow status
+   */
   async checkFollowStatus() {
-    console.log('Checking follow status for group:', this.groupId);
     try {
-      const apiToken = await window.auth.getApiToken();
-      const headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      };
-
-      if (apiToken) {
-        headers['Authorization'] = `Bearer ${apiToken}`;
-      }
-
-      const url = `${API_URL}/api/v1/groups/${this.groupId}`;
-      console.log('Making GET request to:', url);
-
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: headers
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      console.log('Raw API response:', data);
+      const data = await this.makeRequest(`/api/v1/groups/${this.groupId}`);
       
-      // Use is_member to determine follow status, matching project-join-group.js
-      const isFollowing = data.data && data.data.is_member;
-      const followersCount = data.data && data.data.followers_count;
-      
-      console.log('Parsed follow status:', {
-        isFollowing: isFollowing,
-        followersCount: followersCount
-      });
-      
-      // Update initial state based on API response
-      this.isLiked = Boolean(isFollowing);
-      console.log('Updated like state from API:', this.isLiked);
-      this.updateUI(followersCount || 0);
-      
-      // Remove shimmer effect and show counter after data is loaded
-      this.button.classList.remove('shimmer');
-      this.counter.style.visibility = 'visible';
-      
+      this.isLiked = Boolean(data.data?.is_member);
+      this.updateUI(data.data?.followers_count || 0);
     } catch (error) {
       console.error('Error checking follow status:', error);
-      // Show counter even on error, but with 0
-      this.counter.style.visibility = 'visible';
-      this.button.classList.remove('shimmer');
+    } finally {
+      this.setLoadingState(false);
     }
   }
 
+  /**
+   * Toggle the like/follow state
+   */
   async toggleLike() {
-    console.log('Toggling like state, current state:', this.isLiked);
     try {
-      // Add loading state
       this.button.classList.add('loading');
       
-      // Get API token
-      console.log('Getting API token');
-      const apiToken = await window.auth.getApiToken();
-      console.log('API token received:', apiToken ? 'Yes' : 'No');
-      
-      if (!apiToken) {
-        throw new Error('No API token available');
-      }
-
-      const headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiToken}`
-      };
-      
-      // Choose endpoint based on current state
       const endpoint = this.isLiked ? 'unfollow' : 'follow';
-      const url = `${API_URL}/api/v1/groups/${this.groupId}/${endpoint}`;
-      console.log(`Making POST request to ${endpoint} endpoint:`, url, 'Current isLiked state:', this.isLiked);
-      console.log('Request headers:', headers);
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: headers
+      await this.makeRequest(`/api/v1/groups/${this.groupId}/${endpoint}`, {
+        method: 'POST'
       });
-
-      console.log('Follow API response status:', response.status);
       
-      // Handle specific error cases
-      if (response.status === 403) {
-        const errorData = await response.json();
-        console.error('Permission error:', errorData);
-        // If we get a 403, refresh our state
-        await this.checkFollowStatus();
-        return;
-      }
+      // Get updated group data
+      const data = await this.makeRequest(`/api/v1/groups/${this.groupId}`);
       
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Error response:', errorData);
-        throw new Error(`Network response was not ok: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log('Follow API response data:', data);
-      
-      // Get the updated group data to ensure we have the correct count
-      const groupResponse = await fetch(`${API_URL}/api/v1/groups/${this.groupId}`, {
-        method: 'GET',
-        headers: headers
-      });
-
-      if (!groupResponse.ok) {
-        throw new Error('Failed to get updated group data');
-      }
-
-      const groupData = await groupResponse.json();
-      console.log('Updated group data:', groupData);
-      
-      // Update state based on API response using is_member
-      this.isLiked = Boolean(groupData.data && groupData.data.is_member);
-      console.log('Updated like state after toggle:', this.isLiked);
-      
-      // Update UI with the count from the API response
-      const newFollowersCount = groupData.data && groupData.data.followers_count;
-      this.updateUI(newFollowersCount || 0);
+      this.isLiked = Boolean(data.data?.is_member);
+      this.updateUI(data.data?.followers_count || 0);
       
     } catch (error) {
       console.error('Error toggling like:', error);
-      // Visual feedback for error
       this.button.classList.add('error');
       setTimeout(() => this.button.classList.remove('error'), 2000);
-      
-      // Refresh the status to ensure UI is in sync
       await this.checkFollowStatus();
     } finally {
-      // Remove loading state
       this.button.classList.remove('loading');
     }
   }
 
+  /**
+   * Update the UI state
+   * @param {number} count - The new follower count
+   */
   updateUI(count) {
-    console.log('Updating UI - count:', count, 'isLiked:', this.isLiked);
-    // Update the counter with the exact count from API
-    if (typeof count === 'number') {
-      this.counter.textContent = count.toString();
-    }
+    // Update counter
+    this.counter.textContent = count.toString();
     
-    // Update heart icon and button state
+    // Update like state
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
       this.button.classList.add('liked');
-      console.log('Added liked classes to button and heart');
     } else {
       this.heartIcon.classList.remove('liked');
       this.button.classList.remove('liked');
-      console.log('Removed liked classes from button and heart');
     }
   }
 }
 
-// Initialize like buttons
+// Initialize like buttons when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM ready, initializing like buttons');
-  // Initialize for all like buttons on the page
   const buttons = document.querySelectorAll('.project__like-btn');
-  console.log('Found like buttons:', buttons.length);
-  buttons.forEach(button => {
-    new LikeButton(button);
-  });
+  buttons.forEach(button => new LikeButton(button));
 }); 
