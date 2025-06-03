@@ -1,4 +1,12 @@
 // Like Button Handler
+/*
+CSS classes for styling:
+.project__like-btn.liked - The liked state of the button
+.project__like-btn.loading - The loading state while API call is in progress
+.project__like-btn.error - Shown briefly when an error occurs
+.project__like-heart.liked - The liked state of the heart icon
+*/
+
 const API_URL = window.API_BASE_URL || 'https://api.crowdbuilding.com';
 
 class LikeButton {
@@ -57,11 +65,8 @@ class LikeButton {
       }
     });
 
-    // Apply initial state to button if liked
-    if (this.isLiked) {
-      this.heartIcon.classList.add('liked');
-      this.button.classList.add('liked');
-    }
+    // Apply initial state to button and heart if liked
+    this.updateUI(parseInt(this.counter.textContent) || 0);
 
     // Check initial follow status
     this.checkFollowStatus();
