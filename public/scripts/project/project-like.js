@@ -60,6 +60,7 @@ class LikeButton {
     // Apply initial state to button if liked
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
+      this.button.classList.add('liked');
     }
 
     // Check initial follow status
@@ -143,17 +144,20 @@ class LikeButton {
       const data = await response.json();
       console.log('Follow API response data:', data);
       
-      // Toggle like state
-      this.isLiked = !this.isLiked;
+      // Update state based on API response
+      this.isLiked = data.is_following;
       
-      // Update UI
-      this.updateUI(data.followers_count || 0);
+      // Update UI with the count from the API response
+      this.updateUI(data.followers_count);
       
     } catch (error) {
       console.error('Error toggling like:', error);
       // Visual feedback for error
       this.button.classList.add('error');
       setTimeout(() => this.button.classList.remove('error'), 2000);
+      
+      // Refresh the status to ensure UI is in sync
+      await this.checkFollowStatus();
     } finally {
       // Remove loading state
       this.button.classList.remove('loading');
@@ -162,10 +166,12 @@ class LikeButton {
 
   updateUI(count) {
     console.log('Updating UI - count:', count, 'isLiked:', this.isLiked);
-    // Update the counter
-    this.counter.textContent = count;
+    // Update the counter with the exact count from API
+    if (typeof count === 'number') {
+      this.counter.textContent = count.toString();
+    }
     
-    // Update heart icon state
+    // Update heart icon and button state
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
       this.button.classList.add('liked');
