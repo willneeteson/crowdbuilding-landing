@@ -16,50 +16,70 @@
     const cache = {
         apiToken: null,
         memberstackId: null,
-        userEmail: null
+        userEmail: null,
+        tokenPromise: null // Cache promise to prevent multiple simultaneous requests
     };
+
+    /**
+     * Parse cookies once and cache the result
+     * @returns {Object} Cookie key-value pairs
+     */
+    const getCookies = (() => {
+        let cookieCache = null;
+        
+        return () => {
+            if (!cookieCache) {
+                cookieCache = document.cookie
+                    .split('; ')
+                    .reduce((acc, cookie) => {
+                        const [key, value] = cookie.split('=');
+                        acc[key] = value;
+                        return acc;
+                    }, {});
+            }
+            return cookieCache;
+        };
+    })();
 
     /**
      * Gets API token using Memberstack
      * @returns {Promise<string|null>} API token or null if not available
      */
     async function getApiToken() {
-        console.log('getApiToken called');
-        
-        // First check if token exists in cookie
-        const cookieToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith(CONFIG.COOKIE_NAME + '='))
-            ?.split('=')[1];
-
-        if (cookieToken) {
-            console.log('Using token from cookie');
-            cache.apiToken = cookieToken;
-            return cookieToken;
+        // Return existing token request if one is in progress
+        if (cache.tokenPromise) {
+            return cache.tokenPromise;
         }
 
-        // Return cached token if available
-        if (cache.apiToken) {
-            console.log('Using cached API token');
-            return cache.apiToken;
-        }
-
-        // If Memberstack is available, attempt to get a token
-        if (typeof $memberstackDom !== "undefined") {
-            console.log('Memberstack DOM is available');
-            await $memberstackDom.onReady;
-            console.log('Memberstack is ready');
-            
-            const memberstackToken = $memberstackDom.getMemberCookie();
-            console.log('Memberstack token:', memberstackToken ? 'exists' : 'not found');
-
-            if (!memberstackToken) {
-                console.warn("User not signed in.");
-                return null;
-            }
-
+        // Create a new token request promise
+        cache.tokenPromise = (async () => {
             try {
-                console.log('Attempting to exchange token with API');
+                // First check if token exists in cookie
+                const cookieToken = getCookies()[CONFIG.COOKIE_NAME];
+                if (cookieToken) {
+                    cache.apiToken = cookieToken;
+                    return cookieToken;
+                }
+
+                // Return cached token if available
+                if (cache.apiToken) {
+                    return cache.apiToken;
+                }
+
+                // If Memberstack is available, attempt to get a token
+                if (typeof $memberstackDom === "undefined") {
+                    console.warn('Memberstack DOM is not available');
+                    return null;
+                }
+
+                await $memberstackDom.onReady;
+                const memberstackToken = $memberstackDom.getMemberCookie();
+
+                if (!memberstackToken) {
+                    console.warn("User not signed in.");
+                    return null;
+                }
+
                 const response = await fetch(
                     `${CONFIG.API_BASE_URL}/sanctum/token`,
                     {
@@ -76,10 +96,8 @@
                     }
                 );
 
-                console.log('API response status:', response.status);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Successfully obtained API token');
                     cache.apiToken = data.token;
 
                     // Store token in cookie - expires in 24 hours
@@ -113,11 +131,14 @@
                 }
             } catch (error) {
                 console.error("Error fetching token:", error.message);
+            } finally {
+                // Clear the promise cache after completion
+                cache.tokenPromise = null;
             }
-        } else {
-            console.warn('Memberstack DOM is not available');
-        }
-        return null;
+            return null;
+        })();
+
+        return cache.tokenPromise;
     }
 
     /**
@@ -131,31 +152,19 @@
         }
 
         if (typeof $memberstackDom === "undefined") {
-            console.log('Memberstack not available');
             return null;
         }
 
         try {
-            console.log('Waiting for Memberstack to be ready...');
             await $memberstackDom.onReady;
-            console.log('Memberstack is ready');
-
-            console.log('Getting current member...');
             const response = await $memberstackDom.getCurrentMember();
-            console.log('Member data:', response);
-
-            // Handle nested data structure
             const member = response?.data || response;
-            console.log('Processed member data:', member);
 
             if (member && member.id) {
-                console.log('Found member ID:', member.id);
                 cache.memberstackId = member.id;
                 return member.id;
-            } else {
-                console.log('No member ID found in member data');
-                return null;
             }
+            return null;
         } catch (error) {
             console.error("Error getting current memberstack ID:", error);
             return null;
@@ -178,6 +187,8 @@
         cache.apiToken = null;
         cache.memberstackId = null;
         cache.userEmail = null;
+        cache.tokenPromise = null;
+        getCookies(); // Reset cookie cache
     }
 
     // Export functions to global scope
