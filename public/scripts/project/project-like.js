@@ -46,7 +46,10 @@ class LikeButton {
   async checkFollowStatus() {
     try {
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}`, {
-        credentials: 'include'
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
@@ -72,9 +75,9 @@ class LikeButton {
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}/follow`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
       });
 
       if (!response.ok) {
