@@ -1,4 +1,6 @@
 // Like Button Handler
+const API_URL = window.API_BASE_URL || 'https://api.crowdbuilding.com';
+
 class LikeButton {
   constructor(button) {
     this.button = button;
@@ -77,7 +79,10 @@ class LikeButton {
         headers['Authorization'] = `Bearer ${apiToken}`;
       }
 
-      const response = await fetch(`${window.API_BASE_URL}/api/v1/groups/${this.groupId}`, {
+      const url = `${API_URL}/api/v1/groups/${this.groupId}`;
+      console.log('Making GET request to:', url);
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: headers
       });
@@ -119,11 +124,11 @@ class LikeButton {
         'Authorization': `Bearer ${apiToken}`
       };
       
-      console.log('Making follow API request');
-      console.log('Request URL:', `${window.API_BASE_URL}/api/v1/groups/${this.groupId}/follow`);
+      const url = `${API_URL}/api/v1/groups/${this.groupId}/follow`;
+      console.log('Making POST request to:', url);
       console.log('Request headers:', headers);
 
-      const response = await fetch(`${window.API_BASE_URL}/api/v1/groups/${this.groupId}/follow`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: headers
       });
