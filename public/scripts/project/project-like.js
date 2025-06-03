@@ -5,6 +5,7 @@ CSS classes for styling:
 .project__like-btn.loading - The loading state while API call is in progress
 .project__like-btn.error - Shown briefly when an error occurs
 .project__like-heart.liked - The liked state of the heart icon
+.project__like-btn.shimmer - Shows shimmer effect while loading initial state
 */
 
 const API_URL = window.API_BASE_URL || 'https://api.crowdbuilding.com';
@@ -20,6 +21,10 @@ class LikeButton {
     console.log('Initializing like button:', this.button);
     this.heartIcon = this.button.querySelector('.project__like-heart');
     this.counter = this.button.querySelector('.project__like-counter');
+    
+    // Hide the counter initially and add shimmer effect
+    this.counter.style.visibility = 'hidden';
+    this.button.classList.add('shimmer');
     
     // Try to get initial state from class
     this.isLiked = this.button.classList.contains('liked');
@@ -65,9 +70,6 @@ class LikeButton {
       }
     });
 
-    // Apply initial state to button and heart if liked
-    this.updateUI(parseInt(this.counter.textContent) || 0);
-
     // Check initial follow status
     this.checkFollowStatus();
   }
@@ -104,8 +106,15 @@ class LikeButton {
       this.isLiked = data.data.is_following;
       this.updateUI(data.data.followers_count || 0);
       
+      // Remove shimmer effect and show counter after data is loaded
+      this.button.classList.remove('shimmer');
+      this.counter.style.visibility = 'visible';
+      
     } catch (error) {
       console.error('Error checking follow status:', error);
+      // Show counter even on error, but with 0
+      this.counter.style.visibility = 'visible';
+      this.button.classList.remove('shimmer');
     }
   }
 
@@ -130,8 +139,10 @@ class LikeButton {
         'Authorization': `Bearer ${apiToken}`
       };
       
-      const url = `${API_URL}/api/v1/groups/${this.groupId}/follow`;
-      console.log('Making POST request to:', url);
+      // Choose endpoint based on current state
+      const endpoint = this.isLiked ? 'unfollow' : 'follow';
+      const url = `${API_URL}/api/v1/groups/${this.groupId}/${endpoint}`;
+      console.log(`Making POST request to ${endpoint} endpoint:`, url);
       console.log('Request headers:', headers);
 
       const response = await fetch(url, {
