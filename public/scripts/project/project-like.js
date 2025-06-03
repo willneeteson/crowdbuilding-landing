@@ -24,6 +24,8 @@ class LikeButton {
     this.heartIcon = this.button.querySelector('.project__like-heart');
     this.counter = this.button.querySelector('.project__like-counter');
     this.isLiked = null;
+    this.canFollow = false;
+    this.canUnfollow = false;
     
     // Initialize button state
     this.setLoadingState(true);
@@ -68,6 +70,16 @@ class LikeButton {
       const isLoggedIn = await window.auth.isUserLoggedIn();
       if (!isLoggedIn) {
         console.log('User needs to login first');
+        return;
+      }
+      
+      // Check if we can perform the action based on permissions
+      if (this.isLiked && !this.canUnfollow) {
+        console.log('Cannot unfollow - no permission');
+        return;
+      }
+      if (!this.isLiked && !this.canFollow) {
+        console.log('Cannot follow - no permission');
         return;
       }
       
@@ -125,7 +137,13 @@ class LikeButton {
     try {
       const data = await this.makeRequest(`/api/v1/groups/${this.groupId}`);
       
-      this.isLiked = Boolean(data.data?.is_member);
+      // Update permissions
+      this.canFollow = data.data?.permissions?.can_follow || false;
+      this.canUnfollow = data.data?.permissions?.can_unfollow || false;
+      
+      // Update liked state based on permissions
+      this.isLiked = this.canUnfollow;
+      
       this.updateUI(data.data?.followers_count || 0);
     } catch (error) {
       console.error('Error checking follow status:', error);
@@ -141,6 +159,11 @@ class LikeButton {
     try {
       this.button.classList.add('loading');
       
+      // Only attempt the action if we have permission
+      if ((this.isLiked && !this.canUnfollow) || (!this.isLiked && !this.canFollow)) {
+        throw new Error('No permission to perform this action');
+      }
+      
       const endpoint = this.isLiked ? 'unfollow' : 'follow';
       await this.makeRequest(`/api/v1/groups/${this.groupId}/${endpoint}`, {
         method: 'POST'
@@ -149,7 +172,11 @@ class LikeButton {
       // Get updated group data
       const data = await this.makeRequest(`/api/v1/groups/${this.groupId}`);
       
-      this.isLiked = Boolean(data.data?.is_member);
+      // Update permissions and state
+      this.canFollow = data.data?.permissions?.can_follow || false;
+      this.canUnfollow = data.data?.permissions?.can_unfollow || false;
+      this.isLiked = this.canUnfollow;
+      
       this.updateUI(data.data?.followers_count || 0);
       
     } catch (error) {
@@ -178,6 +205,9 @@ class LikeButton {
       this.heartIcon.classList.remove('liked');
       this.button.classList.remove('liked');
     }
+    
+    // Update button state based on permissions
+    this.button.disabled = (!this.canFollow && !this.canUnfollow);
   }
 }
 
