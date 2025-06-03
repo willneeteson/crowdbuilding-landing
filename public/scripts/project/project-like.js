@@ -1,12 +1,14 @@
 // Like Button Handler
 class LikeButton {
-  constructor(buttonSelector) {
-    this.button = document.querySelector(buttonSelector);
+  constructor(button) {
+    this.button = button;
     if (!this.button) return;
     
     this.heartIcon = this.button.querySelector('.project__like-heart');
     this.counter = this.button.querySelector('.project__like-counter');
-    this.isLiked = false;
+    
+    // Try to get initial state from class
+    this.isLiked = this.button.classList.contains('liked');
     
     this.init();
   }
@@ -15,9 +17,18 @@ class LikeButton {
     // Get the group ID from the button's data attribute or URL
     this.groupId = this.button.dataset.groupId;
     
+    // If no group ID in data attribute, try to get it from URL
     if (!this.groupId) {
-      console.error('No group ID found for like button');
-      return;
+      const urlParams = new URLSearchParams(window.location.search);
+      this.groupId = urlParams.get('group') || urlParams.get('groupId');
+      
+      // If found in URL, set it as data attribute
+      if (this.groupId) {
+        this.button.dataset.groupId = this.groupId;
+      } else {
+        console.error('No group ID found for like button');
+        return;
+      }
     }
     
     // Initialize click handler
@@ -27,6 +38,11 @@ class LikeButton {
         this.toggleLike();
       }
     });
+
+    // Apply initial state to button if liked
+    if (this.isLiked) {
+      this.heartIcon.classList.add('liked');
+    }
   }
 
   async toggleLike() {
@@ -72,8 +88,10 @@ class LikeButton {
     // Update heart icon state
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
+      this.button.classList.add('liked');
     } else {
       this.heartIcon.classList.remove('liked');
+      this.button.classList.remove('liked');
     }
   }
 }
@@ -82,6 +100,6 @@ class LikeButton {
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize for all like buttons on the page
   document.querySelectorAll('.project__like-btn').forEach(button => {
-    new LikeButton('.project__like-btn[data-group-id="' + button.dataset.groupId + '"]');
+    new LikeButton(button);
   });
 }); 
