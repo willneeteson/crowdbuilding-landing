@@ -8,7 +8,8 @@
     // Configuration
     const CONFIG = {
         API_BASE_URL: 'https://api.crowdbuilding.com/api/v1',
-        DEVICE_NAME: 'kaartenbak-browser'
+        DEVICE_NAME: 'crowdbuilding-frontend',
+        COOKIE_NAME: 'api_token'
     };
 
     // Cache for tokens and user data
@@ -25,6 +26,18 @@
     async function getApiToken() {
         console.log('getApiToken called');
         
+        // First check if token exists in cookie
+        const cookieToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith(CONFIG.COOKIE_NAME + '='))
+            ?.split('=')[1];
+
+        if (cookieToken) {
+            console.log('Using token from cookie');
+            cache.apiToken = cookieToken;
+            return cookieToken;
+        }
+
         // Return cached token if available
         if (cache.apiToken) {
             console.log('Using cached API token');
@@ -68,6 +81,11 @@
                     const data = await response.json();
                     console.log('Successfully obtained API token');
                     cache.apiToken = data.token;
+
+                    // Store token in cookie - expires in 24 hours
+                    const expirationDate = new Date();
+                    expirationDate.setTime(expirationDate.getTime() + (24 * 60 * 60 * 1000));
+                    document.cookie = `${CONFIG.COOKIE_NAME}=${data.token}; expires=${expirationDate.toUTCString()}; path=/`;
 
                     // Get member email if possible
                     try {
