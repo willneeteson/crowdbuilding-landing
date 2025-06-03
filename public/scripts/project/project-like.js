@@ -100,12 +100,21 @@ class LikeButton {
       }
 
       const data = await response.json();
-      console.log('Follow status response:', data);
+      console.log('Raw API response:', data);
+      
+      // Ensure we're accessing the correct property path
+      const isFollowing = data.data && data.data.is_following;
+      const followersCount = data.data && data.data.followers_count;
+      
+      console.log('Parsed follow status:', {
+        isFollowing: isFollowing,
+        followersCount: followersCount
+      });
       
       // Update initial state based on API response
-      this.isLiked = data.data.is_following;
+      this.isLiked = Boolean(isFollowing); // Ensure boolean value
       console.log('Updated like state from API:', this.isLiked);
-      this.updateUI(data.data.followers_count || 0);
+      this.updateUI(followersCount || 0);
       
       // Remove shimmer effect and show counter after data is loaded
       this.button.classList.remove('shimmer');
@@ -143,7 +152,7 @@ class LikeButton {
       // Choose endpoint based on current state
       const endpoint = this.isLiked ? 'unfollow' : 'follow';
       const url = `${API_URL}/api/v1/groups/${this.groupId}/${endpoint}`;
-      console.log(`Making POST request to ${endpoint} endpoint:`, url);
+      console.log(`Making POST request to ${endpoint} endpoint:`, url, 'Current isLiked state:', this.isLiked);
       console.log('Request headers:', headers);
 
       const response = await fetch(url, {
@@ -157,8 +166,11 @@ class LikeButton {
       if (response.status === 403) {
         const errorData = await response.json();
         console.error('Permission error:', errorData);
-        // Refresh status to ensure we have correct state
-        await this.checkFollowStatus();
+        // If we get a 403 on follow, we might already be following
+        if (!this.isLiked) {
+          console.log('Got 403 while trying to follow - checking if we are already following');
+          await this.checkFollowStatus();
+        }
         return;
       }
       
@@ -185,11 +197,13 @@ class LikeButton {
       console.log('Updated group data:', groupData);
       
       // Update state based on API response
-      this.isLiked = groupData.data.is_following;
+      const newIsFollowing = groupData.data && groupData.data.is_following;
+      this.isLiked = Boolean(newIsFollowing);
       console.log('Updated like state after toggle:', this.isLiked);
       
       // Update UI with the count from the API response
-      this.updateUI(groupData.data.followers_count);
+      const newFollowersCount = groupData.data && groupData.data.followers_count;
+      this.updateUI(newFollowersCount || 0);
       
     } catch (error) {
       console.error('Error toggling like:', error);
@@ -216,9 +230,11 @@ class LikeButton {
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
       this.button.classList.add('liked');
+      console.log('Added liked classes to button and heart');
     } else {
       this.heartIcon.classList.remove('liked');
       this.button.classList.remove('liked');
+      console.log('Removed liked classes from button and heart');
     }
   }
 }
