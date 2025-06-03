@@ -26,9 +26,9 @@ class LikeButton {
     this.counter.style.visibility = 'hidden';
     this.button.classList.add('shimmer');
     
-    // Try to get initial state from class
-    this.isLiked = this.button.classList.contains('liked');
-    console.log('Initial like state:', this.isLiked);
+    // Initialize state as null until we get it from the API
+    this.isLiked = null;
+    console.log('Initial like state set to null until API response');
     
     this.init();
   }
@@ -104,6 +104,7 @@ class LikeButton {
       
       // Update initial state based on API response
       this.isLiked = data.data.is_following;
+      console.log('Updated like state from API:', this.isLiked);
       this.updateUI(data.data.followers_count || 0);
       
       // Remove shimmer effect and show counter after data is loaded
@@ -119,7 +120,7 @@ class LikeButton {
   }
 
   async toggleLike() {
-    console.log('Toggling like state');
+    console.log('Toggling like state, current state:', this.isLiked);
     try {
       // Add loading state
       this.button.classList.add('loading');
@@ -151,6 +152,16 @@ class LikeButton {
       });
 
       console.log('Follow API response status:', response.status);
+      
+      // Handle specific error cases
+      if (response.status === 403) {
+        const errorData = await response.json();
+        console.error('Permission error:', errorData);
+        // Refresh status to ensure we have correct state
+        await this.checkFollowStatus();
+        return;
+      }
+      
       if (!response.ok) {
         const errorData = await response.text();
         console.error('Error response:', errorData);
@@ -175,6 +186,7 @@ class LikeButton {
       
       // Update state based on API response
       this.isLiked = groupData.data.is_following;
+      console.log('Updated like state after toggle:', this.isLiked);
       
       // Update UI with the count from the API response
       this.updateUI(groupData.data.followers_count);
