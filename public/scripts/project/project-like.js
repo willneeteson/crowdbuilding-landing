@@ -2,13 +2,18 @@
 class LikeButton {
   constructor(button) {
     this.button = button;
-    if (!this.button) return;
+    if (!this.button) {
+      console.error('No button element found');
+      return;
+    }
     
+    console.log('Initializing like button:', this.button);
     this.heartIcon = this.button.querySelector('.project__like-heart');
     this.counter = this.button.querySelector('.project__like-counter');
     
     // Try to get initial state from class
     this.isLiked = this.button.classList.contains('liked');
+    console.log('Initial like state:', this.isLiked);
     
     this.init();
   }
@@ -17,6 +22,7 @@ class LikeButton {
     // Get project ID from URL using the same logic as project-get-details.js
     const pathParts = window.location.pathname.split('/');
     this.groupId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    console.log('Group ID from URL:', this.groupId);
     
     if (!this.groupId) {
       console.error('No project ID found in URL');
@@ -28,10 +34,13 @@ class LikeButton {
     
     // Initialize click handler
     this.button.addEventListener('click', async (e) => {
+      console.log('Like button clicked');
       e.preventDefault();
       
       // Check if user is logged in
       const isLoggedIn = await window.auth.isUserLoggedIn();
+      console.log('User logged in status:', isLoggedIn);
+      
       if (!isLoggedIn) {
         // Trigger login modal or redirect to login page
         console.log('User needs to login first');
@@ -39,7 +48,10 @@ class LikeButton {
       }
       
       if (!this.button.classList.contains('loading')) {
+        console.log('Initiating like toggle');
         this.toggleLike();
+      } else {
+        console.log('Button is in loading state, ignoring click');
       }
     });
 
@@ -53,6 +65,7 @@ class LikeButton {
   }
 
   async checkFollowStatus() {
+    console.log('Checking follow status for group:', this.groupId);
     try {
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}`, {
         headers: {
@@ -66,6 +79,7 @@ class LikeButton {
       }
 
       const data = await response.json();
+      console.log('Follow status response:', data);
       
       // Update initial state based on API response
       this.isLiked = data.data.is_following;
@@ -77,16 +91,21 @@ class LikeButton {
   }
 
   async toggleLike() {
+    console.log('Toggling like state');
     try {
       // Add loading state
       this.button.classList.add('loading');
       
       // Get API token
+      console.log('Getting API token');
       const token = await window.auth.getApiToken();
+      console.log('API token received:', token ? 'Yes' : 'No');
+      
       if (!token) {
         throw new Error('No API token available');
       }
       
+      console.log('Making follow API request');
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}/follow`, {
         method: 'POST',
         headers: {
@@ -96,11 +115,13 @@ class LikeButton {
         }
       });
 
+      console.log('Follow API response status:', response.status);
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error(`Network response was not ok: ${response.status}`);
       }
 
       const data = await response.json();
+      console.log('Follow API response data:', data);
       
       // Toggle like state
       this.isLiked = !this.isLiked;
@@ -120,6 +141,7 @@ class LikeButton {
   }
 
   updateUI(count) {
+    console.log('Updating UI - count:', count, 'isLiked:', this.isLiked);
     // Update the counter
     this.counter.textContent = count;
     
@@ -136,8 +158,11 @@ class LikeButton {
 
 // Initialize like buttons
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM ready, initializing like buttons');
   // Initialize for all like buttons on the page
-  document.querySelectorAll('.project__like-btn').forEach(button => {
+  const buttons = document.querySelectorAll('.project__like-btn');
+  console.log('Found like buttons:', buttons.length);
+  buttons.forEach(button => {
     new LikeButton(button);
   });
 }); 
