@@ -14,22 +14,17 @@ class LikeButton {
   }
 
   init() {
-    // Get the group ID from the button's data attribute or URL
-    this.groupId = this.button.dataset.groupId;
+    // Get project ID from URL using the same logic as project-get-details.js
+    const pathParts = window.location.pathname.split('/');
+    this.groupId = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
     
-    // If no group ID in data attribute, try to get it from URL
     if (!this.groupId) {
-      const urlParams = new URLSearchParams(window.location.search);
-      this.groupId = urlParams.get('group') || urlParams.get('groupId');
-      
-      // If found in URL, set it as data attribute
-      if (this.groupId) {
-        this.button.dataset.groupId = this.groupId;
-      } else {
-        console.error('No group ID found for like button');
-        return;
-      }
+      console.error('No project ID found in URL');
+      return;
     }
+    
+    // Store group ID in button's data attribute for reference
+    this.button.dataset.groupId = this.groupId;
     
     // Initialize click handler
     this.button.addEventListener('click', (e) => {
@@ -43,6 +38,30 @@ class LikeButton {
     if (this.isLiked) {
       this.heartIcon.classList.add('liked');
     }
+
+    // Check initial follow status
+    this.checkFollowStatus();
+  }
+
+  async checkFollowStatus() {
+    try {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      
+      // Update initial state based on API response
+      this.isLiked = data.data.is_following;
+      this.updateUI(data.data.followers_count || 0);
+      
+    } catch (error) {
+      console.error('Error checking follow status:', error);
+    }
   }
 
   async toggleLike() {
@@ -50,12 +69,12 @@ class LikeButton {
       // Add loading state
       this.button.classList.add('loading');
       
-      const response = await fetch(`/groups/${this.groupId}/follow`, {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${this.groupId}/follow`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include' // Include cookies if needed for authentication
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -68,7 +87,7 @@ class LikeButton {
       this.isLiked = !this.isLiked;
       
       // Update UI
-      this.updateUI(data.followersCount || 0);
+      this.updateUI(data.followers_count || 0);
       
     } catch (error) {
       console.error('Error toggling like:', error);
