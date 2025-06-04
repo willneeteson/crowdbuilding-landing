@@ -323,11 +323,11 @@
 }
 
 .tag {
-    background: transparent;
-    padding: 4px 12px;
+    background: transparent!important;
+    padding: 2px 6px!important;
     border-radius: var(--border-radius-full);
-    border: 1px solid var(--color-border);
-    font-size: 14px;
+    border: 1px solid var(--color-border)!important;
+    font-size: 15px;
     color: var(--color-text);
     font-weight: 400;
     display: inline-flex;
