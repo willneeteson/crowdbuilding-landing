@@ -1,4 +1,4 @@
-// Dynamic tab system functionality with accessibility
+// Dynamic tab system functionality with accessibility and URL hash support
 document.addEventListener('DOMContentLoaded', function() {
     // Cache DOM elements and create tab mapping
     const tabsWrapper = document.querySelector('.tabs__wrapper');
@@ -49,11 +49,14 @@ document.addEventListener('DOMContentLoaded', function() {
             panel.setAttribute('aria-hidden', 'true');
             panel.setAttribute('tabindex', '0');
             panel.setAttribute('aria-labelledby', btn.id);
+
+            // Update href to use hash
+            btn.href = `#${key}`;
         });
     }
 
     // Function to switch tabs with enhanced accessibility
-    function switchTab(activeKey) {
+    function switchTab(activeKey, updateHash = true) {
         if (!tabButtons[activeKey] || !tabPanels[activeKey]) {
             console.error(`Invalid tab key: ${activeKey}`);
             return;
@@ -80,6 +83,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         activePanel.style.display = 'block';
         activePanel.setAttribute('aria-hidden', 'false');
+
+        // Update URL hash if requested
+        if (updateHash) {
+            history.pushState(null, '', `#${activeKey}`);
+        }
     }
 
     // Handle keyboard navigation
@@ -114,6 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Handle URL hash changes
+    function handleHashChange() {
+        const hash = window.location.hash.slice(1).toLowerCase();
+        if (hash && tabButtons[hash]) {
+            switchTab(hash, false); // Don't update hash again
+        }
+    }
+
     // Event listeners
     function addEventListeners() {
         // Click events for all tab buttons
@@ -126,6 +142,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Keyboard navigation
             btn.addEventListener('keydown', handleKeyPress);
         });
+
+        // Listen for hash changes
+        window.addEventListener('hashchange', handleHashChange);
     }
 
     // Initialize tabs
@@ -140,9 +159,16 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeARIA();
         addEventListeners();
 
-        // Activate first tab by default
-        const firstTabKey = Object.keys(tabButtons)[0];
-        switchTab(firstTabKey);
+        // Check for hash in URL on load
+        const initialHash = window.location.hash.slice(1).toLowerCase();
+        if (initialHash && tabButtons[initialHash]) {
+            // Use the hash from URL
+            switchTab(initialHash, false);
+        } else {
+            // Activate first tab by default
+            const firstTabKey = Object.keys(tabButtons)[0];
+            switchTab(firstTabKey);
+        }
     }
 
     init();
