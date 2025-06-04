@@ -736,7 +736,6 @@
 .modal-section h4 {
     margin-bottom: 12px;
     font-size: 18px;
-    color: #090F3F;
 }
 
 .project-details,
@@ -1286,7 +1285,7 @@ button.post-menu-item.delete {
 
 .description-section h3 {
     margin: 0 0 1rem 0;
-    font-size: 1.2rem;
+    font-size: 1.2em;
     font-weight: 600;
 }
 
