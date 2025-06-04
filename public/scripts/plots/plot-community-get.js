@@ -41,24 +41,43 @@ function showErrorState(container, message) {
 }
 
 async function fetchPlotPosts(plotSlug, cursor = null) {
+    // First, ensure we have a plot slug
+    if (!plotSlug) {
+        console.error('No plot slug provided');
+        const container = document.getElementById('communityFeed');
+        if (container) {
+            showErrorState(container, 'Error: No plot identifier found.');
+        }
+        return;
+    }
+
+    console.log('Fetching posts for plot:', plotSlug);
+    
+    // Check if user is logged in
+    const isLoggedIn = await window.auth.isUserLoggedIn();
+    if (!isLoggedIn) {
+        const container = document.getElementById('communityFeed');
+        if (container) {
+            showErrorState(container, 'Please log in to view posts.');
+        }
+        return;
+    }
+    
     // First, ensure the communityFeed container exists
     let container = document.getElementById('communityFeed');
     if (!container) {
-        // Create the container if it doesn't exist
         container = document.createElement('div');
         container.id = 'communityFeed';
         container.className = 'community-feed-container';
         
-        // Find a suitable parent element to append to
         const mainContent = document.querySelector('main') || document.querySelector('.main-content') || document.body;
         mainContent.appendChild(container);
     }
     
-    // Only show loading state if this is the first load, not when loading more
+    // Only show loading state if this is the first load
     if (!cursor) {
         showLoadingState(container);
     } else if (!isLoadingMore) {
-        // If we're loading more posts, show a loading indicator at the bottom
         const loadingMore = document.getElementById('loadMoreLoading');
         if (loadingMore) {
             loadingMore.style.display = 'flex';
@@ -67,26 +86,60 @@ async function fetchPlotPosts(plotSlug, cursor = null) {
     
     isLoadingMore = !!cursor;
 
+    // Get fresh token for the request
     const token = await window.auth.getApiToken();
-    let endpoint = `https://api.crowdbuilding.com/api/v1/plots/${plotSlug}/community`;
-    
-    // Add the cursor parameter if provided (for pagination)
+    if (!token) {
+        console.error('No authentication token available');
+        showErrorState(container, 'Authentication failed. Please try logging in again.');
+        return;
+    }
+
+    let endpoint = `https://api.crowdbuilding.com/api/v1/plots/${plotSlug}/posts`;
     if (cursor) {
         endpoint += `?cursor=${cursor}`;
     }
+
+    console.log('Fetching from endpoint:', endpoint);
 
     try {
         const response = await fetch(endpoint, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                'Authorization': `Bearer ${token}`
             },
         });
 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('API Error Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: errorText
+            });
+            
+            let errorMessage = 'Failed to load posts. Please try again.';
+            if (response.status === 404) {
+                errorMessage = 'Plot not found or you do not have access to it.';
+            } else if (response.status === 401) {
+                // Clear auth cache on 401 to force re-authentication
+                window.auth.clearAuthCache();
+                errorMessage = 'Your session has expired. Please log in again.';
+            } else if (response.status === 403) {
+                errorMessage = 'You do not have permission to view these posts.';
+            }
+            
+            throw new Error(`HTTP error! Status: ${response.status} - ${errorMessage}`);
+        }
+
         const data = await response.json();
-        console.log('API Response:', data); // Add logging to see the response
+        console.log('API Response:', data);
+        
+        // Validate the response data
+        if (!data || !Array.isArray(data.data)) {
+            console.error('Invalid API response format:', data);
+            throw new Error('Invalid response format from server');
+        }
         
         // Store the next cursor from the API response
         if (data.meta && data.meta.next_cursor) {
@@ -104,11 +157,11 @@ async function fetchPlotPosts(plotSlug, cursor = null) {
     } catch (error) {
         console.error('Error fetching plot posts:', error);
         if (!isLoadingMore) {
-            showErrorState(container, 'Berichten laden mislukt. Probeer het opnieuw.');
+            showErrorState(container, error.message || 'Failed to load posts. Please try again.');
         } else {
             const loadMoreButton = document.getElementById('loadMoreButton');
             if (loadMoreButton) {
-                loadMoreButton.innerText = 'Fout bij het laden van meer berichten. Probeer het opnieuw.';
+                loadMoreButton.innerText = error.message || 'Error loading more posts. Please try again.';
                 loadMoreButton.disabled = false;
             }
         }
