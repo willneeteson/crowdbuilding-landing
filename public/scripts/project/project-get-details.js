@@ -73,8 +73,10 @@ function updatePageElements(data) {
     updateElement('.project-subtitle', data.subtitle);
     updateElement('.project-intro', data.intro, true);
     updateElement('.project-location', data.location);
-    updateElement('.project-phase', data.phase?.name);
-    updateElement('.project-development-form', data.development_form?.name);
+    
+    // Update elements and their parent containers
+    updateElementAndParent('.project-phase', data.phase?.name, '#phase');
+    updateElementAndParent('.project-development-form', data.development_form?.name, '#development-form');
     updateElement('.project-homes-count', data.number_of_homes);
     updateElement('.project-member-status', data.member_status?.name);
 
@@ -83,9 +85,9 @@ function updatePageElements(data) {
         updateDescriptions(data.info);
     }
 
-    // Update arrays with max items
-    updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
-    updateArrayElement('.project-target-audiences', data.target_audiences, 'name');
+    // Update arrays with max items and their parent containers
+    updateArrayElementAndParent('.project-housing-forms', data.housing_forms, 'title', '#housing-forms');
+    updateArrayElementAndParent('.project-target-audiences', data.target_audiences, 'name', '#target-audiences');
     updateArrayElement('.project-interests', data.interests, 'name');
 
     // Update images if they exist
@@ -113,6 +115,22 @@ function updateElement(selector, value, isHTML = false) {
     }
 }
 
+function updateElementAndParent(selector, value, parentSelector) {
+    const element = document.querySelector(selector);
+    const parent = document.querySelector(parentSelector);
+    
+    if (element && parent) {
+        if (value) {
+            element.textContent = value;
+            element.style.display = 'block';
+            parent.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+            parent.style.display = 'none';
+        }
+    }
+}
+
 function updateArrayElement(selector, array, property) {
     const container = document.querySelector(selector);
     if (!container) return;
@@ -127,6 +145,28 @@ function updateArrayElement(selector, array, property) {
         ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
     } else {
         container.style.display = 'none';
+    }
+}
+
+function updateArrayElementAndParent(selector, array, property, parentSelector) {
+    const container = document.querySelector(selector);
+    const parent = document.querySelector(parentSelector);
+    
+    if (!container || !parent) return;
+
+    if (array && array.length > 0) {
+        const maxItems = 3;
+        const displayItems = array.slice(0, maxItems);
+        const remainingCount = Math.max(0, array.length - maxItems);
+
+        container.innerHTML = displayItems.map(item => 
+            `<div class="tag">${item[property]}</div>`
+        ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
+        container.style.display = 'block';
+        parent.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+        parent.style.display = 'none';
     }
 }
 
