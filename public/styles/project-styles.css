@@ -324,7 +324,7 @@
 
 .tag {
     background: transparent!important;
-    padding: 2px 6px!important;
+    padding: 0px 8px!important;
     border-radius: var(--border-radius-full);
     border: 2px solid #090F3F!important;
     font-size: 15px;
@@ -333,7 +333,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 4px;
+    margin-right: 8px;
 }
 
 .tags-list {
