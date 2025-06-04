@@ -21,7 +21,8 @@ class LikeButton {
       return;
     }
     
-    this.heartIcon = this.button.querySelector('.project__like-heart');
+    this.unlikedHeartIcon = this.button.querySelector('.project__like-heart.unliked');
+    this.likedHeartIcon = this.button.querySelector('.project__like-heart.liked');
     this.counter = this.button.querySelector('.project__like-counter');
     this.isLiked = null;
     this.canFollow = false;
@@ -199,11 +200,13 @@ class LikeButton {
     
     // Update like state
     if (this.isLiked) {
-      this.heartIcon.classList.add('liked');
       this.button.classList.add('liked');
+      if (this.likedHeartIcon) this.likedHeartIcon.style.display = 'block';
+      if (this.unlikedHeartIcon) this.unlikedHeartIcon.style.display = 'none';
     } else {
-      this.heartIcon.classList.remove('liked');
       this.button.classList.remove('liked');
+      if (this.likedHeartIcon) this.likedHeartIcon.style.display = 'none';
+      if (this.unlikedHeartIcon) this.unlikedHeartIcon.style.display = 'block';
     }
     
     // Update button state based on permissions
