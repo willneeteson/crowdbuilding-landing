@@ -34,6 +34,66 @@
     --spacing-xl: 32px;
 }
 
+
+/* Project Like Button Styles */
+
+/* Shimmer effect */
+.project__like-btn.shimmer {
+    position: relative;
+    overflow: hidden;
+    background: #f6f7f8;
+}
+
+.project__like-btn.shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Button states */
+.project__like-btn {
+    transition: all 0.2s ease;
+}
+
+.project__like-btn.liked {
+    background-color: rgba(255, 64, 129, 0.1);
+    border-color: #ff4081;
+    color: #ff4081;
+}
+
+.project__like-heart.liked svg {
+    fill: #ff4081;
+}
+
+.project__like-btn.loading {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.project__like-btn.error {
+    border-color: #f44336;
+    color: #f44336;
+} 
+
 /* 2. Layout & Grid
    ========================================================================== */
 .members-compact-view {
@@ -1257,9 +1317,6 @@ button.post-menu-item.delete {
     text-decoration: underline;
 }
 
-.project-details-modal .cb-details-grid {
-    padding: 20px;
-}
 
 .project-details-modal .section-header {
     margin-bottom: 20px;
