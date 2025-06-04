@@ -41,13 +41,13 @@ function showErrorState(container, message) {
 }
 
 async function fetchPlotPosts(plotSlug, cursor = null) {
-    // First, ensure the plotPosts container exists
-    let container = document.getElementById('plotPosts');
+    // First, ensure the communityFeed container exists
+    let container = document.getElementById('communityFeed');
     if (!container) {
         // Create the container if it doesn't exist
         container = document.createElement('div');
-        container.id = 'plotPosts';
-        container.className = 'plot-posts-container';
+        container.id = 'communityFeed';
+        container.className = 'community-feed-container';
         
         // Find a suitable parent element to append to
         const mainContent = document.querySelector('main') || document.querySelector('.main-content') || document.body;
@@ -68,7 +68,7 @@ async function fetchPlotPosts(plotSlug, cursor = null) {
     isLoadingMore = !!cursor;
 
     const token = await window.auth.getApiToken();
-    let endpoint = `https://api.crowdbuilding.com/api/v1/plots/${plotSlug}/posts`;
+    let endpoint = `https://api.crowdbuilding.com/api/v1/plots/${plotSlug}/community`;
     
     // Add the cursor parameter if provided (for pagination)
     if (cursor) {
@@ -86,6 +86,7 @@ async function fetchPlotPosts(plotSlug, cursor = null) {
 
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
+        console.log('API Response:', data); // Add logging to see the response
         
         // Store the next cursor from the API response
         if (data.meta && data.meta.next_cursor) {
@@ -133,7 +134,7 @@ function updateLoadMoreButton() {
     
     // Only add the button if there are more posts to load
     if (nextCursor) {
-        const container = document.getElementById('plotPosts');
+        const container = document.getElementById('communityFeed');
         const loadMoreContainer = document.createElement('div');
         loadMoreContainer.id = 'loadMoreContainer';
         loadMoreContainer.className = 'load-more-container';
@@ -301,7 +302,7 @@ async function toggleLike(postId) {
 }
 
 function renderPosts(posts, append = false) {
-    const container = document.getElementById('plotPosts');
+    const container = document.getElementById('communityFeed');
     
     if (!append) {
         container.innerHTML = '';
@@ -986,7 +987,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Add a style tag to force heart icons to display correctly
         const styleTag = document.createElement('style');
         styleTag.innerHTML = `
-            .plot-posts-container {
+            .community-feed-container {
                 width: 100%;
                 max-width: 800px;
                 margin: 0 auto;
@@ -1049,7 +1050,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (!plotSlug) {
                 console.error('No plot slug found in URL');
-                const container = document.getElementById('plotPosts');
+                const container = document.getElementById('communityFeed');
                 if (container) {
                     container.innerHTML = '<div class="post-item">Error: No plot found in URL.</div>';
                 }
@@ -1066,14 +1067,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             addDirectLikeClickHandler();
         } else {
             console.warn('No user ID found, post fetching skipped');
-            const container = document.getElementById('plotPosts');
+            const container = document.getElementById('communityFeed');
             if (container) {
                 container.innerHTML = '<div class="post-item">Log in of meld je aan om berichten te lezen.</div>';
             }
         }
     } catch (error) {
         console.error('Error during initialization:', error);
-        const container = document.getElementById('plotPosts');
+        const container = document.getElementById('communityFeed');
         if (container) {
             container.innerHTML = '<div class="post-item">Fout bij het laden van meer berichten. Probeer het opnieuw.</div>';
         }
