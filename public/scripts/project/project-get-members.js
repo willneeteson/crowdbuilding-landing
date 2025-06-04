@@ -1,6 +1,13 @@
 // Function to show login message
 function showLoginMessage() {
     const membersContainer = document.getElementById('projectMembers');
+    const memberWrapper = document.getElementById('projectMemberWrapper');
+    
+    // Hide the entire wrapper
+    if (memberWrapper) {
+        memberWrapper.style.display = 'none';
+    }
+    
     if (!membersContainer) return;
 
     membersContainer.innerHTML = `

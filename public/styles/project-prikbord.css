@@ -566,10 +566,10 @@
 
 /* Tags */
 .tag, .remaining-count {
-    background: rgba(0, 0, 0, 0.08);
-    padding: 6px 12px;
+    background:transparent;
+    padding: 2px 6px;
     border-radius: 99px;
-    font-size: 14px;
+    font-size: 16px;
     color: #090F3F;
     display: inline-flex;
     align-items: center;

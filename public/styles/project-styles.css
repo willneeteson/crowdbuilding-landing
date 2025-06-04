@@ -326,13 +326,14 @@
     background: transparent!important;
     padding: 2px 6px!important;
     border-radius: var(--border-radius-full);
-    border: 1px solid var(--color-border)!important;
+    border: 2px solid #090F3F!important;
     font-size: 15px;
     color: var(--color-text);
     font-weight: 400;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    margin-right: 4px;
 }
 
 .tags-list {
@@ -567,17 +568,17 @@
 .project-housing-forms div, 
 .project-interests div, 
 .project-target-audiences div {
-    background: rgba(0, 0, 0, 0.08);
-    padding: 6px 12px;
+    background: transparent;
+    padding: 2px 6px;
     border-radius: 99px;
 }
 
 /* Tag Styles */
 .tag, .remaining-count {
-    background: rgba(0, 0, 0, 0.08);
-    padding: 6px 12px;
+    background: transparent;
+    padding: 2px 6px;
     border-radius: 99px;
-    font-size: 14px;
+    font-size: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
