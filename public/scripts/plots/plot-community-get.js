@@ -41,7 +41,18 @@ function showErrorState(container, message) {
 }
 
 async function fetchPlotPosts(plotSlug, cursor = null) {
-    const container = document.getElementById('plotPosts');
+    // First, ensure the plotPosts container exists
+    let container = document.getElementById('plotPosts');
+    if (!container) {
+        // Create the container if it doesn't exist
+        container = document.createElement('div');
+        container.id = 'plotPosts';
+        container.className = 'plot-posts-container';
+        
+        // Find a suitable parent element to append to
+        const mainContent = document.querySelector('main') || document.querySelector('.main-content') || document.body;
+        mainContent.appendChild(container);
+    }
     
     // Only show loading state if this is the first load, not when loading more
     if (!cursor) {
@@ -975,6 +986,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Add a style tag to force heart icons to display correctly
         const styleTag = document.createElement('style');
         styleTag.innerHTML = `
+            .plot-posts-container {
+                width: 100%;
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+            
             .post-like-button.liked svg path {
                 fill: #e74c3c !important;
                 stroke: #e74c3c !important;
