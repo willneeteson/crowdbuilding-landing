@@ -955,7 +955,6 @@
     margin: 0;
     font-size: 1rem;
     font-weight: 600;
-    color: #333333;
 }
 
 .post-meta time {
@@ -965,8 +964,7 @@
 
 .post-body p {
     margin: 0;
-    font-size: 1rem;
-    color: #444444;
+    font-size: 1em;
     line-height: 1.5;
 }
 
@@ -975,7 +973,6 @@
     justify-content: space-between;
     align-items: center;
     font-size: 0.875rem;
-    color: #555555;
 }
 
 .post-likes, .post-comments {
@@ -1289,19 +1286,17 @@ button.post-menu-item.delete {
 
 .description-section h3 {
     margin: 0 0 1rem 0;
-    color: #090F3F;
     font-size: 1.2rem;
     font-weight: 600;
 }
 
 .description-content {
-    color: #444;
     line-height: 1.6;
-    font-size: 1rem;
+    font-size: 1em;
 }
 
 .description-content p {
-    margin: 0 0 1rem 0;
+    margin: 0 0 1em 0;
 }
 
 .description-content p:last-child {
@@ -1324,7 +1319,6 @@ button.post-menu-item.delete {
 
 .project-details-modal .section-header h3 {
     font-size: 1.5em;
-    color: #333;
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
 }
@@ -1345,7 +1339,6 @@ button.post-menu-item.delete {
 
 .project-details-modal .detail-label {
     font-weight: 600;
-    color: #666;
     margin-bottom: 8px;
 }
 
@@ -1364,7 +1357,6 @@ button.post-menu-item.delete {
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 0.9em;
-    color: #666;
 }
 
 @media (min-width: 768px) {
