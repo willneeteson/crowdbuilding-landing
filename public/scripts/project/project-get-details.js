@@ -123,7 +123,7 @@ function updateElementAndParent(selector, value, parentSelector) {
         if (value) {
             element.textContent = value;
             element.style.display = 'block';
-            parent.style.display = 'block';
+            parent.style.display = 'flex';
         } else {
             element.style.display = 'none';
             parent.style.display = 'none';
@@ -163,7 +163,7 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
             `<div class="tag">${item[property]}</div>`
         ).join('') + (remainingCount > 0 ? `<div class="remaining-count">+${remainingCount}</div>` : '');
         container.style.display = 'block';
-        parent.style.display = 'block';
+        parent.style.display = 'flex';
     } else {
         container.style.display = 'none';
         parent.style.display = 'none';
