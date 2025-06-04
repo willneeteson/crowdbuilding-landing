@@ -87,7 +87,7 @@ function updatePageElements(data) {
 
     // Update arrays with max items and their parent containers
     updateArrayElementAndParent('.project-housing-forms', data.housing_forms, 'title', '#housing-forms');
-    updateArrayElementAndParent('.project-target-audiences', data.target_audiences, 'name', '#target-audiences');
+    updateArrayElementAndParent('.project-target-audiences', data.target_audiences, 'name', '.project__sidebar-list-item:has(.project-target-audiences)');
     updateArrayElement('.project-interests', data.interests, 'name');
 
     // Update images if they exist
