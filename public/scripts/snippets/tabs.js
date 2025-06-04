@@ -30,4 +30,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize tabs (show Community tab by default)
     switchTab(tabBtnCommunity, tabBtnOver, tabCommunity, tabOver);
-}); 
+});
