@@ -48,9 +48,8 @@
 
 .post-meta h4 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1em;
     font-weight: 600;
-    color: #333333;
 }
 
 .post-meta time {
@@ -60,8 +59,7 @@
 
 .post-body p {
     margin: 0;
-    font-size: 1rem;
-    color: #444444;
+    font-size: 1em;
     line-height: 1.5;
 }
 
