@@ -160,9 +160,10 @@ async function joinGroup(answers = {}) {
                 return acc;
             }, {});
 
-        // Ensure we have at least one answer
-        if (Object.keys(formattedAnswers).length === 0) {
-            throw new Error('No answers provided');
+        // Only check for answers if there are questions in the form
+        const questionsExist = document.querySelector('.group-questions-form')?.children.length > 0;
+        if (questionsExist && Object.keys(formattedAnswers).length === 0) {
+            throw new Error('Geen antwoorden gegeven');
         }
 
         console.log('Raw answers before formatting:', answers);
