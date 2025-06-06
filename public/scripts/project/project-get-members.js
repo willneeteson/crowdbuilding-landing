@@ -157,33 +157,39 @@ function populateProjectDetailsModal(data) {
 }
 
 // Function to populate members list in Webflow
-async function populateMembersList(data) {
+async function populateMembersList(members, containerType = 'members') {
     try {
-        console.log('Starting to populate members list with data:', data);
+        console.log(`Starting to populate ${containerType} list with data:`, members);
         
-        const membersContainer = document.getElementById('projectMembers');
-        console.log('Found members container:', membersContainer);
+        // Determine which container to use based on type
+        const containerId = containerType === 'admins' ? 'projectAdmin' : 'projectMembers';
+        const wrapperId = containerType === 'admins' ? 'projectAdminWrapper' : 'projectMemberWrapper';
+        const modalId = containerType === 'admins' ? 'adminsModal' : 'membersModal';
+        const container = document.getElementById(containerId);
         
-        if (!membersContainer) {
-            console.error('Members container not found!');
+        console.log(`Found ${containerType} container:`, container);
+        
+        if (!container) {
+            console.error(`${containerType} container not found!`);
             return;
         }
 
-        // Handle both array and object data structures
-        const members = Array.isArray(data) ? data : (data.members || []);
+        // Filter members based on role
+        const filteredMembers = members.filter(member => {
+            if (containerType === 'admins') {
+                return member.role_label === 'Beheerder';
+            } else {
+                return member.role_label !== 'Beheerder';
+            }
+        });
         
-        if (!Array.isArray(members)) {
-            console.error('No valid members array found in data:', data);
-            return;
-        }
+        console.log(`Number of ${containerType} to display:`, filteredMembers.length);
 
-        console.log('Number of members to display:', members.length);
-
-        // Create compact avatar view (max 5 avatars + remaining count)
-        const maxAvatars = 5;
-        const remainingCount = Math.max(0, members.length - maxAvatars);
+        // Set max avatars based on container type
+        const maxAvatars = containerType === 'admins' ? 3 : 5;
+        const remainingCount = Math.max(0, filteredMembers.length - maxAvatars);
         
-        const avatarsHTML = members.slice(0, maxAvatars).map(member => {
+        const avatarsHTML = filteredMembers.slice(0, maxAvatars).map(member => {
             const avatarUrl = member.avatar_url 
                 ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
                 : 'https://api.crowdbuilding.com/storage/default-avatar.png';
@@ -213,7 +219,7 @@ async function populateMembersList(data) {
         // Create members list content for modal
         const membersListContent = `
             <div class="cb-members-list">
-                ${members.map(member => {
+                ${filteredMembers.map(member => {
                     const avatarUrl = member.avatar_url 
                         ? (member.avatar_url.startsWith('http') ? member.avatar_url : `https://api.crowdbuilding.com${member.avatar_url}`)
                         : 'https://api.crowdbuilding.com/storage/default-avatar.png';
@@ -237,31 +243,32 @@ async function populateMembersList(data) {
 
         // Wait for modal system and create the members modal
         const modalSystem = await window.waitForModalSystem();
-        modalSystem.createModal(`Leden (${members.length})`, membersListContent, { id: 'membersModal' });
+        const modalTitle = containerType === 'admins' ? `Beheerders (${filteredMembers.length})` : `Deelnememers (${filteredMembers.length})`;
+        modalSystem.createModal(modalTitle, membersListContent, { id: modalId });
 
         // Add the compact view to the container
-        membersContainer.innerHTML = compactViewHTML;
+        container.innerHTML = compactViewHTML;
 
         // Add click handler to the wrapper div
-        const wrapper = document.getElementById('projectMemberWrapper');
+        const wrapper = document.getElementById(wrapperId);
         if (wrapper) {
             wrapper.style.cursor = 'pointer';
-            wrapper.addEventListener('click', showMembersModal);
+            wrapper.addEventListener('click', () => showModal(modalId));
         }
 
-        console.log('Members list populated successfully');
+        console.log(`${containerType} list populated successfully`);
     } catch (error) {
-        console.error('Error populating members list:', error);
+        console.error(`Error populating ${containerType} list:`, error);
     }
 }
 
-// Function to show the members modal
-async function showMembersModal() {
+// Function to show any modal
+async function showModal(modalId) {
     try {
         const modalSystem = await window.waitForModalSystem();
-        modalSystem.showModal('membersModal');
+        modalSystem.showModal(modalId);
     } catch (error) {
-        console.error('Error showing members modal:', error);
+        console.error('Error showing modal:', error);
     }
 }
 
@@ -270,8 +277,12 @@ async function fetchMembersData() {
     try {
         console.log('Starting to fetch members data...');
         
-        // Show loading state immediately
+        // Show loading state immediately for both containers
         showLoadingState();
+        const adminContainer = document.getElementById('projectAdmin');
+        if (adminContainer) {
+            showLoadingState('admin');
+        }
         
         // Check if user is logged in first
         const isLoggedIn = await window.auth.isUserLoggedIn();
@@ -280,6 +291,7 @@ async function fetchMembersData() {
         if (!isLoggedIn) {
             console.log('User is not logged in, showing login message');
             showLoginMessage();
+            if (adminContainer) showLoginMessage('admin');
             return;
         }
 
@@ -291,6 +303,7 @@ async function fetchMembersData() {
         if (!token) {
             console.log('No authentication token available, showing login message');
             showLoginMessage();
+            if (adminContainer) showLoginMessage('admin');
             return;
         }
 
@@ -332,6 +345,7 @@ async function fetchMembersData() {
                 if (response.status === 403) {
                     console.log('User needs to be a member of the group');
                     showPermissionMessage();
+                    if (adminContainer) showPermissionMessage('admin');
                     return;
                 }
                 
@@ -355,12 +369,17 @@ async function fetchMembersData() {
 
         console.log('Total members fetched:', allMembers.length);
         
-        // Now populate the members list with all members
-        populateMembersList(allMembers);
+        // Now populate both the members and admins lists with filtered data
+        await populateMembersList(allMembers, 'members');
+        if (adminContainer) {
+            await populateMembersList(allMembers, 'admins');
+        }
         
     } catch (error) {
         console.error('Error fetching members data:', error);
         showPermissionMessage();
+        const adminContainer = document.getElementById('projectAdmin');
+        if (adminContainer) showPermissionMessage('admin');
     }
 }
 
