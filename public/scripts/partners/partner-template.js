@@ -10,7 +10,7 @@ localStorage.setItem('locat', location.href);
   ];
   let isFollowing = false;
 
-  const rawPartnerType = "{{wf {&quot;path&quot;:&quot;expert-type:name&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}";
+  const rawPartnerType = document.body.getAttribute('partner-type');
   let partnerType;
 
   if (rawPartnerType === "Gemeente") {
@@ -20,6 +20,8 @@ localStorage.setItem('locat', location.href);
   } else {
     partnerType = "service-providers";
   }
+
+  console.log('Partner Type:', partnerType, '(from:', rawPartnerType, ')');
 
   async function checkFollowStatus(apiToken) {
     if (!apiToken) {
