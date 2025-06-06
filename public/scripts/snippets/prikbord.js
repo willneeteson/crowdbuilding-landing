@@ -30,6 +30,7 @@ function detectPageType() {
     if (pathParts.includes('project')) return 'project';
     if (pathParts.includes('plot')) return 'plot';
     if (pathParts.includes('partner')) return 'partner';
+    if (pathParts.includes('gemeente')) return 'gemeente';
     
     return 'project'; // Default to project if we can't determine
 }
@@ -47,6 +48,8 @@ function getApiEndpoint() {
             return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts`;
         case 'partner':
             return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts`;
+        case 'gemeente':
+            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts`;
     }
@@ -60,6 +63,8 @@ function getPostEndpoint(postId) {
             return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}`;
         case 'partner':
             return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}`;
+        case 'gemeente':
+            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}`;
     }
