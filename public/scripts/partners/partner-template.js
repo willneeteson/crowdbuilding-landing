@@ -1,27 +1,29 @@
 localStorage.setItem('locat', location.href);
 
+// Partner type detection
+const rawPartnerType = document.body.getAttribute('partner-type');
+let partnerType;
+
+if (rawPartnerType === "Gemeente") {
+  partnerType = "region-areas";
+} else if (rawPartnerType === "Provincie") {
+  partnerType = "regions";
+} else {
+  partnerType = "service-providers";
+}
+
+// Get partner ID from URL
+const id = window.location.pathname.split('/').filter(Boolean).pop();
+console.log('Partner Type:', partnerType, '(from:', rawPartnerType, ')');
+console.log('Partner ID (from URL):', id);
+
 (function () {
   const deviceName = "default_device_name";
-  const id = window.location.pathname.split('/').filter(Boolean).pop();
-  console.log('Partner ID (from URL):', id);
   const followButtons = [
     document.getElementById("steunButton"),
     document.getElementById("steunButtonModal")
   ];
   let isFollowing = false;
-
-  const rawPartnerType = document.body.getAttribute('partner-type');
-  let partnerType;
-
-  if (rawPartnerType === "Gemeente") {
-    partnerType = "region-areas";
-  } else if (rawPartnerType === "Provincie") {
-    partnerType = "regions";
-  } else {
-    partnerType = "service-providers";
-  }
-
-  console.log('Partner Type:', partnerType, '(from:', rawPartnerType, ')');
 
   async function checkFollowStatus(apiToken) {
     if (!apiToken) {
