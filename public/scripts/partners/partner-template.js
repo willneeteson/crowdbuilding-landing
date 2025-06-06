@@ -30,7 +30,7 @@ localStorage.setItem('locat', location.href);
     }
 
     try {
-      const response = await fetch(`https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}`, {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}`, {
         method: "GET",
         headers: {
           "Accept": "application/json",
@@ -69,7 +69,7 @@ localStorage.setItem('locat', location.href);
       return;
     }
 
-    const apiUrl = `https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}/follow`;
+    const apiUrl = `https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/follow`;
     console.log("Follow API URL:", apiUrl);
 
     try {
@@ -109,7 +109,7 @@ localStorage.setItem('locat', location.href);
       return;
     }
 
-    const apiUrl = `https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}/unfollow`;
+    const apiUrl = `https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/unfollow`;
     console.log("Unfollow API URL:", apiUrl);
 
     try {
@@ -143,7 +143,7 @@ localStorage.setItem('locat', location.href);
   }
 
   async function displayFollowerCount() {
-    const apiUrl = `https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}`;
+    const apiUrl = `https://api.crowdbuilding.com/api/v1/${partnerType}/${id}`;
     try {
       const response = await fetch(apiUrl, {
         method: "GET",
