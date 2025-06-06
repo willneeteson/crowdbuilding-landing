@@ -1,8 +1,5 @@
-<script>
 localStorage.setItem('locat', location.href);
-</script>
 
-<script>
 (function () {
   const deviceName = "default_device_name";
   const id = "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}";
@@ -24,46 +21,63 @@ localStorage.setItem('locat', location.href);
   }
 
   async function getApiToken() {
-    if (typeof $memberstackDom !== "undefined") {
+    try {
+      if (typeof $memberstackDom === "undefined") {
+        console.log("MemberStack not available");
+        return null;
+      }
+
       await $memberstackDom.onReady;
       const memberstackToken = $memberstackDom.getMemberCookie();
-      console.log("Retrieved MemberStack Token:", memberstackToken);
 
       if (!memberstackToken) {
-        console.log("User not signed in.");
+        console.log("User not signed in");
         return null;
+      }
+
+      // Check if we have a cached token
+      const cachedToken = localStorage.getItem('api_token');
+      if (cachedToken) {
+        try {
+          const tokenData = JSON.parse(cachedToken);
+          if (tokenData.expiry > Date.now()) {
+            return tokenData.token;
+          }
+        } catch (e) {
+          localStorage.removeItem('api_token');
+        }
       }
 
       // Exchange MemberStack token for API token
-      try {
-        const response = await fetch(`https://api.crowdbuilding.nl/api/v1/sanctum/token`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-          },
-          body: JSON.stringify({
-            memberstack_token: memberstackToken,
-            device_name: deviceName,
-          }),
-        });
+      const response = await fetch(`https://api.crowdbuilding.nl/api/v1/sanctum/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          memberstack_token: memberstackToken,
+          device_name: deviceName,
+        }),
+      });
 
-        if (!response.ok) {
-          console.error("Failed to exchange token:", response.statusText);
-          return null;
-        }
-
-        const data = await response.json();
-        console.log("Retrieved API Token:", data.token);
-        return data.token;
-      } catch (error) {
-        console.error("Error exchanging token:", error);
-        return null;
+      if (!response.ok) {
+        throw new Error(`Token exchange failed: ${response.statusText}`);
       }
-    }
 
-    console.log("No MemberStack detected.");
-    return null;
+      const data = await response.json();
+      
+      // Cache the token with a 1-hour expiry
+      localStorage.setItem('api_token', JSON.stringify({
+        token: data.token,
+        expiry: Date.now() + (60 * 60 * 1000) // 1 hour
+      }));
+
+      return data.token;
+    } catch (error) {
+      console.error("Error in getApiToken:", error);
+      return null;
+    }
   }
 
   async function checkFollowStatus(apiToken) {
@@ -252,230 +266,285 @@ localStorage.setItem('locat', location.href);
 
   waitForMemberStack();
 })();
-</script>
 
-<script>
-  mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsbG5lZXRlc29uIiwiYSI6ImNtMDJpZGM0eTAxbmkyanF1bTI2ZDByczQifQ.irtx4lkDC9cUXHtRIgBJVg';
+// Map configuration
+const MAP_CONFIG = {
+  accessToken: 'pk.eyJ1Ijoid2lsbG5lZXRlc29uIiwiYSI6ImNtMDJpZGM0eTAxbmkyanF1bTI2ZDByczQifQ.irtx4lkDC9cUXHtRIgBJVg',
+  style: 'mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq',
+  center: [5.2, 52.55],
+  zoom: 7.5,
+  minZoom: 6,
+  maxZoom: 10,
+  bounds: [[2, 50], [8, 53]]
+};
 
-  const map = new mapboxgl.Map({
-    container: 'mapExpert',
-    style: 'mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq',
-    center: [5.2, 52.55],
-    zoom: 7.5,
-    minZoom: 6,
-    maxZoom: 10,
-    language: 'nl',
-    localize: true,
-    zoomAnimationOptions: { duration: 300 },
-    pitchWithRotate: false,
-    dragRotate: false,
-    touchZoomRotate: false
-  });
-  
-  const bounds = [
-    [2, 50],
-    [8, 53]
-  ];
+class MapManager {
+  constructor() {
+    this.map = null;
+    this.markers = new Map();
+    this.markerCluster = null;
+    this.init();
+  }
 
-  map.setMaxBounds(bounds);
-  map.scrollZoom.disable();
+  init() {
+    mapboxgl.accessToken = MAP_CONFIG.accessToken;
+    
+    this.map = new mapboxgl.Map({
+      container: 'mapExpert',
+      style: MAP_CONFIG.style,
+      center: MAP_CONFIG.center,
+      zoom: MAP_CONFIG.zoom,
+      minZoom: MAP_CONFIG.minZoom,
+      maxZoom: MAP_CONFIG.maxZoom,
+      language: 'nl',
+      localize: true,
+      zoomAnimationOptions: { duration: 300 },
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: false
+    });
 
-  let isPinching = false;
-  map.getCanvas().addEventListener('wheel', (event) => {
-    if (event.ctrlKey) {
-      map.scrollZoom.enable();
-    } else {
-      map.scrollZoom.disable();
-    }
-  });
+    this.map.setMaxBounds(MAP_CONFIG.bounds);
+    this.setupZoomControls();
+    this.setupMarkers();
+  }
 
-  map.getCanvas().addEventListener('touchstart', function (event) {
-    if (event.touches.length === 2) {
-      isPinching = true;
-      map.scrollZoom.enable();
-    }
-  });
+  setupZoomControls() {
+    this.map.scrollZoom.disable();
 
-  map.getCanvas().addEventListener('touchend', function () {
-    isPinching = false;
-    map.scrollZoom.disable();
-  });
+    let isPinching = false;
+    const canvas = this.map.getCanvas();
 
-  map.getCanvas().addEventListener('touchmove', function (event) {
-    if (event.touches.length !== 2) {
+    canvas.addEventListener('wheel', (event) => {
+      if (event.ctrlKey) {
+        this.map.scrollZoom.enable();
+      } else {
+        this.map.scrollZoom.disable();
+      }
+    });
+
+    canvas.addEventListener('touchstart', (event) => {
+      if (event.touches.length === 2) {
+        isPinching = true;
+        this.map.scrollZoom.enable();
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
       isPinching = false;
-      map.scrollZoom.disable();
-    }
-  });
+      this.map.scrollZoom.disable();
+    });
 
-  let markers = [];
+    canvas.addEventListener('touchmove', (event) => {
+      if (event.touches.length !== 2) {
+        isPinching = false;
+        this.map.scrollZoom.disable();
+      }
+    });
+  }
 
-  // Function to retrieve dynamic markers from CMS
-  function getDynamicMarkers() {
+  setupMarkers() {
+    this.map.on('load', () => {
+      const geojsonData = this.getDynamicMarkers();
+      
+      // Remove existing markers
+      this.clearMarkers();
+
+      // Add new markers with clustering
+      geojsonData.features.forEach(feature => {
+        this.createMarker(feature);
+      });
+    });
+  }
+
+  getDynamicMarkers() {
     const features = [];
+    document.querySelectorAll('.marker__item').forEach(item => {
+      const lat = parseFloat(item.querySelector('.marker.lat')?.textContent);
+      const long = parseFloat(item.querySelector('.marker.long')?.textContent);
+      const title = item.querySelector('.marker.title')?.textContent;
+      const link = item.querySelector('.marker.link')?.textContent;
+      const description = item.querySelector('.marker.short-description')?.textContent;
+      const image = item.querySelector('.marker.image')?.src;
 
-    document.querySelectorAll('.marker__item').forEach(function (item) {
-      const latElement = item.querySelector('.marker.lat');
-      const longElement = item.querySelector('.marker.long');
-      const titleElement = item.querySelector('.marker.title');
-      const linkElement = item.querySelector('.marker.link');
-      const descriptionElement = item.querySelector('.marker.short-description');
-      const imageElement = item.querySelector('.marker.image');
-
-      if (latElement && longElement && titleElement && descriptionElement && imageElement) {
-        const lat = parseFloat(latElement.textContent);
-        const long = parseFloat(longElement.textContent);
-        const title = titleElement.textContent;
-        const link = linkElement.textContent;
-        const description = descriptionElement.textContent;
-        const image = imageElement.src;
-
-        if (!isNaN(lat) && !isNaN(long)) {
-          features.push({
-            "type": "Feature",
-            "geometry": { "type": "Point", "coordinates": [long, lat] },
-            "properties": {
-              "title": title,
-              "link": link,
-              "description": description,
-              "image": image
-            }
-          });
-        }
+      if (!isNaN(lat) && !isNaN(long) && title) {
+        features.push({
+          type: "Feature",
+          geometry: { type: "Point", coordinates: [long, lat] },
+          properties: { title, link, description, image }
+        });
       }
     });
 
     return {
-      "type": "FeatureCollection",
-      "features": features
+      type: "FeatureCollection",
+      features
     };
   }
 
-  // Function to create individual markers
-  function createMarker(feature) {
+  createMarker(feature) {
+    const { coordinates } = feature.geometry;
+    const { title, link, description, image } = feature.properties;
+
     const markerElement = document.createElement('div');
     markerElement.className = 'custom-marker';
 
     const marker = new mapboxgl.Marker(markerElement)
-      .setLngLat(feature.geometry.coordinates)
-      .setPopup(new mapboxgl.Popup({ offset: 24 })
-        .setHTML(`
-<img src="${feature.properties.image}" class="marker__popup-img"/>
-<div class="marker__popup-content">
-<h4>${feature.properties.title}</h4>
-<p>${feature.properties.description}</p>
-  </div>
-<a href="${feature.properties.link}" class="marker__popup-link"></a>
-`))
-      .addTo(map);
+      .setLngLat(coordinates)
+      .setPopup(
+        new mapboxgl.Popup({ offset: 24 })
+          .setHTML(`
+            <img src="${image}" class="marker__popup-img"/>
+            <div class="marker__popup-content">
+              <h4>${title}</h4>
+              <p>${description}</p>
+            </div>
+            <a href="${link}" class="marker__popup-link"></a>
+          `)
+      )
+      .addTo(this.map);
 
-    markers.push(marker);
+    this.markers.set(coordinates.join(','), marker);
   }
 
-  map.on('load', function () {
-    const geojsonData = getDynamicMarkers();
+  clearMarkers() {
+    this.markers.forEach(marker => marker.remove());
+    this.markers.clear();
+  }
+}
 
-    map.addSource('markers', {
-      type: 'geojson',
-      data: geojsonData
-    });
-    markers.forEach(marker => marker.remove());
-    markers = [];
-
-    geojsonData.features.forEach(function (feature) {
-      createMarker(feature);
-    });
-  });
-
-</script>
-
-
-<script>
-document.getElementById('btnBack').addEventListener('click', function() {
-    var referrer = document.referrer;
-    var currentOrigin = window.location.origin;
-
-    if (referrer && referrer.startsWith(currentOrigin)) {
-        window.history.back();
-    } else {
-        window.location.href = '/';
-    }
+// Initialize map when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  new MapManager();
 });
-</script>
 
+class TabManager {
+  constructor() {
+    this.tabs = document.querySelectorAll(".community__tab-link");
+    this.init();
+  }
 
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const tabs = document.querySelectorAll(".community__tab-link");
-
-    tabs.forEach(tab => {
-        tab.addEventListener("click", function(event) {
-            event.preventDefault();
-            const tabName = tab.getAttribute("data-tab");
-            const targetContent = document.getElementById(tabName);
-            if (!targetContent) {
-                console.error(`Element with ID '${tabName}' not found.`);
-                return;
-            }
-
-            document.querySelectorAll(".tab-wrapper").forEach(content => content.classList.remove("active-tab"));
-            tabs.forEach(t => t.classList.remove("active"));
-
-            targetContent.classList.add("active-tab");
-            tab.classList.add("active");
-
-            if (tabName === 'Projecten') {
-                setTimeout(() => {
-                    map.resize();
-                }, 10);
-            }
-        });
+  init() {
+    // Event delegation for tab clicks
+    document.addEventListener("click", (e) => {
+      const tab = e.target.closest(".community__tab-link");
+      if (tab) {
+        e.preventDefault();
+        this.switchTab(tab);
+      }
     });
 
-    // Show the first tab by default
-    if (tabs.length > 0) {
-        tabs[0].click();
+    // Show first tab by default
+    if (this.tabs.length > 0) {
+      this.switchTab(this.tabs[0]);
     }
-});
-</script>
+  }
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const readMoreBtn = document.getElementById("readmore1Btn");
-    const content = document.getElementById("readmore1Content");
+  switchTab(selectedTab) {
+    const tabName = selectedTab.getAttribute("data-tab");
+    const targetContent = document.getElementById(tabName);
     
-    const maxChars = 600;
-    const fullText = content.innerHTML;
-    const truncatedText = fullText.substring(0, maxChars) + "...";
-
-    if (fullText.length > maxChars) {
-        const span = document.createElement("span");
-        span.innerHTML = truncatedText;
-        span.classList.add("truncated");
-        
-        const fullSpan = document.createElement("span");
-        fullSpan.innerHTML = fullText;
-        fullSpan.style.display = "none";
-        
-        content.innerHTML = "";
-        content.appendChild(span);
-        content.appendChild(fullSpan);
-
-        readMoreBtn.addEventListener("click", function (event) {
-            event.preventDefault();
-            if (fullSpan.style.display === "none") {
-                span.style.display = "none";
-                fullSpan.style.display = "inline";
-                readMoreBtn.textContent = "Lees minder";
-            } else {
-                span.style.display = "inline";
-                fullSpan.style.display = "none";
-                readMoreBtn.textContent = "Lees meer";
-            }
-        });
-    } else {
-        readMoreBtn.style.display = "none";
+    if (!targetContent) {
+      console.error(`Tab content '${tabName}' not found`);
+      return;
     }
+
+    // Update tab states
+    this.tabs.forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".tab-wrapper").forEach(content => 
+      content.classList.remove("active-tab")
+    );
+
+    // Activate selected tab
+    targetContent.classList.add("active-tab");
+    selectedTab.classList.add("active");
+
+    // Handle map resize if needed
+    if (tabName === 'Projecten') {
+      requestAnimationFrame(() => {
+        if (window.mapManager?.map) {
+          window.mapManager.map.resize();
+        }
+      });
+    }
+  }
+}
+
+class ContentManager {
+  constructor() {
+    this.readMoreBtn = document.getElementById("readmore1Btn");
+    this.content = document.getElementById("readmore1Content");
+    this.maxChars = 600;
+    this.init();
+  }
+
+  init() {
+    if (!this.readMoreBtn || !this.content) return;
+
+    const fullText = this.content.innerHTML;
+    if (fullText.length <= this.maxChars) {
+      this.readMoreBtn.style.display = "none";
+      return;
+    }
+
+    this.setupExpandableContent(fullText);
+  }
+
+  setupExpandableContent(fullText) {
+    const truncatedText = fullText.substring(0, this.maxChars) + "...";
+    
+    // Create truncated view
+    const truncatedView = document.createElement("span");
+    truncatedView.innerHTML = truncatedText;
+    truncatedView.classList.add("truncated");
+
+    // Create full view
+    const fullView = document.createElement("span");
+    fullView.innerHTML = fullText;
+    fullView.style.display = "none";
+
+    // Clear and update content
+    this.content.innerHTML = "";
+    this.content.appendChild(truncatedView);
+    this.content.appendChild(fullView);
+
+    // Setup toggle
+    this.readMoreBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const isExpanded = fullView.style.display !== "none";
+      
+      truncatedView.style.display = isExpanded ? "inline" : "none";
+      fullView.style.display = isExpanded ? "none" : "inline";
+      this.readMoreBtn.textContent = isExpanded ? "Lees meer" : "Lees minder";
+    });
+  }
+}
+
+class NavigationManager {
+  constructor() {
+    this.backButton = document.getElementById('btnBack');
+    this.init();
+  }
+
+  init() {
+    if (!this.backButton) return;
+
+    this.backButton.addEventListener('click', () => {
+      const referrer = document.referrer;
+      const currentOrigin = window.location.origin;
+
+      if (referrer && referrer.startsWith(currentOrigin)) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    });
+  }
+}
+
+// Initialize managers when DOM is ready
+document.addEventListener("DOMContentLoaded", () => {
+  new TabManager();
+  new ContentManager();
+  new NavigationManager();
 });
-</script>
