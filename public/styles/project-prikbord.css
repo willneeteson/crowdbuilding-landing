@@ -580,3 +580,12 @@
     color: #666;
     font-size: 14px;
 }
+
+a.project__like-btn.w-inline-block.liked {
+    background: var(--_color---color-neutral-black-100);
+    color: white!important;
+    border: var(--_color---color-neutral-black-100);
+}
+.project__like-heart unliked w-embed liked .project__like-heart.liked {
+display: static;
+}
