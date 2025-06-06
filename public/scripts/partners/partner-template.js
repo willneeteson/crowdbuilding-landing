@@ -248,19 +248,21 @@ const MAP_CONFIG = {
   bounds: [[2, 50], [8, 53]]
 };
 
-class MapManager {
+class ExpertMapManager {
   constructor() {
     this.map = null;
     this.markers = new Map();
-    this.markerCluster = null;
     this.init();
   }
 
   init() {
+    const mapContainer = document.getElementById('mapSidebar');
+    if (!mapContainer) return;
+
     mapboxgl.accessToken = MAP_CONFIG.accessToken;
     
     this.map = new mapboxgl.Map({
-      container: 'mapExpert',
+      container: 'mapSidebar',
       style: MAP_CONFIG.style,
       center: MAP_CONFIG.center,
       zoom: MAP_CONFIG.zoom,
@@ -281,34 +283,37 @@ class MapManager {
 
   setupZoomControls() {
     this.map.scrollZoom.disable();
+    this.setupTouchControls(this.map);
+  }
 
+  setupTouchControls(map) {
     let isPinching = false;
-    const canvas = this.map.getCanvas();
+    const canvas = map.getCanvas();
 
     canvas.addEventListener('wheel', (event) => {
       if (event.ctrlKey) {
-        this.map.scrollZoom.enable();
+        map.scrollZoom.enable();
       } else {
-        this.map.scrollZoom.disable();
+        map.scrollZoom.disable();
       }
     });
 
     canvas.addEventListener('touchstart', (event) => {
       if (event.touches.length === 2) {
         isPinching = true;
-        this.map.scrollZoom.enable();
+        map.scrollZoom.enable();
       }
     });
 
     canvas.addEventListener('touchend', () => {
       isPinching = false;
-      this.map.scrollZoom.disable();
+      map.scrollZoom.disable();
     });
 
     canvas.addEventListener('touchmove', (event) => {
       if (event.touches.length !== 2) {
         isPinching = false;
-        this.map.scrollZoom.disable();
+        map.scrollZoom.disable();
       }
     });
   }
@@ -316,11 +321,7 @@ class MapManager {
   setupMarkers() {
     this.map.on('load', () => {
       const geojsonData = this.getDynamicMarkers();
-      
-      // Remove existing markers
       this.clearMarkers();
-
-      // Add new markers with clustering
       geojsonData.features.forEach(feature => {
         this.createMarker(feature);
       });
@@ -383,9 +384,155 @@ class MapManager {
   }
 }
 
-// Initialize map when DOM is ready
+class ProjectMapManager {
+  constructor() {
+    this.map = null;
+    this.markers = new Map();
+    this.init();
+  }
+
+  init() {
+    const mapContainer = document.getElementById('mapExpert');
+    if (!mapContainer) return;
+
+    mapboxgl.accessToken = MAP_CONFIG.accessToken;
+    
+    this.map = new mapboxgl.Map({
+      container: 'mapExpert',
+      style: MAP_CONFIG.style,
+      center: MAP_CONFIG.center,
+      zoom: MAP_CONFIG.zoom,
+      minZoom: MAP_CONFIG.minZoom,
+      maxZoom: MAP_CONFIG.maxZoom,
+      language: 'nl',
+      localize: true,
+      zoomAnimationOptions: { duration: 300 },
+      pitchWithRotate: false,
+      dragRotate: false,
+      touchZoomRotate: false
+    });
+
+    this.map.setMaxBounds(MAP_CONFIG.bounds);
+    this.setupZoomControls();
+    this.loadPartnerProjects();
+  }
+
+  setupZoomControls() {
+    this.map.scrollZoom.disable();
+    this.setupTouchControls(this.map);
+  }
+
+  setupTouchControls(map) {
+    let isPinching = false;
+    const canvas = map.getCanvas();
+
+    canvas.addEventListener('wheel', (event) => {
+      if (event.ctrlKey) {
+        map.scrollZoom.enable();
+      } else {
+        map.scrollZoom.disable();
+      }
+    });
+
+    canvas.addEventListener('touchstart', (event) => {
+      if (event.touches.length === 2) {
+        isPinching = true;
+        map.scrollZoom.enable();
+      }
+    });
+
+    canvas.addEventListener('touchend', () => {
+      isPinching = false;
+      map.scrollZoom.disable();
+    });
+
+    canvas.addEventListener('touchmove', (event) => {
+      if (event.touches.length !== 2) {
+        isPinching = false;
+        map.scrollZoom.disable();
+      }
+    });
+  }
+
+  async loadPartnerProjects() {
+    try {
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/projects`);
+      if (!response.ok) throw new Error('Failed to fetch projects');
+      
+      const data = await response.json();
+      const projects = data.data || [];
+
+      // Clear existing markers
+      this.clearMarkers();
+
+      // Add new markers
+      projects.forEach(project => {
+        if (project.latitude && project.longitude) {
+          this.createProjectMarker(project);
+        }
+      });
+
+      // Update project list in #groupContainer
+      this.updateProjectList(projects);
+
+    } catch (error) {
+      console.error('Error loading partner projects:', error);
+    }
+  }
+
+  createProjectMarker(project) {
+    const markerElement = document.createElement('div');
+    markerElement.className = 'custom-marker project-marker';
+
+    const marker = new mapboxgl.Marker(markerElement)
+      .setLngLat([project.longitude, project.latitude])
+      .setPopup(
+        new mapboxgl.Popup({ offset: 24 })
+          .setHTML(`
+            <div class="project__popup">
+              <img src="${project.image_url || ''}" class="project__popup-img"/>
+              <div class="project__popup-content">
+                <h4>${project.name}</h4>
+                <p>${project.description || ''}</p>
+              </div>
+              <a href="/projects/${project.slug}" class="project__popup-link"></a>
+            </div>
+          `)
+      )
+      .addTo(this.map);
+
+    this.markers.set(project.id, marker);
+  }
+
+  updateProjectList(projects) {
+    const container = document.getElementById('groupContainer');
+    if (!container) return;
+
+    container.innerHTML = projects.map(project => `
+      <div class="project-card">
+        <img src="${project.image_url || ''}" alt="${project.name}" class="project-card__image">
+        <div class="project-card__content">
+          <h3>${project.name}</h3>
+          <p>${project.description || ''}</p>
+          <a href="/projects/${project.slug}" class="project-card__link">Bekijk project</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  clearMarkers() {
+    this.markers.forEach(marker => marker.remove());
+    this.markers.clear();
+  }
+}
+
+// Initialize maps when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  new MapManager();
+  const partnerType = document.body.getAttribute('partner-type');
+  if (partnerType === 'expert') {
+    new ExpertMapManager();
+  }
+  new ProjectMapManager();
 });
 
 class TabManager {
@@ -559,3 +706,99 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// Add styles for project cards and markers
+const projectStyles = document.createElement('style');
+projectStyles.textContent = `
+  .project-card {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 16px;
+    background: white;
+  }
+
+  .project-card__image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .project-card__content {
+    padding: 16px;
+  }
+
+  .project-card__content h3 {
+    margin: 0 0 8px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .project-card__content p {
+    margin: 0 0 16px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .project-card__link {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #e74c3c;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background 0.3s;
+  }
+
+  .project-card__link:hover {
+    background: #d44133;
+  }
+
+  .project-marker {
+    width: 24px;
+    height: 24px;
+    background: #e74c3c;
+    border: 2px solid white;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s;
+  }
+
+  .project-marker:hover {
+    transform: scale(1.1);
+  }
+
+  .project__popup {
+    max-width: 300px;
+  }
+
+  .project__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .project__popup-content {
+    padding: 12px;
+  }
+
+  .project__popup-content h4 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .project__popup-content p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  #groupContainer {
+    padding: 16px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+`;
+document.head.appendChild(projectStyles);
