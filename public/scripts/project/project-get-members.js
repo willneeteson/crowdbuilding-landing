@@ -166,11 +166,12 @@ async function populateMembersList(members, containerType = 'members') {
         const wrapperId = containerType === 'admins' ? 'projectAdminWrapper' : 'projectMemberWrapper';
         const modalId = containerType === 'admins' ? 'adminsModal' : 'membersModal';
         const container = document.getElementById(containerId);
+        const wrapper = document.getElementById(wrapperId);
         
         console.log(`Found ${containerType} container:`, container);
         
-        if (!container) {
-            console.error(`${containerType} container not found!`);
+        if (!container || !wrapper) {
+            console.error(`${containerType} container or wrapper not found!`);
             return;
         }
 
@@ -184,6 +185,14 @@ async function populateMembersList(members, containerType = 'members') {
         });
         
         console.log(`Number of ${containerType} to display:`, filteredMembers.length);
+
+        // Hide the wrapper if no members to display
+        if (filteredMembers.length === 0) {
+            wrapper.style.display = 'none';
+            return;
+        } else {
+            wrapper.style.display = 'block';
+        }
 
         // Set max avatars based on container type
         const maxAvatars = containerType === 'admins' ? 3 : 5;
@@ -250,7 +259,6 @@ async function populateMembersList(members, containerType = 'members') {
         container.innerHTML = compactViewHTML;
 
         // Add click handler to the wrapper div
-        const wrapper = document.getElementById(wrapperId);
         if (wrapper) {
             wrapper.style.cursor = 'pointer';
             wrapper.addEventListener('click', () => showModal(modalId));
