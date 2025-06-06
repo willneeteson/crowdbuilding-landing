@@ -957,6 +957,110 @@ function updateLoadMoreButton() {
     }
 }
 
+function createCommentForm(postId) {
+    const form = document.createElement('form');
+    form.className = 'comment-form';
+    form.innerHTML = `
+        <textarea placeholder="Reageer..." required></textarea>
+        <button type="submit">Verstuur</button>
+    `;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const textarea = form.querySelector('textarea');
+        const button = form.querySelector('button');
+        const commentText = textarea.value.trim();
+
+        if (!commentText) return;
+
+        // Disable form while submitting
+        textarea.disabled = true;
+        button.disabled = true;
+        button.textContent = 'Versturen...';
+
+        try {
+            const token = await window.auth.getApiToken();
+            if (!token) {
+                alert('Je moet ingelogd zijn om te reageren.');
+                return;
+            }
+
+            const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ body: commentText })
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            const data = await response.json();
+            
+            // Add likes array and count if not present
+            if (!data.data.likes) {
+                data.data.likes = [];
+            }
+            if (data.data.likes_count === undefined) {
+                data.data.likes_count = 0;
+            }
+            
+            // Add the new comment to the list
+            const commentsList = document.getElementById(`modal-comments-${postId}`);
+            const commentElement = document.createElement('div');
+            commentElement.className = 'comment-item';
+            commentElement.innerHTML = `
+                <img class="post-avatar comment-avatar" src="${data.data.created_by.avatar_url}" alt="${data.data.created_by.name}" data-user-id="${data.data.created_by.id}">
+                <div class="comment-content">
+                    <h5 data-user-id="${data.data.created_by.id}">${data.data.created_by.name}</h5>
+                    <p>${data.data.body}</p>
+                    <div class="comment-footer">
+                        <time datetime="${data.data.created_at}">${formatDate(data.data.created_at)}</time>
+                        <button class="comment-like-button" data-comment-id="${data.data.id}" data-liked="false">
+                            <img class="heart-icon-small" width="16" height="16" 
+                                 src="${getEmptyHeartSvg()}" 
+                                 alt="Not liked">
+                            <span class="like-count-small">0</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            commentsList.appendChild(commentElement);
+            
+            // Attach like handlers to the new comment
+            attachCommentLikeHandlers();
+
+            // Clear and re-enable form
+            textarea.value = '';
+            textarea.disabled = false;
+            button.disabled = false;
+            button.textContent = 'Verstuur';
+
+            // Update comment count in the main post list and modal
+            const postElements = document.querySelectorAll(`.post-item[data-post-id="${postId}"]`);
+            postElements.forEach(postElement => {
+                const commentsCount = postElement.querySelector('.post-comments-count span');
+                if (commentsCount) {
+                    const currentCount = parseInt(commentsCount.textContent) || 0;
+                    const newCount = currentCount + 1;
+                    commentsCount.textContent = `${newCount} reactie${newCount !== 1 ? 's' : ''}`;
+                }
+            });
+
+        } catch (error) {
+            console.error('Error posting comment:', error);
+            alert('Reactie plaatsen mislukt. Probeer het opnieuw.');
+        } finally {
+            // Re-enable form
+            textarea.disabled = false;
+            button.disabled = false;
+            button.textContent = 'Verstuur';
+        }
+    });
+
+    return form;
+}
+
 // Make necessary functions available globally
 window.attachLikeHandlers = attachLikeHandlers;
 window.attachPostClickHandlers = attachPostClickHandlers;
