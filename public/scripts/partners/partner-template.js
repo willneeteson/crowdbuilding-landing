@@ -3,6 +3,7 @@ localStorage.setItem('locat', location.href);
 (function () {
   const deviceName = "default_device_name";
   const id = "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;\} }}";
+  console.log('Partner ID:', id);
   const followButtons = [
     document.getElementById("steunButton"),
     document.getElementById("steunButtonModal")
