@@ -70,6 +70,21 @@ function getPostEndpoint(postId) {
     }
 }
 
+function getLikeEndpoint(postId) {
+    switch (pageType) {
+        case 'project':
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/like`;
+        case 'plot':
+            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}/like`;
+        case 'partner':
+            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}/like`;
+        case 'gemeente':
+            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}/like`;
+        default:
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/like`;
+    }
+}
+
 // ===============================
 // Common Helper Functions
 // ===============================
@@ -511,7 +526,7 @@ async function toggleLike(postId) {
         const countElement = likeButton?.querySelector('.like-count');
         const previousCount = countElement ? parseInt(countElement.textContent || '0', 10) : 0;
         
-        const response = await fetch(getPostEndpoint(postId), {
+        const response = await fetch(getLikeEndpoint(postId), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
