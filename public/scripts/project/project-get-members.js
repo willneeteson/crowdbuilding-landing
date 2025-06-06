@@ -177,9 +177,9 @@ async function populateMembersList(members, containerType = 'members') {
         // Filter members based on role
         const filteredMembers = members.filter(member => {
             if (containerType === 'admins') {
-                return member.status === 'beheerder';
+                return member.role_label === 'beheerder';
             } else {
-                return member.status === 'member';
+                return member.role_label !== 'beheerder';
             }
         });
         
