@@ -752,6 +752,71 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+function addDirectLikeClickHandler() {
+    // This handler is for direct likes that don't go through the modal
+    document.addEventListener('click', async (e) => {
+        const likeButton = e.target.closest('.post-like-button');
+        if (!likeButton) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const postId = likeButton.getAttribute('data-post-id');
+        if (!postId) return;
+        
+        try {
+            likeButton.disabled = true;
+            await toggleLike(postId);
+        } catch (error) {
+            console.error('Error handling direct like click:', error);
+            alert('Like actie mislukt. Probeer het opnieuw.');
+        } finally {
+            likeButton.disabled = false;
+        }
+    });
+}
+
+function updateLoadMoreButton() {
+    const loadMoreContainer = document.querySelector('.load-more-container');
+    if (!loadMoreContainer) {
+        // Create load more container if it doesn't exist
+        const container = document.createElement('div');
+        container.className = 'load-more-container';
+        container.innerHTML = `
+            <div id="loadMoreLoading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Meer berichten laden...</p>
+            </div>
+            <button id="loadMoreButton" class="load-more-button">
+                Meer berichten laden
+            </button>
+        `;
+        
+        const postsContainer = document.getElementById('groupPosts');
+        if (postsContainer) {
+            postsContainer.appendChild(container);
+        }
+    }
+    
+    const loadMoreButton = document.getElementById('loadMoreButton');
+    if (loadMoreButton) {
+        // Update button state based on whether there are more posts
+        if (nextCursor) {
+            loadMoreButton.style.display = 'block';
+            loadMoreButton.disabled = false;
+            loadMoreButton.onclick = () => {
+                if (!isLoadingMore) {
+                    const pathParts = window.location.pathname.split('/');
+                    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+                    fetchGroupPosts(groupSlug, nextCursor);
+                }
+            };
+        } else {
+            loadMoreButton.style.display = 'none';
+        }
+    }
+}
+
 // Make necessary functions available globally
 window.attachLikeHandlers = attachLikeHandlers;
 window.attachPostClickHandlers = attachPostClickHandlers;
