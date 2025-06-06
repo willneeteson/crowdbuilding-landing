@@ -155,14 +155,39 @@ localStorage.setItem('locat', location.href);
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-      const followersCount = data.data.followers_count;
+      const followersCount = data.data.followers_count || 0;
+      const followers = data.data.followers || [];
 
-      document.getElementById("followerCount").textContent = followersCount || "0";
-      document.getElementById("followerCountModal").textContent = followersCount || "0";
+      // Update follower count
+      document.getElementById("followerCount").textContent = followersCount;
+      
+      // Update avatars
+      const avatarContainers = document.querySelectorAll('.partner__followed-avatar:not(.number)');
+      avatarContainers.forEach((container, index) => {
+        const follower = followers[index];
+        if (follower) {
+          container.innerHTML = ''; // Clear existing content
+          const img = document.createElement('img');
+          img.src = follower.avatar_url?.startsWith('http') 
+            ? follower.avatar_url 
+            : `https://api.crowdbuilding.com${follower.avatar_url || '/storage/default-avatar.png'}`;
+          img.alt = follower.name || 'Follower avatar';
+          img.onerror = () => {
+            img.src = 'https://api.crowdbuilding.com/storage/default-avatar.png';
+          };
+          container.appendChild(img);
+          container.style.display = 'block';
+        } else {
+          container.style.display = 'none';
+        }
+      });
+
     } catch (error) {
       console.error("Failed to fetch follower count:", error);
       document.getElementById("followerCount").textContent = "0";
-      document.getElementById("followerCountModal").textContent = "0";
+      document.querySelectorAll('.partner__followed-avatar:not(.number)').forEach(container => {
+        container.style.display = 'none';
+      });
     }
   }
 
@@ -493,3 +518,44 @@ document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
   new NavigationManager();
 });
+
+// Add styles for avatars
+const style = document.createElement('style');
+style.textContent = `
+  .partner__followed-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+  }
+
+  .partner__followed-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .partner__followed-avatar.number {
+    background-color: #e74c3c;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .partner__avatar-wrapper {
+    display: flex;
+    gap: 8px;
+  }
+
+  .partner__avatar-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+`;
+document.head.appendChild(style);
