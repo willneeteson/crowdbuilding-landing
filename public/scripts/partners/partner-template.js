@@ -21,66 +21,6 @@ localStorage.setItem('locat', location.href);
     partnerType = "service-providers";
   }
 
-  async function getApiToken() {
-    try {
-      if (typeof $memberstackDom === "undefined") {
-        console.log("MemberStack not available");
-        return null;
-      }
-
-      await $memberstackDom.onReady;
-      const memberstackToken = $memberstackDom.getMemberCookie();
-
-      if (!memberstackToken) {
-        console.log("User not signed in");
-        return null;
-      }
-
-      // Check if we have a cached token
-      const cachedToken = localStorage.getItem('api_token');
-      if (cachedToken) {
-        try {
-          const tokenData = JSON.parse(cachedToken);
-          if (tokenData.expiry > Date.now()) {
-            return tokenData.token;
-          }
-        } catch (e) {
-          localStorage.removeItem('api_token');
-        }
-      }
-
-      // Exchange MemberStack token for API token
-      const response = await fetch(`https://api.crowdbuilding.nl/api/v1/sanctum/token`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({
-          memberstack_token: memberstackToken,
-          device_name: deviceName,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Token exchange failed: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      // Cache the token with a 1-hour expiry
-      localStorage.setItem('api_token', JSON.stringify({
-        token: data.token,
-        expiry: Date.now() + (60 * 60 * 1000) // 1 hour
-      }));
-
-      return data.token;
-    } catch (error) {
-      console.error("Error in getApiToken:", error);
-      return null;
-    }
-  }
-
   async function checkFollowStatus(apiToken) {
     if (!apiToken) {
       console.log("User not signed in, skipping follow status check.");
@@ -120,7 +60,8 @@ localStorage.setItem('locat', location.href);
     });
   }
 
-  async function followPartner(apiToken) {
+  async function followPartner() {
+    const apiToken = await window.auth.getApiToken();
     if (!apiToken) {
       alert("Log in om deze actie uit te voeren.");
       return;
@@ -128,7 +69,6 @@ localStorage.setItem('locat', location.href);
 
     const apiUrl = `https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}/follow`;
     console.log("Follow API URL:", apiUrl);
-    console.log("Authorization Token:", apiToken);
 
     try {
       const response = await fetch(apiUrl, {
@@ -160,7 +100,8 @@ localStorage.setItem('locat', location.href);
     }
   }
 
-  async function unfollowPartner(apiToken) {
+  async function unfollowPartner() {
+    const apiToken = await window.auth.getApiToken();
     if (!apiToken) {
       alert("Log in om deze actie uit te voeren.");
       return;
@@ -168,7 +109,6 @@ localStorage.setItem('locat', location.href);
 
     const apiUrl = `https://api.crowdbuilding.nl/api/v1/${partnerType}/${id}/unfollow`;
     console.log("Unfollow API URL:", apiUrl);
-    console.log("Authorization Token:", apiToken);
 
     try {
       const response = await fetch(apiUrl, {
@@ -229,15 +169,15 @@ localStorage.setItem('locat', location.href);
     if (validButtons.length === 0) return;
 
     try {
-      const apiToken = await getApiToken();
+      const apiToken = await window.auth.getApiToken();
 
       if (apiToken) {
         validButtons.forEach(button => {
           button.addEventListener("click", async function () {
             if (isFollowing) {
-              await unfollowPartner(apiToken);
+              await unfollowPartner();
             } else {
-              await followPartner(apiToken);
+              await followPartner();
             }
           });
         });
@@ -256,16 +196,18 @@ localStorage.setItem('locat', location.href);
     }
   }
 
-  function waitForMemberStack() {
-    const interval = setInterval(() => {
-      if (typeof $memberstackDom !== "undefined") {
-        clearInterval(interval);
+  // Initialize when auth module is ready
+  if (window.auth) {
+    init();
+  } else {
+    window.addEventListener('load', () => {
+      if (window.auth) {
         init();
+      } else {
+        console.error('Auth module not available');
       }
-    }, 100);
+    });
   }
-
-  waitForMemberStack();
 })();
 
 // Map configuration
