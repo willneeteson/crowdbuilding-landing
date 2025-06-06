@@ -132,7 +132,66 @@ async function submitPost(body, imageFile, submitButton) {
         }
 
         // Add the new post to the top of the list
-        await handleNewPost(data.data);
+        const container = document.getElementById('groupPosts');
+        if (container) {
+            const postElement = document.createElement('article');
+            postElement.className = 'post-item';
+            postElement.style.opacity = '0';
+            postElement.setAttribute('data-post-id', data.data.id);
+            
+            const postImages = data.data.images?.length
+                ? data.data.images.map(img =>
+                    `<div class="post-image">
+                        <img src="${img.original_url}" alt="${img.name || ''}">
+                    </div>`
+                ).join('')
+                : '';
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <img class="post-avatar" src="${data.data.created_by.avatar_url}" alt="${data.data.created_by.name}" data-user-id="${data.data.created_by.id}">
+                    <div class="post-meta">
+                        <h4 class="post-author" data-user-id="${data.data.created_by.id}">${data.data.created_by.name}</h4>
+                        <time datetime="${data.data.created_at}">${formatDate(data.data.created_at)}</time>
+                    </div>
+                </div>
+                <div class="post-body">
+                    <p>${data.data.body}</p>
+                    ${postImages}
+                </div>
+                <div class="post-footer">
+                    <button class="post-like-button" data-post-id="${data.data.id}" data-liked="false">
+                        <img class="heart-icon" width="24" height="24" 
+                             src="${getEmptyHeartSvg()}"
+                             alt="Not liked">
+                        <span class="like-count">0</span>
+                    </button>
+                    <div class="post-comments-count" data-post-id="${data.data.id}">
+                        <span>0 reacties</span>
+                    </div>
+                </div>
+            `;
+
+            container.insertBefore(postElement, container.firstChild);
+            
+            // Fade in the new post
+            requestAnimationFrame(() => {
+                postElement.style.transition = 'opacity 0.3s ease-in';
+                postElement.style.opacity = '1';
+            });
+            
+            // Attach event handlers to the new post
+            attachPostClickHandlers();
+            attachMenuHandlers();
+            attachLikeHandlers();
+            
+            // Also run the heart fix just in case
+            setTimeout(() => {
+                if (window.fixAllHearts) {
+                    window.fixAllHearts();
+                }
+            }, 200);
+        }
 
         // Clear form
         document.getElementById('newPostBody').value = '';
