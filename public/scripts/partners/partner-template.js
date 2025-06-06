@@ -10,8 +10,18 @@ localStorage.setItem('locat', location.href);
   ];
   let isFollowing = false;
 
-  const partnerType = document.body.getAttribute('partner-type');
-  console.log('Partner Type:', partnerType);
+  const rawPartnerType = document.body.getAttribute('partner-type');
+  let partnerType;
+
+  if (rawPartnerType === "Gemeente") {
+    partnerType = "region-areas";
+  } else if (rawPartnerType === "Provincie") {
+    partnerType = "regions";
+  } else {
+    partnerType = "service-providers";
+  }
+
+  console.log('Partner Type:', partnerType, '(from:', rawPartnerType, ')');
 
   async function checkFollowStatus(apiToken) {
     if (!apiToken) {
