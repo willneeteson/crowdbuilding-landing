@@ -177,9 +177,9 @@ async function populateMembersList(members, containerType = 'members') {
         // Filter members based on role
         const filteredMembers = members.filter(member => {
             if (containerType === 'admins') {
-                return member.role_label === 'Beheerder';
+                return member.status === 'beheerder';
             } else {
-                return member.role_label !== 'Beheerder';
+                return member.status === 'member';
             }
         });
         
@@ -243,7 +243,7 @@ async function populateMembersList(members, containerType = 'members') {
 
         // Wait for modal system and create the members modal
         const modalSystem = await window.waitForModalSystem();
-        const modalTitle = containerType === 'admins' ? `Beheerders (${filteredMembers.length})` : `Deelnememers (${filteredMembers.length})`;
+        const modalTitle = containerType === 'admins' ? `Beheerders (${filteredMembers.length})` : `Deelnemers (${filteredMembers.length})`;
         modalSystem.createModal(modalTitle, membersListContent, { id: modalId });
 
         // Add the compact view to the container
