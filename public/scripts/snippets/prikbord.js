@@ -553,12 +553,93 @@ function attachPostClickHandlers() {
         
         // Make post clickable to view details
         post.style.cursor = 'pointer';
-        post.addEventListener('click', (e) => {
+        post.addEventListener('click', async (e) => {
             // Don't trigger if clicking on a button or link
             if (e.target.closest('button, a, .post-menu')) return;
             
-            window.location.href = `/post?id=${postId}`;
+            const modal = document.getElementById('postModal');
+            const modalContent = modal.querySelector('.post-modal-content');
+            const modalTitle = modal.querySelector('.post-modal-title');
+            
+            // Get author name from the post
+            const authorName = post.querySelector('.post-author').textContent;
+            modalTitle.textContent = `${authorName}'s bericht`;
+            
+            // Clone the post content
+            const postContent = post.cloneNode(true);
+            
+            // Make sure the like status is preserved in the modal
+            const originalLikeButton = post.querySelector('.post-like-button');
+            const modalLikeButton = postContent.querySelector('.post-like-button');
+            
+            if (originalLikeButton && modalLikeButton) {
+                // Copy liked status
+                const isLiked = originalLikeButton.classList.contains('liked');
+                if (isLiked) {
+                    modalLikeButton.classList.add('liked');
+                    modalLikeButton.setAttribute('data-liked', 'true');
+                    
+                    // Make sure heart is filled
+                    const heartIcon = modalLikeButton.querySelector('.heart-icon');
+                    if (heartIcon) {
+                        heartIcon.src = getFilledHeartSvg();
+                        heartIcon.alt = 'Liked';
+                    }
+                }
+            }
+            
+            // Add comments section
+            const commentsList = document.createElement('div');
+            commentsList.className = 'post-comments-list';
+            commentsList.id = `modal-comments-${postId}`;
+            postContent.appendChild(commentsList);
+            
+            // Add comment form
+            const commentForm = createCommentForm(postId);
+            
+            // Update modal content
+            modalContent.innerHTML = '';
+            modalContent.appendChild(postContent);
+            modalContent.appendChild(commentForm);
+            
+            // Show modal
+            modal.classList.add('show');
+            
+            // Load comments
+            const comments = await fetchCommentsForPost(postId);
+            renderComments(comments, commentsList);
+            
+            // Ensure all like buttons in the modal work correctly
+            attachLikeHandlers();
         });
+    });
+
+    // Handle modal close button
+    const closeButton = document.querySelector('.post-modal-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            document.getElementById('postModal').classList.remove('show');
+        });
+    }
+
+    // Close modal when clicking outside
+    const modalOverlay = document.getElementById('postModal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target.id === 'postModal') {
+                e.target.classList.remove('show');
+            }
+        });
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('postModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
     });
 }
 
