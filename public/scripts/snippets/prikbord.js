@@ -455,6 +455,159 @@ function updateLikeButtonState(postId, isLiked, likeCount) {
 }
 
 // ===============================
+// Event Handlers
+// ===============================
+
+function attachLikeHandlers() {
+    document.querySelectorAll('.post-like-button').forEach(button => {
+        // Remove existing event listener to prevent duplicates
+        button.removeEventListener('click', button._handleLikeClick);
+        
+        const handleLikeClick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const postId = button.getAttribute('data-post-id');
+            if (!postId) return;
+            
+            try {
+                button.disabled = true;
+                await toggleLike(postId);
+            } catch (error) {
+                console.error('Error handling like click:', error);
+                alert('Like actie mislukt. Probeer het opnieuw.');
+            } finally {
+                button.disabled = false;
+            }
+        };
+        
+        // Store reference to handler for future removal
+        button._handleLikeClick = handleLikeClick;
+        button.addEventListener('click', handleLikeClick);
+    });
+}
+
+function attachPostClickHandlers() {
+    document.querySelectorAll('.post-item').forEach(post => {
+        const postId = post.getAttribute('data-post-id');
+        if (!postId) return;
+        
+        // Make post clickable to view details
+        post.style.cursor = 'pointer';
+        post.addEventListener('click', (e) => {
+            // Don't trigger if clicking on a button or link
+            if (e.target.closest('button, a, .post-menu')) return;
+            
+            window.location.href = `/post?id=${postId}`;
+        });
+    });
+}
+
+function attachMenuHandlers() {
+    document.querySelectorAll('.post-menu-button').forEach(button => {
+        const postId = button.getAttribute('data-post-id');
+        const dropdown = document.querySelector(`.post-menu-dropdown[data-post-id="${postId}"]`);
+        
+        if (!dropdown) return;
+        
+        // Toggle dropdown on click
+        button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            dropdown.style.display = 'none';
+        });
+        
+        // Handle delete action
+        const deleteButton = dropdown.querySelector('.delete');
+        if (deleteButton) {
+            deleteButton.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                
+                if (!confirm('Weet je zeker dat je dit bericht wilt verwijderen?')) return;
+                
+                try {
+                    const token = await window.auth.getApiToken();
+                    const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    
+                    // Remove post from DOM
+                    const post = document.querySelector(`.post-item[data-post-id="${postId}"]`);
+                    if (post) post.remove();
+                    
+                } catch (error) {
+                    console.error('Error deleting post:', error);
+                    alert('Bericht verwijderen mislukt. Probeer het opnieuw.');
+                }
+            });
+        }
+    });
+}
+
+function attachCommentLikeHandlers() {
+    document.querySelectorAll('.comment-like-button').forEach(button => {
+        const commentId = button.getAttribute('data-comment-id');
+        if (!commentId) return;
+        
+        button.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            try {
+                button.disabled = true;
+                const token = await window.auth.getApiToken();
+                
+                const response = await fetch(`https://api.crowdbuilding.com/api/v1/comments/${commentId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                
+                // Update like count and button state
+                const countElement = button.querySelector('.like-count');
+                if (countElement) {
+                    countElement.textContent = data.data.likes_count;
+                }
+                
+                button.classList.toggle('liked');
+                
+            } catch (error) {
+                console.error('Error liking comment:', error);
+                alert('Like actie mislukt. Probeer het opnieuw.');
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+}
+
+function fixAllHeartIcons() {
+    document.querySelectorAll('.post-like-button').forEach(button => {
+        const isLiked = button.classList.contains('liked') || button.getAttribute('data-liked') === 'true';
+        const heartIcon = button.querySelector('.heart-icon');
+        
+        if (heartIcon) {
+            heartIcon.src = isLiked ? getFilledHeartSvg() : getEmptyHeartSvg();
+            heartIcon.alt = isLiked ? 'Liked' : 'Not liked';
+        }
+    });
+}
+
+// ===============================
 // Helper Functions
 // ===============================
 
