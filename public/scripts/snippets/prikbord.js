@@ -11,6 +11,59 @@ let hasMorePosts = true;
 let currentGroupSlug = null;
 let nextCursor = null;
 let isLoadingMore = false;
+let pageType = null;
+let pageSlug = null;
+
+// ===============================
+// Page Type Detection & Configuration
+// ===============================
+
+function detectPageType() {
+    // First try to get from body attribute
+    const bodyPageType = document.body.getAttribute('page-type');
+    if (bodyPageType) {
+        return bodyPageType.toLowerCase();
+    }
+
+    // Fallback to URL path analysis
+    const pathParts = window.location.pathname.split('/');
+    if (pathParts.includes('project')) return 'project';
+    if (pathParts.includes('plot')) return 'plot';
+    if (pathParts.includes('partner')) return 'partner';
+    
+    return 'project'; // Default to project if we can't determine
+}
+
+function getApiEndpoint() {
+    if (!pageSlug) {
+        const pathParts = window.location.pathname.split('/');
+        pageSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    }
+    
+    switch (pageType) {
+        case 'project':
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts`;
+        case 'plot':
+            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts`;
+        case 'partner':
+            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts`;
+        default:
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts`;
+    }
+}
+
+function getPostEndpoint(postId) {
+    switch (pageType) {
+        case 'project':
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}`;
+        case 'plot':
+            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}`;
+        case 'partner':
+            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}`;
+        default:
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}`;
+    }
+}
 
 // ===============================
 // Common Helper Functions
@@ -93,13 +146,9 @@ async function submitPost(body, imageFile, submitButton) {
         return;
     }
 
-    // Get the current page slug from the URL
-    const pathParts = window.location.pathname.split('/');
-    const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-    
-    if (!groupSlug) {
-        console.error('No group slug found in URL');
-        alert('Error: groep kon niet worden bepaald. Probeer het opnieuw.');
+    if (!pageSlug) {
+        console.error('No page slug found');
+        alert('Error: pagina kon niet worden bepaald. Probeer het opnieuw.');
         return;
     }
 
@@ -118,7 +167,7 @@ async function submitPost(body, imageFile, submitButton) {
     }
 
     try {
-        const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`, {
+        const response = await fetch(getApiEndpoint(), {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
@@ -245,7 +294,7 @@ async function fetchGroupPosts(groupSlug, cursor = null) {
     isLoadingMore = !!cursor;
 
     const token = await window.auth.getApiToken();
-    let endpoint = `https://api.crowdbuilding.com/api/v1/groups/${groupSlug}/posts`;
+    let endpoint = getApiEndpoint();
     
     if (cursor) {
         endpoint += `?cursor=${cursor}`;
@@ -457,7 +506,7 @@ async function toggleLike(postId) {
         const countElement = likeButton?.querySelector('.like-count');
         const previousCount = countElement ? parseInt(countElement.textContent || '0', 10) : 0;
         
-        const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/like`, {
+        const response = await fetch(getPostEndpoint(postId), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -671,7 +720,7 @@ function attachMenuHandlers() {
                 
                 try {
                     const token = await window.auth.getApiToken();
-                    const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}`, {
+                    const response = await fetch(getPostEndpoint(postId), {
                         method: 'DELETE',
                         headers: {
                             'Authorization': `Bearer ${token}`
@@ -843,6 +892,10 @@ function addHeartIconObserver() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Detect page type
+        pageType = detectPageType();
+        console.log('Detected page type:', pageType);
+        
         // Add necessary styles
         addStyles();
         
@@ -857,21 +910,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Initialized with user ID:', currentUserId);
         
         if (currentUserId) {
-            // Get the current page slug from the URL
+            // Get the current page slug
             const pathParts = window.location.pathname.split('/');
-            const groupSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+            pageSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
             
-            if (!groupSlug) {
-                console.error('No group slug found in URL');
+            if (!pageSlug) {
+                console.error('No page slug found in URL');
                 const container = document.getElementById('groupPosts');
                 if (container) {
-                    container.innerHTML = '<div class="post-item">Error: No group found in URL.</div>';
+                    container.innerHTML = '<div class="post-item">Error: No page identifier found.</div>';
                 }
                 return;
             }
             
             // Initialize posts
-            fetchGroupPosts(groupSlug, null);
+            const response = await fetch(getApiEndpoint(), {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${await window.auth.getApiToken()}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            renderPosts(data.data);
             
             // Setup heart icons and handlers
             setTimeout(fixAllHeartIcons, 1000);
