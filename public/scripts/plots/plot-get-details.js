@@ -74,6 +74,9 @@ class PlotDetailsManager {
         // Update deadline counter
         this.updateDeadlineCounter(data.application_deadline);
 
+        // Update documents
+        this.updateDocuments(data.documents);
+
         // Update descriptions
         if (data.info) {
             this.updateDescriptions(data.info);
@@ -176,6 +179,76 @@ class PlotDetailsManager {
             deadlineCounter.style.display = 'none';
             if (signupBtn) signupBtn.style.display = 'none';
         }
+    }
+
+    updateDocuments(documents) {
+        const container = document.getElementById('tabContentPlotFiles');
+        const tabButton = document.getElementById('tabBtnBestanden');
+        
+        // Hide tab button if no documents
+        if (tabButton) {
+            tabButton.style.display = (!documents?.length) ? 'none' : 'block';
+        }
+
+        if (!container || !documents?.length) {
+            if (container) {
+                container.innerHTML = '<div class="no-documents">Geen documenten beschikbaar</div>';
+            }
+            return;
+        }
+
+        const documentsList = documents.map(doc => this.generateDocumentElement(doc)).join('');
+        container.innerHTML = `
+            <div class="documents-grid">
+                ${documentsList}
+            </div>
+        `;
+    }
+
+    generateDocumentElement(doc) {
+        const fileIcon = this.getFileIcon(doc.mime_type);
+        const fileDate = new Date(doc.created_at).toLocaleDateString('nl-NL', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        return `
+            <div class="document-item">
+                <a href="${doc.original_url}" target="_blank" class="document-link">
+                    <div class="document-icon">
+                        ${fileIcon}
+                    </div>
+                    <div class="document-info">
+                        <div class="document-name">${doc.name}</div>
+                        <div class="document-meta">
+                            <span class="document-date">${fileDate}</span>
+                            <span class="document-type">${this.getFileExtension(doc.file_name)}</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        `;
+    }
+
+    getFileIcon(mimeType) {
+        // Default icon for documents
+        let icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0zM64 224H88c30.9 0 56 25.1 56 56s-25.1 56-56 56H80v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24H80v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H176c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16V272c0-8.8-7.2-16-16-16h-8v96zm96-128h24c8.8 0 16 7.2 16 16s-7.2 16-16 16H304v32h24c8.8 0 16 7.2 16 16s-7.2 16-16 16H304v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/>
+        </svg>`;
+
+        // Specific icons for different mime types
+        if (mimeType === 'application/pdf') {
+            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M64 464H96v48H64c-35.3 0-64-28.7-64-64V64C0 28.7 28.7 0 64 0H229.5c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3V288H336V160H256c-17.7 0-32-14.3-32-32V48H64c-8.8 0-16 7.2-16 16V448c0 8.8 7.2 16 16 16zM176 352h32c30.9 0 56 25.1 56 56s-25.1 56-56 56H192v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24H192v48h16zm96-80h32c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H304c-8.8 0-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H320v96h16zm80-112c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H432c-8.8 0-16-7.2-16-16V368zm32 112h8c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16h-8v96z"/>
+            </svg>`;
+        }
+
+        return icon;
+    }
+
+    getFileExtension(filename) {
+        return filename.split('.').pop().toUpperCase();
     }
 
     showModal() {
