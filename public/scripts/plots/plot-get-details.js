@@ -71,6 +71,9 @@ class PlotDetailsManager {
         this.updateElement('.project-homes-count', data.number_of_homes);
         this.updateElement('.project-member-status', data.member_status?.name);
 
+        // Update deadline counter
+        this.updateDeadlineCounter(data.application_deadline);
+
         // Update descriptions
         if (data.info) {
             this.updateDescriptions(data.info);
@@ -150,6 +153,31 @@ class PlotDetailsManager {
             .join('');
     }
 
+    updateDeadlineCounter(deadline) {
+        const deadlineCounter = document.querySelector('.plot-deadline-counter');
+        const deadlineNumber = document.querySelector('.deadline-number');
+        const signupBtn = document.querySelector('#plotSignupBtn');
+        
+        if (!deadlineCounter || !deadlineNumber || !deadline) {
+            if (deadlineCounter) deadlineCounter.style.display = 'none';
+            return;
+        }
+
+        const today = new Date();
+        const deadlineDate = new Date(deadline);
+        const diffTime = deadlineDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 0) {
+            deadlineNumber.textContent = diffDays;
+            deadlineCounter.style.display = 'block';
+            if (signupBtn) signupBtn.style.display = 'block';
+        } else {
+            deadlineCounter.style.display = 'none';
+            if (signupBtn) signupBtn.style.display = 'none';
+        }
+    }
+
     showModal() {
         if (!this.plotData) {
             console.error('No plot data available');
@@ -177,6 +205,15 @@ class PlotDetailsManager {
                     ${this.generateDetailItem('Woonmilieu', data.living_environment?.name)}
                     ${this.generateTagsSection('Doelgroepen', data.target_audiences)}
                     ${this.generateTagsSection('Woonvormen', data.housing_forms, 'title')}
+                </div>
+
+                <div class="section-header">
+                    <h3>Inschrijving</h3>
+                </div>
+                <div class="cb-detail-items">
+                    ${this.generateDetailItem('Status', data.application_deadline_status?.name)}
+                    ${this.generateDetailItem('Start inschrijving', data.application_open_date)}
+                    ${this.generateDetailItem('Deadline inschrijving', data.application_deadline)}
                 </div>
 
                 <div class="section-header">
