@@ -106,7 +106,7 @@ class PlotDetailsManager {
             } else {
                 element.textContent = value;
             }
-            element.style.display = 'block';
+            element.style.display = 'inline-block';
         } else {
             element.style.display = 'none';
         }

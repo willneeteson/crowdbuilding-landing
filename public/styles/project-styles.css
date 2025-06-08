@@ -75,13 +75,13 @@
 }
 
 .project__like-btn.liked {
-    background-color: rgba(255, 64, 129, 0.1);
-    border-color: #ff4081;
-    color: #ff4081;
+    background-color:  var(--color--color-neutral-black-100);
+    border-color:  var(--color--color-neutral-black-100);
+    color: white;
 }
 
 .project__like-heart.liked svg {
-    fill: #ff4081;
+    fill: white;
 }
 
 .project__like-btn.loading {
@@ -90,8 +90,8 @@
 }
 
 .project__like-btn.error {
-    border-color: #f44336;
-    color: #f44336;
+    border-color:  var(--color--color-neutral-black-100);
+    color:  var(--color--color-neutral-black-100);
 } 
 
 /* 2. Layout & Grid
@@ -1381,4 +1381,24 @@ button.post-menu-item.delete {
     .project-details-modal .detail-value .tags-list {
         justify-content: flex-end;
     }
+}
+
+.document-item {
+    width: 100%;
+    border: solid 1.5px var(--_color---color-neutral-black-100);
+    border-radius: 99px;
+    color: var(--_color---color-neutral-black-100);
+}
+
+.document-icon {
+    width: 24px;
+    height: 24px;
+}
+
+a.document-link {
+    padding: 8px 16px;
+    display: flex;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--_color---color-neutral-black-100);
 }
