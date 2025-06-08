@@ -65,11 +65,18 @@ class PlotDetailsManager {
         this.updateElement('.project-title', data.title);
         this.updateElement('.project-subtitle', data.subtitle);
         this.updateElement('.project-intro', data.intro, true);
-        this.updateElement('.project-location', data.location);
-        this.updateElement('.project-phase', data.phase?.name);
-        this.updateElement('.project-development-form', data.development_form?.name);
-        this.updateElement('.project-homes-count', data.number_of_homes);
-        this.updateElement('.project-member-status', data.member_status?.name);
+        
+        // Update sidebar status
+        this.updateSidebarStatus(data);
+        
+        // Update sidebar planning
+        this.updateSidebarPlanning(data);
+        
+        // Update sidebar location
+        this.updateSidebarLocation(data);
+        
+        // Update sidebar contact
+        this.updateSidebarContact(data);
 
         // Update deadline counter
         this.updateDeadlineCounter(data.application_deadline);
@@ -141,7 +148,7 @@ class PlotDetailsManager {
                     <div class="description-content">${desc.text}</div>
                 </div>
             `).join('');
-            container.style.display = 'block';
+            container.style.display = 'inline-block';
         } else {
             container.style.display = 'none';
         }
@@ -187,7 +194,7 @@ class PlotDetailsManager {
         
         // Hide tab button if no documents
         if (tabButton) {
-            tabButton.style.display = (!documents?.length) ? 'none' : 'block';
+            tabButton.style.display = (!documents?.length) ? 'none' : 'inline-block';
         }
 
         if (!container || !documents?.length) {
@@ -327,6 +334,74 @@ class PlotDetailsManager {
                         ${items.map(item => `<div class="tag">${item[property]}</div>`).join('')}
                     </div>
                 </div>
+            </div>
+        `;
+    }
+
+    updateSidebarStatus(data) {
+        const statusWrapper = document.querySelector('.project__sidebar-group.status .project__sidebar-details-list');
+        if (!statusWrapper) return;
+
+        statusWrapper.innerHTML = `
+            <div class="project__sidebar-list-item">
+                <div class="project-development-form">${data.application_deadline_status?.name || 'Vooraankondiging'}</div>
+            </div>
+        `;
+    }
+
+    updateSidebarPlanning(data) {
+        const planningWrapper = document.querySelector('.project__sidebar-group.planning .project__sidebar-details-list');
+        if (!planningWrapper) return;
+
+        const openDate = data.application_open_date ? new Date(data.application_open_date).toLocaleDateString('nl-NL') : 'Nog niet bekend';
+        const deadline = data.application_deadline ? new Date(data.application_deadline).toLocaleDateString('nl-NL') : 'Nog niet bekend';
+
+        planningWrapper.innerHTML = `
+            <div class="project__sidebar-list-item">
+                <div class="project-development-form">Datum inschrijving open: ${openDate}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">Sluitingsdatum inschrijving: ${deadline}</div>
+            </div>
+        `;
+    }
+
+    updateSidebarLocation(data) {
+        const locationWrapper = document.querySelector('.project__sidebar-group.locatie .project__sidebar-list-item');
+        if (!locationWrapper) return;
+
+        const address = data.address || {};
+        locationWrapper.innerHTML = `
+            <div class="project-phase">
+                ${address.street || ''} ${address.house_number || ''}<br>
+                ${address.postal_code || ''}<br>
+                ${address.city || ''}
+            </div>
+        `;
+    }
+
+    updateSidebarContact(data) {
+        const contactWrapper = document.querySelector('.project__sidebar-group.contact .project__sidebar-details-list');
+        if (!contactWrapper) return;
+
+        contactWrapper.innerHTML = `
+            <div class="project__sidebar-list-item">
+                <div class="project-development-form">${data.provider_type?.name || 'Type aanbieder'}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">${data.organization || 'Organisatie'}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">${data.contact_person || 'Naam'}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">${data.contact_email || 'E-mailadres'}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">${data.contact_phone || 'Telefoonnummer'}</div>
+            </div>
+            <div class="project__sidebar-list-item">
+                <div class="project-phase">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Website'}</div>
             </div>
         `;
     }
