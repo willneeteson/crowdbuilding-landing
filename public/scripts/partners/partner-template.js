@@ -9,7 +9,7 @@ if (rawPartnerType === "Gemeente") {
 } else if (rawPartnerType === "Provincie") {
   partnerType = "regions";
 } else if (rawPartnerType === "Expert") {
-  partnerType = "experts";
+  partnerType = "service-providers";
 } else {
   partnerType = "service-providers";
 }
