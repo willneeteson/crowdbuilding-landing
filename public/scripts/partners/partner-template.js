@@ -8,6 +8,8 @@ if (rawPartnerType === "Gemeente") {
   partnerType = "region-areas";
 } else if (rawPartnerType === "Provincie") {
   partnerType = "regions";
+} else if (rawPartnerType === "Expert") {
+  partnerType = "experts";
 } else {
   partnerType = "service-providers";
 }
@@ -766,16 +768,6 @@ projectStyles.textContent = `
     margin: 8px 0;
   }
 
-  .project-card__phase {
-    display: inline-block;
-    padding: 4px 8px;
-    background: transparent;
-    border: 1px solid var(--_color---color-neutral-black-100);
-    border-radius: 99px;
-    font-size: 14px;
-    margin: 8px 0;
-  }
-
   .project-card__tags {
     margin: 8px 0;
     display: flex;
@@ -783,12 +775,13 @@ projectStyles.textContent = `
     gap: 8px;
   }
 
-  .project-card__tags .tag {
-    padding: 4px 8px;
+  .project-card__tags .tag, .project-card__phase {
+    padding: 0px 8px;
     background: transparent;
     border-radius: 99px;
     font-size: 14px;
     color: var(--_color---color-neutral-black-100);
+    border: 1.5px solid var(--_color---color-neutral-black-100);
   }
 
   .project-marker-wrapper {
