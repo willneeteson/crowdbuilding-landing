@@ -417,6 +417,16 @@ class ProjectMapManager {
     this.map.setMaxBounds(MAP_CONFIG.bounds);
     this.setupZoomControls();
     this.loadPartnerProjects();
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      this.map.resize();
+    });
+
+    // Initial resize after map loads
+    this.map.on('load', () => {
+      this.map.resize();
+    });
   }
 
   setupZoomControls() {
@@ -487,11 +497,10 @@ class ProjectMapManager {
     if (!container) return;
 
     container.innerHTML = projects.map(project => `
-      <div class="project-card">
+      <a href="/groups/${project.slug}" class="project-card">
         <div class="project-card__content">
           <h3>${project.title}</h3>
           ${project.subtitle ? `<p class="project-card__subtitle">${project.subtitle}</p>` : ''}
-          ${project.intro ? `<div class="project-card__intro">${project.intro}</div>` : ''}
           ${project.phase ? `<div class="project-card__phase">${project.phase.name}</div>` : ''}
           ${project.housing_forms?.length ? `
             <div class="project-card__tags">
@@ -508,14 +517,13 @@ class ProjectMapManager {
               ${project.members.length > 5 ? `<div class="member-count">+${project.members.length - 5}</div>` : ''}
             </div>
           ` : ''}
-          <a href="/groups/${project.slug}" class="project-card__link">Bekijk project</a>
         </div>
         ${project.image ? `
           <div class="project-card__image-wrapper">
             <img src="${project.image.original_url}" alt="${project.title}" class="project-card__image">
           </div>
         ` : ''}
-      </div>
+      </a>
     `).join('');
   }
 
@@ -523,23 +531,39 @@ class ProjectMapManager {
     const markerElement = document.createElement('div');
     markerElement.className = 'custom-marker project-marker';
 
-    const marker = new mapboxgl.Marker(markerElement)
+    const popup = new mapboxgl.Popup({
+      offset: 25,
+      closeButton: false,
+      maxWidth: '300px'
+    }).setHTML(`
+      <div class="project__popup">
+        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
+        <div class="project__popup-content">
+          <h4>${project.title}</h4>
+          ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
+          ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
+        </div>
+      </div>
+    `);
+
+    const marker = new mapboxgl.Marker({
+      element: markerElement,
+      anchor: 'bottom'
+    })
       .setLngLat([project.longitude, project.latitude])
-      .setPopup(
-        new mapboxgl.Popup({ offset: 24 })
-          .setHTML(`
-            <div class="project__popup">
-              ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
-              <div class="project__popup-content">
-                <h4>${project.title}</h4>
-                ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
-                ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
-              </div>
-              <a href="/groups/${project.slug}" class="project__popup-link"></a>
-            </div>
-          `)
-      )
+      .setPopup(popup)
       .addTo(this.map);
+
+    // Show popup on hover
+    markerElement.addEventListener('mouseenter', () => {
+      marker.getPopup().addTo(this.map);
+    });
+
+    markerElement.addEventListener('mouseleave', () => {
+      if (!marker.getPopup().isOpen()) {
+        marker.getPopup().remove();
+      }
+    });
 
     this.markers.set(project.id, marker);
   }
@@ -799,7 +823,6 @@ projectStyles.textContent = `
     background: #d44133;
   }
 
-  /* Keep existing marker and popup styles */
   .project-marker {
     width: 24px;
     height: 24px;
@@ -807,11 +830,12 @@ projectStyles.textContent = `
     border: 2px solid white;
     border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.3s;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
 
   .project-marker:hover {
     transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
   .project__popup {
@@ -832,7 +856,7 @@ projectStyles.textContent = `
   .project__popup-content h4 {
     margin: 0 0 8px;
     font-size: 16px;
-    color: #333;
+    
   }
 
   .project__popup-content p {
@@ -844,10 +868,10 @@ projectStyles.textContent = `
   .project__popup-phase {
     display: inline-block;
     padding: 4px 8px;
-    background: #e74c3c;
-    color: white;
-    border-radius: 4px;
-    font-size: 12px;
+    color: var(--_color---color-neutral-black-100);
+    border: 1px solid var(--_color---color-neutral-black-100);
+    border-radius: 99px;
+    font-size: 14px;
   }
 `;
 document.head.appendChild(projectStyles);
