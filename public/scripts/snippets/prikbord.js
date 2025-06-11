@@ -51,6 +51,8 @@ function getApiEndpoint() {
             return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts`;
         case 'gemeente':
             return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts`;
+        case 'expert':
+            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts`;
     }
@@ -66,6 +68,8 @@ function getPostEndpoint(postId) {
             return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}`;
         case 'gemeente':
             return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}`;
+        case 'expert':
+            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}`;
     }
