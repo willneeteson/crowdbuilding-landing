@@ -3,6 +3,7 @@ class PlotDetailsManager {
     constructor() {
         this.modalSystem = null;
         this.plotData = null;
+        this.mapManager = null;
         this.init();
     }
 
@@ -12,6 +13,7 @@ class PlotDetailsManager {
             await this.setupModal();
             await this.fetchPlotData();
             this.setupEventListeners();
+            this.initializeMap();
         } catch (error) {
             console.error('Error initializing plot details:', error);
         }
@@ -465,7 +467,216 @@ class PlotDetailsManager {
             container.style.display = 'none';
         }
     }
+
+    initializeMap() {
+        const mapContainer = document.getElementById('plotMap');
+        if (!mapContainer) return;
+
+        this.mapManager = new PlotMapManager(mapContainer, this.plotData);
+    }
 }
+
+class PlotMapManager {
+    constructor(container, plotData) {
+        this.map = null;
+        this.container = container;
+        this.plotData = plotData;
+        this.marker = null;
+        this.init();
+    }
+
+    init() {
+        if (!this.container || !this.plotData?.latitude || !this.plotData?.longitude) return;
+
+        mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsbG5lZXRlc29uIiwiYSI6ImNtMDJpZGM0eTAxbmkyanF1bTI2ZDByczQifQ.irtx4lkDC9cUXHtRIgBJVg';
+        
+        this.map = new mapboxgl.Map({
+            container: this.container,
+            style: 'mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq',
+            center: [this.plotData.longitude, this.plotData.latitude],
+            zoom: 14,
+            minZoom: 6,
+            maxZoom: 18,
+            language: 'nl',
+            localize: true,
+            zoomAnimationOptions: { duration: 300 },
+            pitchWithRotate: false,
+            dragRotate: false,
+            touchZoomRotate: false
+        });
+
+        this.setupMapControls();
+        this.createMarker();
+    }
+
+    setupMapControls() {
+        this.map.scrollZoom.disable();
+        this.setupTouchControls();
+    }
+
+    setupTouchControls() {
+        let isPinching = false;
+        const canvas = this.map.getCanvas();
+
+        canvas.addEventListener('wheel', (event) => {
+            if (event.ctrlKey) {
+                this.map.scrollZoom.enable();
+            } else {
+                this.map.scrollZoom.disable();
+            }
+        });
+
+        canvas.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 2) {
+                isPinching = true;
+                this.map.scrollZoom.enable();
+            }
+        });
+
+        canvas.addEventListener('touchend', () => {
+            isPinching = false;
+            this.map.scrollZoom.disable();
+        });
+
+        canvas.addEventListener('touchmove', (event) => {
+            if (event.touches.length !== 2) {
+                isPinching = false;
+                this.map.scrollZoom.disable();
+            }
+        });
+    }
+
+    createMarker() {
+        const markerElement = document.createElement('div');
+        markerElement.className = 'plot-marker';
+
+        const popup = new mapboxgl.Popup({
+            offset: 25,
+            closeButton: true,
+            maxWidth: '300px',
+            className: 'plot-popup',
+            closeOnClick: false
+        }).setHTML(`
+            <div class="plot__popup">
+                ${this.plotData.image ? `<img src="${this.plotData.image.original_url}" alt="${this.plotData.title}" class="plot__popup-img"/>` : ''}
+                <div class="plot__popup-content">
+                    <h4>${this.plotData.title}</h4>
+                    ${this.plotData.subtitle ? `<p>${this.plotData.subtitle}</p>` : ''}
+                    ${this.plotData.address ? `
+                        <div class="plot__popup-address">
+                            ${this.plotData.address.street} ${this.plotData.address.house_number}<br>
+                            ${this.plotData.address.postal_code} ${this.plotData.address.city}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `);
+
+        this.marker = new mapboxgl.Marker({
+            element: markerElement,
+            anchor: 'center'
+        })
+            .setLngLat([this.plotData.longitude, this.plotData.latitude])
+            .setPopup(popup)
+            .addTo(this.map);
+    }
+
+    destroy() {
+        if (this.marker) {
+            this.marker.remove();
+        }
+        if (this.map) {
+            this.map.remove();
+            this.map = null;
+        }
+    }
+}
+
+// Add styles for plot map and marker
+const plotMapStyles = document.createElement('style');
+plotMapStyles.textContent = `
+    .plot-marker {
+        width: 24px;
+        height: 24px;
+        background: #e74c3c;
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: transform 0.2s;
+    }
+
+    .plot-marker:hover {
+        transform: scale(1.1);
+    }
+
+    .plot-popup .mapboxgl-popup-content {
+        padding: 0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        min-width: 250px;
+    }
+
+    .plot-popup .mapboxgl-popup-close-button {
+        padding: 8px;
+        font-size: 16px;
+        color: #666;
+        background: white;
+        border-radius: 50%;
+        margin: 8px;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .plot-popup .mapboxgl-popup-close-button:hover {
+        background: #f5f5f5;
+        color: #333;
+    }
+
+    .plot__popup {
+        position: relative;
+    }
+
+    .plot__popup-img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .plot__popup-content {
+        padding: 16px;
+    }
+
+    .plot__popup-content h4 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+    .plot__popup-content p {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #666;
+    }
+
+    .plot__popup-address {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #666;
+    }
+
+    #plotMap {
+        width: 100%;
+        height: 100%;
+        min-height: 400px;
+    }
+`;
+document.head.appendChild(plotMapStyles);
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => new PlotDetailsManager()); 
