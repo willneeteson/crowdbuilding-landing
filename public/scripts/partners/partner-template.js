@@ -390,6 +390,7 @@ class ProjectMapManager {
   constructor() {
     this.map = null;
     this.markers = new Map();
+    this.boundHandleResize = this.handleResize.bind(this);
     this.init();
   }
 
@@ -397,10 +398,15 @@ class ProjectMapManager {
     const mapContainer = document.getElementById('mapExpert');
     if (!mapContainer) return;
 
+    this.initializeMap(mapContainer);
+    this.setupEventListeners();
+  }
+
+  initializeMap(container) {
     mapboxgl.accessToken = MAP_CONFIG.accessToken;
     
     this.map = new mapboxgl.Map({
-      container: 'mapExpert',
+      container: container,
       style: MAP_CONFIG.style,
       center: MAP_CONFIG.center,
       zoom: MAP_CONFIG.zoom,
@@ -412,63 +418,142 @@ class ProjectMapManager {
       pitchWithRotate: false,
       dragRotate: false,
       touchZoomRotate: false,
-      clickTolerance: 3 // Make clicks more precise
+      clickTolerance: 3
     });
 
     this.map.setMaxBounds(MAP_CONFIG.bounds);
-    
-    // Disable scroll zoom by default
     this.map.scrollZoom.disable();
+  }
 
-    // Simplified touch controls
-    let isPinching = false;
-    const canvas = this.map.getCanvas();
+  setupEventListeners() {
+    // Map click handler to close popups
+    this.map.on('click', this.closeAllPopups.bind(this));
 
-    canvas.addEventListener('wheel', (event) => {
-      this.map.scrollZoom[event.ctrlKey ? 'enable' : 'disable']();
-    });
-
-    canvas.addEventListener('touchstart', (event) => {
-      if (event.touches.length === 2) {
-        isPinching = true;
-        this.map.scrollZoom.enable();
-      }
-    });
-
-    canvas.addEventListener('touchend', () => {
-      isPinching = false;
-      this.map.scrollZoom.disable();
-    });
-
-    canvas.addEventListener('touchmove', (event) => {
-      if (event.touches.length !== 2) {
-        isPinching = false;
-        this.map.scrollZoom.disable();
-      }
-    });
-
-    // Close popups when clicking the map (not on markers)
-    this.map.on('click', () => {
-      this.markers.forEach((marker) => {
-        if (marker.getPopup().isOpen()) {
-          marker.getPopup().remove();
-        }
-      });
-    });
-
-    // Load markers after map is ready
+    // Map load handler
     this.map.on('load', () => {
-      console.log('Map is ready, loading projects...');
       this.loadPartnerProjects();
       this.map.resize();
     });
 
-    // Handle resize
-    window.addEventListener('resize', () => {
-      if (this.map) {
-        this.map.resize();
+    // Touch and zoom controls
+    this.setupTouchControls();
+
+    // Resize handler
+    window.addEventListener('resize', this.boundHandleResize);
+  }
+
+  setupTouchControls() {
+    let isPinching = false;
+    const canvas = this.map.getCanvas();
+
+    const handleWheel = (event) => {
+      this.map.scrollZoom[event.ctrlKey ? 'enable' : 'disable']();
+    };
+
+    const handleTouchStart = (event) => {
+      if (event.touches.length === 2) {
+        isPinching = true;
+        this.map.scrollZoom.enable();
+      }
+    };
+
+    const handleTouchEnd = () => {
+      isPinching = false;
+      this.map.scrollZoom.disable();
+    };
+
+    const handleTouchMove = (event) => {
+      if (event.touches.length !== 2 && isPinching) {
+        isPinching = false;
+        this.map.scrollZoom.disable();
+      }
+    };
+
+    canvas.addEventListener('wheel', handleWheel);
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchend', handleTouchEnd);
+    canvas.addEventListener('touchmove', handleTouchMove);
+
+    // Store event listeners for cleanup
+    this._touchListeners = {
+      wheel: handleWheel,
+      touchstart: handleTouchStart,
+      touchend: handleTouchEnd,
+      touchmove: handleTouchMove,
+      canvas
+    };
+  }
+
+  handleResize() {
+    if (this.map) {
+      this.map.resize();
+    }
+  }
+
+  closeAllPopups() {
+    this.markers.forEach(marker => {
+      if (marker.getPopup().isOpen()) {
+        marker.getPopup().remove();
       }
     });
+  }
+
+  createMarkerElement() {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'project-marker-wrapper';
+
+    const marker = document.createElement('div');
+    marker.className = 'custom-marker project-marker';
+
+    wrapper.appendChild(marker);
+    return wrapper;
+  }
+
+  createPopup(project) {
+    return new mapboxgl.Popup({
+      offset: 25,
+      closeButton: true,
+      maxWidth: '300px',
+      className: 'project-popup',
+      closeOnClick: false,
+      focusAfterOpen: false
+    }).setHTML(`
+      <div class="project__popup">
+        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
+        <div class="project__popup-content">
+          <h4>${project.title}</h4>
+          ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
+          ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
+        </div>
+        <a href="/groups/${project.slug}" class="project__popup-link"></a>
+      </div>
+    `);
+  }
+
+  createProjectMarker(project) {
+    if (!project.latitude || !project.longitude) return;
+
+    const markerElement = this.createMarkerElement();
+    const popup = this.createPopup(project);
+
+    const marker = new mapboxgl.Marker({
+      element: markerElement,
+      anchor: 'center'
+    })
+      .setLngLat([project.longitude, project.latitude])
+      .setPopup(popup)
+      .addTo(this.map);
+
+    const handleClick = (e) => {
+      e.stopPropagation();
+      this.closeAllPopups();
+      if (!popup.isOpen()) {
+        popup.addTo(this.map);
+      }
+    };
+
+    markerElement.addEventListener('click', handleClick);
+    this.markers.set(project.id, { marker, handleClick });
   }
 
   async loadPartnerProjects() {
@@ -476,25 +561,23 @@ class ProjectMapManager {
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/groups`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       
-      const data = await response.json();
-      const projects = data.data || [];
+      const { data: projects = [] } = await response.json();
 
-      // Clear existing markers
       this.clearMarkers();
-
-      // Add new markers
-      projects.forEach(project => {
-        if (project.latitude && project.longitude) {
-          this.createProjectMarker(project);
-        }
-      });
-
-      // Update project list in #groupContainer
+      projects.forEach(project => this.createProjectMarker(project));
       this.updateProjectList(projects);
 
     } catch (error) {
       console.error('Error loading partner projects:', error);
     }
+  }
+
+  clearMarkers() {
+    this.markers.forEach(({ marker, handleClick }) => {
+      marker.remove();
+      marker.getElement().removeEventListener('click', handleClick);
+    });
+    this.markers.clear();
   }
 
   updateProjectList(projects) {
@@ -522,74 +605,26 @@ class ProjectMapManager {
     `).join('');
   }
 
-  createProjectMarker(project) {
-    const markerElement = document.createElement('div');
-    markerElement.className = 'custom-marker project-marker';
+  destroy() {
+    // Remove event listeners
+    window.removeEventListener('resize', this.boundHandleResize);
+    
+    if (this._touchListeners) {
+      const { wheel, touchstart, touchend, touchmove, canvas } = this._touchListeners;
+      canvas.removeEventListener('wheel', wheel);
+      canvas.removeEventListener('touchstart', touchstart);
+      canvas.removeEventListener('touchend', touchend);
+      canvas.removeEventListener('touchmove', touchmove);
+    }
 
-    // Create a larger click target wrapper
-    const clickWrapper = document.createElement('div');
-    clickWrapper.className = 'project-marker-wrapper';
-    clickWrapper.appendChild(markerElement);
+    // Clear markers
+    this.clearMarkers();
 
-    const popup = new mapboxgl.Popup({
-      offset: 25,
-      closeButton: true,
-      maxWidth: '300px',
-      className: 'project-popup',
-      closeOnClick: false,
-      focusAfterOpen: false
-    }).setHTML(`
-      <div class="project__popup">
-        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
-        <div class="project__popup-content">
-          <h4>${project.title}</h4>
-          ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
-          ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
-        </div>
-        <a href="/groups/${project.slug}" class="project__popup-link"></a>
-      </div>
-    `);
-
-    const marker = new mapboxgl.Marker({
-      element: clickWrapper,
-      anchor: 'center'
-    })
-      .setLngLat([project.longitude, project.latitude])
-      .setPopup(popup)
-      .addTo(this.map);
-
-    // Add click handler to both the wrapper and marker
-    const handleClick = (e) => {
-      e.stopPropagation(); // Prevent map click
-      
-      // Close all other popups first
-      this.markers.forEach((m) => {
-        if (m !== marker && m.getPopup().isOpen()) {
-          m.getPopup().remove();
-        }
-      });
-      
-      // Toggle this popup
-      if (!popup.isOpen()) {
-        popup.addTo(this.map);
-      }
-    };
-
-    clickWrapper.addEventListener('click', handleClick);
-    markerElement.addEventListener('click', handleClick);
-
-    // Add to markers collection
-    this.markers.set(project.id, marker);
-
-    // Setup popup close handler
-    popup.on('close', () => {
-      // Optional: Add any cleanup or state management here
-    });
-  }
-
-  clearMarkers() {
-    this.markers.forEach(marker => marker.remove());
-    this.markers.clear();
+    // Remove map
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
   }
 }
 
