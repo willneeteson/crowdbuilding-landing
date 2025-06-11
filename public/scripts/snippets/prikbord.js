@@ -91,20 +91,7 @@ function getLikeEndpoint(postId) {
 }
 
 function getCommentEndpoint(postId) {
-    switch (pageType) {
-        case 'project':
-            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/comments`;
-        case 'plot':
-            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}/comments`;
-        case 'partner':
-            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}/comments`;
-        case 'gemeente':
-            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}/comments`;
-        case 'expert':
-            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}/comments`;
-        default:
-            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/comments`;
-    }
+    return `https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`;
 }
 
 // ===============================
@@ -1055,7 +1042,11 @@ function createCommentForm(postId) {
                 body: JSON.stringify({ body: commentText })
             });
 
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.message || `HTTP error! Status: ${response.status}`);
+            }
+
             const data = await response.json();
             
             // Add likes array and count if not present
@@ -1110,7 +1101,7 @@ function createCommentForm(postId) {
 
         } catch (error) {
             console.error('Error posting comment:', error);
-            alert('Reactie plaatsen mislukt. Probeer het opnieuw.');
+            alert(`Reactie plaatsen mislukt: ${error.message}`);
         } finally {
             // Re-enable form
             textarea.disabled = false;
@@ -1120,6 +1111,66 @@ function createCommentForm(postId) {
     });
 
     return form;
+}
+
+async function fetchCommentsForPost(postId) {
+    try {
+        const token = await window.auth.getApiToken();
+        const response = await fetch(getCommentEndpoint(postId), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Error fetching comments:', response.status);
+            return [];
+        }
+
+        const data = await response.json();
+        return data.data || [];
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        return [];
+    }
+}
+
+function renderComments(comments, container) {
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!comments || comments.length === 0) {
+        container.innerHTML = '<p class="no-comments">Nog geen reacties</p>';
+        return;
+    }
+
+    comments.forEach(comment => {
+        const commentElement = document.createElement('div');
+        commentElement.className = 'comment-item';
+        commentElement.innerHTML = `
+            <img class="post-avatar comment-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}" data-user-id="${comment.created_by.id}">
+            <div class="comment-content">
+                <h5 data-user-id="${comment.created_by.id}">${comment.created_by.name}</h5>
+                <p>${comment.body}</p>
+                <div class="comment-footer">
+                    <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
+                    <button class="comment-like-button" data-comment-id="${comment.id}" data-liked="${comment.likes?.some(like => like.id === currentUserId || like.user_id === currentUserId) ? 'true' : 'false'}">
+                        <img class="heart-icon-small" width="16" height="16" 
+                             src="${comment.likes?.some(like => like.id === currentUserId || like.user_id === currentUserId) ? getFilledHeartSvg() : getEmptyHeartSvg()}" 
+                             alt="${comment.likes?.some(like => like.id === currentUserId || like.user_id === currentUserId) ? 'Liked' : 'Not liked'}">
+                        <span class="like-count-small">${comment.likes_count || 0}</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(commentElement);
+    });
+
+    // Attach like handlers to comments
+    attachCommentLikeHandlers();
 }
 
 // Make necessary functions available globally
