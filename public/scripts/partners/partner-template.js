@@ -518,9 +518,10 @@ class ProjectMapManager {
 
     const popup = new mapboxgl.Popup({
       offset: 25,
-      closeButton: false,
+      closeButton: true,
       maxWidth: '300px',
-      className: 'project-popup'
+      className: 'project-popup',
+      closeOnClick: false
     }).setHTML(`
       <div class="project__popup">
         ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
@@ -535,21 +536,24 @@ class ProjectMapManager {
 
     const marker = new mapboxgl.Marker({
       element: markerElement,
-      anchor: 'bottom',
-      offset: [0, -5]
+      anchor: 'center'
     })
       .setLngLat([project.longitude, project.latitude])
       .setPopup(popup)
       .addTo(this.map);
 
-    // Show popup on hover
-    markerElement.addEventListener('mouseenter', () => {
-      popup.addTo(this.map);
-    });
-
-    markerElement.addEventListener('mouseleave', () => {
+    // Handle click events instead of hover
+    markerElement.addEventListener('click', () => {
+      // Close all other popups first
+      this.markers.forEach((m) => {
+        if (m !== marker && m.getPopup().isOpen()) {
+          m.getPopup().remove();
+        }
+      });
+      
+      // Toggle this popup
       if (!popup.isOpen()) {
-        popup.remove();
+        popup.addTo(this.map);
       }
     });
 
@@ -742,7 +746,6 @@ projectStyles.textContent = `
     padding: 4px 8px;
     background: transparent;
     border: 1px solid var(--_color---color-neutral-black-100);
-    color: white;
     border-radius: 99px;
     font-size: 14px;
     margin: 8px 0;
@@ -780,13 +783,75 @@ projectStyles.textContent = `
 
   .project-popup .mapboxgl-popup-content {
     padding: 0;
-    border-radius: 4px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
   }
 
-  .project-popup .mapboxgl-popup-tip {
-    border-top-color: white;
+  .project-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .project-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
+  }
+
+  .project__popup {
+    position: relative;
+  }
+
+  .project__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+
+  .project__popup-content {
+    padding: 16px;
+  }
+
+  .project__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .project__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+  }
+
+  .project__popup-phase {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 99px;
+    font-size: 12px;
+    color: #333;
+  }
+
+  .project__popup-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
   }
 
   #mapExpert {
