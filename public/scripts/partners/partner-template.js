@@ -537,58 +537,6 @@ document.addEventListener('DOMContentLoaded', () => {
   new ProjectMapManager();
 });
 
-class TabManager {
-  constructor() {
-    this.tabs = document.querySelectorAll(".community__tab-link");
-    this.init();
-  }
-
-  init() {
-    // Event delegation for tab clicks
-    document.addEventListener("click", (e) => {
-      const tab = e.target.closest(".community__tab-link");
-      if (tab) {
-        e.preventDefault();
-        this.switchTab(tab);
-      }
-    });
-
-    // Show first tab by default
-    if (this.tabs.length > 0) {
-      this.switchTab(this.tabs[0]);
-    }
-  }
-
-  switchTab(selectedTab) {
-    const tabName = selectedTab.getAttribute("data-tab");
-    const targetContent = document.getElementById(tabName);
-    
-    if (!targetContent) {
-      console.error(`Tab content '${tabName}' not found`);
-      return;
-    }
-
-    // Update tab states
-    this.tabs.forEach(tab => tab.classList.remove("active"));
-    document.querySelectorAll(".tab-wrapper").forEach(content => 
-      content.classList.remove("active-tab")
-    );
-
-    // Activate selected tab
-    targetContent.classList.add("active-tab");
-    selectedTab.classList.add("active");
-
-    // Handle map resize if needed
-    if (tabName === 'Projecten') {
-      requestAnimationFrame(() => {
-        if (window.mapManager?.map) {
-          window.mapManager.map.resize();
-        }
-      });
-    }
-  }
-}
-
 class ContentManager {
   constructor() {
     this.readMoreBtn = document.getElementById("readmore1Btn");
@@ -663,7 +611,6 @@ class NavigationManager {
 
 // Initialize managers when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  new TabManager();
   new ContentManager();
   new NavigationManager();
 });
