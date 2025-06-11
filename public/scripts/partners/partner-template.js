@@ -721,29 +721,16 @@ projectStyles.textContent = `
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 8px 0;
-    color: #444;
-    font-size: 14px;
-  }
-
-  .project-card__content h3 {
-    margin: 0 0 8px;
-    font-size: 20px;
-    color: #333;
-  }
-
-  .project-card__subtitle {
-    margin: 0 0 8px;
-    color: #666;
-    font-size: 16px;
   }
 
   .project-card__phase {
     display: inline-block;
     padding: 4px 8px;
-    background: #e74c3c;
+    background: transparent;
+    border: 1px solid var(--_color---color-neutral-black-100);
     color: white;
-    border-radius: 4px;
-    font-size: 12px;
+    border-radius: 99px;
+    font-size: 14px;
     margin: 8px 0;
   }
 
@@ -756,10 +743,10 @@ projectStyles.textContent = `
 
   .project-card__tags .tag {
     padding: 4px 8px;
-    background: #f5f5f5;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #666;
+    background: transparent;
+    border-radius: 99px;
+    font-size: 14px;
+    color: var(--_color---color-neutral-black-100);
   }
 
   .project-card__members {
@@ -810,12 +797,6 @@ projectStyles.textContent = `
 
   .project-card__link:hover {
     background: #d44133;
-  }
-
-  #groupContainer {
-    padding: 16px;
-    max-height: 600px;
-    overflow-y: auto;
   }
 
   /* Keep existing marker and popup styles */
