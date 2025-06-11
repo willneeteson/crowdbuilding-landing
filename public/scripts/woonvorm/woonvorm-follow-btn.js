@@ -1,4 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+    // Check if user is logged in
+    const isLoggedIn = await window.auth.isUserLoggedIn();
+    
     // Read More/Read Less Functionality
     const container = document.getElementById("readMoreContainer");
     const button = document.getElementById("readMoreButton");
