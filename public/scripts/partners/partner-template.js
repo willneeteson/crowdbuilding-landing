@@ -482,6 +482,39 @@ class ProjectMapManager {
     }
   }
 
+  updateProjectList(projects) {
+    const container = document.getElementById('groupContainer');
+    if (!container) return;
+
+    container.innerHTML = projects.map(project => `
+      <div class="project-card">
+        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project-card__image">` : ''}
+        <div class="project-card__content">
+          <h3>${project.title}</h3>
+          ${project.subtitle ? `<p class="project-card__subtitle">${project.subtitle}</p>` : ''}
+          ${project.intro ? `<div class="project-card__intro">${project.intro}</div>` : ''}
+          ${project.phase ? `<div class="project-card__phase">${project.phase.name}</div>` : ''}
+          ${project.housing_forms?.length ? `
+            <div class="project-card__tags">
+              ${project.housing_forms.map(form => `<span class="tag">${form.title}</span>`).join('')}
+            </div>
+          ` : ''}
+          ${project.members?.length ? `
+            <div class="project-card__members">
+              ${project.members.slice(0, 5).map(member => `
+                <div class="member-avatar" title="${member.name}">
+                  <img src="${member.avatar_url}" alt="${member.name}" />
+                </div>
+              `).join('')}
+              ${project.members.length > 5 ? `<div class="member-count">+${project.members.length - 5}</div>` : ''}
+            </div>
+          ` : ''}
+          <a href="/groups/${project.slug}" class="project-card__link">Bekijk project</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
   createProjectMarker(project) {
     const markerElement = document.createElement('div');
     markerElement.className = 'custom-marker project-marker';
@@ -492,34 +525,19 @@ class ProjectMapManager {
         new mapboxgl.Popup({ offset: 24 })
           .setHTML(`
             <div class="project__popup">
-              <img src="${project.image_url || ''}" class="project__popup-img"/>
+              ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
               <div class="project__popup-content">
-                <h4>${project.name}</h4>
-                <p>${project.description || ''}</p>
+                <h4>${project.title}</h4>
+                ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
+                ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
               </div>
-              <a href="/projects/${project.slug}" class="project__popup-link"></a>
+              <a href="/groups/${project.slug}" class="project__popup-link"></a>
             </div>
           `)
       )
       .addTo(this.map);
 
     this.markers.set(project.id, marker);
-  }
-
-  updateProjectList(projects) {
-    const container = document.getElementById('groupContainer');
-    if (!container) return;
-
-    container.innerHTML = projects.map(project => `
-      <div class="project-card">
-        <img src="${project.image_url || ''}" alt="${project.name}" class="project-card__image">
-        <div class="project-card__content">
-          <h3>${project.name}</h3>
-          <p>${project.description || ''}</p>
-          <a href="/projects/${project.slug}" class="project-card__link">Bekijk project</a>
-        </div>
-      </div>
-    `).join('');
   }
 
   clearMarkers() {
@@ -665,6 +683,12 @@ projectStyles.textContent = `
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     margin-bottom: 16px;
     background: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
   }
 
   .project-card__image {
@@ -679,14 +703,80 @@ projectStyles.textContent = `
 
   .project-card__content h3 {
     margin: 0 0 8px;
-    font-size: 18px;
+    font-size: 20px;
     color: #333;
   }
 
-  .project-card__content p {
-    margin: 0 0 16px;
+  .project-card__subtitle {
+    margin: 0 0 12px;
     color: #666;
+    font-size: 16px;
+  }
+
+  .project-card__intro {
+    margin: 0 0 16px;
+    color: #444;
     font-size: 14px;
+  }
+
+  .project-card__phase {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-bottom: 12px;
+  }
+
+  .project-card__tags {
+    margin: 12px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .project-card__tags .tag {
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #666;
+  }
+
+  .project-card__members {
+    display: flex;
+    align-items: center;
+    margin: 16px 0;
+    gap: 4px;
+  }
+
+  .member-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid white;
+    margin-left: -8px;
+  }
+
+  .member-avatar:first-child {
+    margin-left: 0;
+  }
+
+  .member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .member-count {
+    background: #f5f5f5;
+    color: #666;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 16px;
+    margin-left: 4px;
   }
 
   .project-card__link {
@@ -697,6 +787,7 @@ projectStyles.textContent = `
     text-decoration: none;
     border-radius: 4px;
     transition: background 0.3s;
+    margin-top: 8px;
   }
 
   .project-card__link:hover {
@@ -739,9 +830,18 @@ projectStyles.textContent = `
   }
 
   .project__popup-content p {
-    margin: 0;
+    margin: 0 0 8px;
     font-size: 14px;
     color: #666;
+  }
+
+  .project__popup-phase {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 4px;
+    font-size: 12px;
   }
 
   #groupContainer {
