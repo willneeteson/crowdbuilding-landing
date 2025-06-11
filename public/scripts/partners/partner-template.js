@@ -411,7 +411,8 @@ class ProjectMapManager {
       zoomAnimationOptions: { duration: 300 },
       pitchWithRotate: false,
       dragRotate: false,
-      touchZoomRotate: false
+      touchZoomRotate: false,
+      clickTolerance: 3 // Make clicks more precise
     });
 
     this.map.setMaxBounds(MAP_CONFIG.bounds);
@@ -444,6 +445,15 @@ class ProjectMapManager {
         isPinching = false;
         this.map.scrollZoom.disable();
       }
+    });
+
+    // Close popups when clicking the map (not on markers)
+    this.map.on('click', () => {
+      this.markers.forEach((marker) => {
+        if (marker.getPopup().isOpen()) {
+          marker.getPopup().remove();
+        }
+      });
     });
 
     // Load markers after map is ready
@@ -516,12 +526,18 @@ class ProjectMapManager {
     const markerElement = document.createElement('div');
     markerElement.className = 'custom-marker project-marker';
 
+    // Create a larger click target wrapper
+    const clickWrapper = document.createElement('div');
+    clickWrapper.className = 'project-marker-wrapper';
+    clickWrapper.appendChild(markerElement);
+
     const popup = new mapboxgl.Popup({
       offset: 25,
       closeButton: true,
       maxWidth: '300px',
       className: 'project-popup',
-      closeOnClick: false
+      closeOnClick: false,
+      focusAfterOpen: false
     }).setHTML(`
       <div class="project__popup">
         ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
@@ -535,15 +551,17 @@ class ProjectMapManager {
     `);
 
     const marker = new mapboxgl.Marker({
-      element: markerElement,
+      element: clickWrapper,
       anchor: 'center'
     })
       .setLngLat([project.longitude, project.latitude])
       .setPopup(popup)
       .addTo(this.map);
 
-    // Handle click events instead of hover
-    markerElement.addEventListener('click', () => {
+    // Add click handler to both the wrapper and marker
+    const handleClick = (e) => {
+      e.stopPropagation(); // Prevent map click
+      
       // Close all other popups first
       this.markers.forEach((m) => {
         if (m !== marker && m.getPopup().isOpen()) {
@@ -555,9 +573,18 @@ class ProjectMapManager {
       if (!popup.isOpen()) {
         popup.addTo(this.map);
       }
-    });
+    };
 
+    clickWrapper.addEventListener('click', handleClick);
+    markerElement.addEventListener('click', handleClick);
+
+    // Add to markers collection
     this.markers.set(project.id, marker);
+
+    // Setup popup close handler
+    popup.on('close', () => {
+      // Optional: Add any cleanup or state management here
+    });
   }
 
   clearMarkers() {
@@ -766,19 +793,30 @@ projectStyles.textContent = `
     color: var(--_color---color-neutral-black-100);
   }
 
+  .project-marker-wrapper {
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+
   .project-marker {
     width: 24px;
     height: 24px;
     background: #e74c3c;
     border: 2px solid white;
     border-radius: 50%;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    pointer-events: none;
   }
 
-  .project-marker:hover {
+  .project-marker-wrapper:hover .project-marker {
     transform: scale(1.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+
+  .project-marker-wrapper:active .project-marker {
+    transform: scale(0.95);
   }
 
   .project-popup .mapboxgl-popup-content {
