@@ -917,20 +917,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         pageType = detectPageType();
         console.log('Detected page type:', pageType);
         
-        // If this is an expert page, don't initialize prikbord
-        if (pageType === 'expert') {
-            console.log('Prikbord disabled for expert pages');
-            const container = document.getElementById('groupPosts');
-            if (container) {
-                container.style.display = 'none';
-            }
-            const newPostForm = document.getElementById('newPostForm');
-            if (newPostForm) {
-                newPostForm.style.display = 'none';
-            }
-            return;
-        }
-        
         // Add necessary styles
         addStyles();
         
