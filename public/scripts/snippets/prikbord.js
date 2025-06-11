@@ -90,6 +90,23 @@ function getLikeEndpoint(postId) {
     }
 }
 
+function getCommentEndpoint(postId) {
+    switch (pageType) {
+        case 'project':
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/comments`;
+        case 'plot':
+            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}/comments`;
+        case 'partner':
+            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}/comments`;
+        case 'gemeente':
+            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}/comments`;
+        case 'expert':
+            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}/comments`;
+        default:
+            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/comments`;
+    }
+}
+
 // ===============================
 // Common Helper Functions
 // ===============================
@@ -1029,7 +1046,7 @@ function createCommentForm(postId) {
                 return;
             }
 
-            const response = await fetch(`https://api.crowdbuilding.com/api/v1/posts/${postId}/comments`, {
+            const response = await fetch(getCommentEndpoint(postId), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
