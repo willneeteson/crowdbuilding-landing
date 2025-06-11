@@ -89,6 +89,11 @@ class PlotDetailsManager {
             this.updateDescriptions(data.info);
         }
 
+        // Update FAQs
+        if (data.faqs) {
+            this.updateFAQs(data.faqs);
+        }
+
         // Update arrays with max items
         this.updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
         this.updateArrayElement('.project-target-audiences', data.target_audiences, 'name');
@@ -304,6 +309,20 @@ class PlotDetailsManager {
                     ${this.generateDetailItem('E-mail adres', data.contact_email)}
                     ${this.generateDetailItem('Website', data.website, null, true)}
                 </div>
+
+                ${data.faqs?.length ? `
+                    <div class="section-header">
+                        <h3>Veelgestelde vragen</h3>
+                    </div>
+                    <div class="cb-detail-items">
+                        ${data.faqs.map((faq, index) => `
+                            <div class="cb-detail-item">
+                                <div class="detail-label">${faq.data.title}</div>
+                                <div class="detail-value">${faq.data.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
             </div>
         `;
     }
@@ -404,6 +423,31 @@ class PlotDetailsManager {
                 <div class="project-phase">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Website'}</div>
             </div>
         `;
+    }
+
+    updateFAQs(faqs) {
+        const container = document.querySelector('#tabContentPlotFAQ');
+        if (!container) return;
+
+        if (faqs?.length) {
+            container.innerHTML = faqs.map((faq, index) => `
+                <div class="dropdown-toggle-2 w-dropdown-toggle" id="w-dropdown-toggle-${index + 1}" 
+                    aria-controls="w-dropdown-list-${index + 1}" aria-haspopup="menu" 
+                    aria-expanded="false" role="button" tabindex="0">
+                    <div class="icon-3 w-icon-dropdown-toggle" aria-hidden="true"></div>
+                    <div class="text-block-6">${faq.data.title}</div>
+                </div>
+                <div class="dropdown-list-2 w-dropdown-list" id="w-dropdown-list-${index + 1}" 
+                    aria-labelledby="w-dropdown-toggle-${index + 1}">
+                    <div class="dropdown-content-2 w-dropdown-content">
+                        ${faq.data.text}
+                    </div>
+                </div>
+            `).join('');
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
     }
 }
 
