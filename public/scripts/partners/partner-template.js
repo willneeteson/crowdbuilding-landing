@@ -159,8 +159,8 @@ console.log('Partner ID (from URL):', id);
       if (!response.ok) throw new Error("Network response was not ok");
 
       const data = await response.json();
-      const followersCount = data.data.followers_count || 0;
-      const followers = data.data.followers || [];
+      const followers = data.data || [];
+      const followersCount = followers.length;
 
       // Update follower count
       document.getElementById("followerCount").textContent = followersCount;
@@ -172,10 +172,8 @@ console.log('Partner ID (from URL):', id);
         if (follower) {
           container.innerHTML = ''; // Clear existing content
           const img = document.createElement('img');
-          img.src = follower.avatar_url?.startsWith('http') 
-            ? follower.avatar_url 
-            : `https://api.crowdbuilding.com${follower.avatar_url || '/storage/default-avatar.png'}`;
-          img.alt = follower.name || 'Follower avatar';
+          img.src = follower.avatar_url || 'https://api.crowdbuilding.com/storage/default-avatar.png';
+          img.alt = 'Follower avatar';
           img.onerror = () => {
             img.src = 'https://api.crowdbuilding.com/storage/default-avatar.png';
           };
