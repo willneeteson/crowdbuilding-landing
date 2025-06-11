@@ -192,87 +192,41 @@ async function submitPost(body, imageFile, submitButton) {
     }
 
     try {
-        const response = await fetch(getApiEndpoint(), {
+        const endpoint = getApiEndpoint();
+        console.log('Submitting post to:', endpoint);
+        
+        const response = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            },
             body: formData
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-            console.error('API Error Response:', response.status, data);
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            const errorData = await response.json().catch(() => null);
+            throw new Error(errorData?.message || `HTTP error! Status: ${response.status}`);
         }
 
-        // Add the new post to the top of the list
-        const container = document.getElementById('groupPosts');
-        if (container) {
-            const postElement = document.createElement('article');
-            postElement.className = 'post-item';
-            postElement.style.opacity = '0';
-            postElement.setAttribute('data-post-id', data.data.id);
-            
-            const postImages = data.data.images?.length
-                ? data.data.images.map(img =>
-                    `<div class="post-image">
-                        <img src="${img.original_url}" alt="${img.name || ''}">
-                    </div>`
-                ).join('')
-                : '';
-
-            postElement.innerHTML = `
-                <div class="post-header">
-                    <img class="post-avatar" src="${data.data.created_by.avatar_url}" alt="${data.data.created_by.name}" data-user-id="${data.data.created_by.id}">
-                    <div class="post-meta">
-                        <h4 class="post-author" data-user-id="${data.data.created_by.id}">${data.data.created_by.name}</h4>
-                        <time datetime="${data.data.created_at}">${formatDate(data.data.created_at)}</time>
-                    </div>
-                </div>
-                <div class="post-body">
-                    <p>${data.data.body}</p>
-                    ${postImages}
-                </div>
-                <div class="post-footer">
-                    <button class="post-like-button" data-post-id="${data.data.id}" data-liked="false">
-                        <img class="heart-icon" width="24" height="24" 
-                             src="${getEmptyHeartSvg()}"
-                             alt="Not liked">
-                        <span class="like-count">0</span>
-                    </button>
-                    <div class="post-comments-count" data-post-id="${data.data.id}">
-                        <span>0 reacties</span>
-                    </div>
-                </div>
-            `;
-
-            container.insertBefore(postElement, container.firstChild);
-            
-            // Fade in the new post
-            requestAnimationFrame(() => {
-                postElement.style.transition = 'opacity 0.3s ease-in';
-                postElement.style.opacity = '1';
-            });
-            
-            // Attach event handlers to the new post
-            attachPostClickHandlers();
-            attachMenuHandlers();
-            attachLikeHandlers();
-            
-            // Also run the heart fix just in case
-            setTimeout(() => {
-                if (window.fixAllHearts) {
-                    window.fixAllHearts();
-                }
-            }, 200);
-        }
-
+        const data = await response.json();
+        
         // Clear form
         document.getElementById('newPostBody').value = '';
         document.getElementById('newPostImage').value = '';
-
+        
+        // Refresh posts
+        await fetchGroupPosts(pageSlug);
+        
+        // Show success message
+        alert('Bericht succesvol geplaatst!');
+        
     } catch (error) {
-        throw error; // Re-throw to be handled by caller
+        console.error('Error in post submission:', error);
+        alert(`Bericht plaatsen mislukt: ${error.message}`);
+    } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = 'Verstuur';
     }
 }
 
