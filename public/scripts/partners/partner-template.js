@@ -717,43 +717,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Add styles for avatars
 const style = document.createElement('style');
-style.textContent = `
-  .partner__followed-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    background-color: #f5f5f5;
-  }
-
-  .partner__followed-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .partner__followed-avatar.number {
-    background-color: #e74c3c;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    line-height: 1;
-  }
-
-  .partner__avatar-wrapper {
-    display: flex;
-    gap: 8px;
-  }
-
-  .partner__avatar-container {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-`;
 document.head.appendChild(style);
 
 // Add styles for project cards and markers
