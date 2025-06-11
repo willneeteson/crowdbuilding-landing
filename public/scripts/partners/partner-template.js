@@ -692,6 +692,17 @@ class ContentManager {
   }
 }
 
+// Add FAQ tab visibility management
+function checkFAQContent() {
+  const faqTab = document.getElementById('tabFAQ');
+  const faqContent = document.getElementById('tabContentFAQ');
+  
+  if (faqTab && faqContent) {
+    const hasContent = faqContent.innerHTML.trim() !== '';
+    faqTab.style.display = hasContent ? 'inline-block' : 'none';
+  }
+}
+
 class NavigationManager {
   constructor() {
     this.backButton = document.getElementById('btnBack');
@@ -718,6 +729,7 @@ class NavigationManager {
 document.addEventListener("DOMContentLoaded", () => {
   new ContentManager();
   new NavigationManager();
+  checkFAQContent(); // Add FAQ content check
 });
 
 // Add styles for avatars
