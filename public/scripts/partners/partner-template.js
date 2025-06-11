@@ -415,53 +415,48 @@ class ProjectMapManager {
     });
 
     this.map.setMaxBounds(MAP_CONFIG.bounds);
-    this.setupZoomControls();
-    this.loadPartnerProjects();
-
-    // Handle resize
-    window.addEventListener('resize', () => {
-      this.map.resize();
-    });
-
-    // Initial resize after map loads
-    this.map.on('load', () => {
-      this.map.resize();
-    });
-  }
-
-  setupZoomControls() {
+    
+    // Disable scroll zoom by default
     this.map.scrollZoom.disable();
-    this.setupTouchControls(this.map);
-  }
 
-  setupTouchControls(map) {
+    // Simplified touch controls
     let isPinching = false;
-    const canvas = map.getCanvas();
+    const canvas = this.map.getCanvas();
 
     canvas.addEventListener('wheel', (event) => {
-      if (event.ctrlKey) {
-        map.scrollZoom.enable();
-      } else {
-        map.scrollZoom.disable();
-      }
+      this.map.scrollZoom[event.ctrlKey ? 'enable' : 'disable']();
     });
 
     canvas.addEventListener('touchstart', (event) => {
       if (event.touches.length === 2) {
         isPinching = true;
-        map.scrollZoom.enable();
+        this.map.scrollZoom.enable();
       }
     });
 
     canvas.addEventListener('touchend', () => {
       isPinching = false;
-      map.scrollZoom.disable();
+      this.map.scrollZoom.disable();
     });
 
     canvas.addEventListener('touchmove', (event) => {
       if (event.touches.length !== 2) {
         isPinching = false;
-        map.scrollZoom.disable();
+        this.map.scrollZoom.disable();
+      }
+    });
+
+    // Load markers after map is ready
+    this.map.on('load', () => {
+      console.log('Map is ready, loading projects...');
+      this.loadPartnerProjects();
+      this.map.resize();
+    });
+
+    // Handle resize
+    window.addEventListener('resize', () => {
+      if (this.map) {
+        this.map.resize();
       }
     });
   }
@@ -507,16 +502,6 @@ class ProjectMapManager {
               ${project.housing_forms.map(form => `<span class="tag">${form.title}</span>`).join('')}
             </div>
           ` : ''}
-          ${project.members?.length ? `
-            <div class="project-card__members">
-              ${project.members.slice(0, 5).map(member => `
-                <div class="member-avatar" title="${member.name}">
-                  <img src="${member.avatar_url}" alt="${member.name}" />
-                </div>
-              `).join('')}
-              ${project.members.length > 5 ? `<div class="member-count">+${project.members.length - 5}</div>` : ''}
-            </div>
-          ` : ''}
         </div>
         ${project.image ? `
           <div class="project-card__image-wrapper">
@@ -534,7 +519,8 @@ class ProjectMapManager {
     const popup = new mapboxgl.Popup({
       offset: 25,
       closeButton: false,
-      maxWidth: '300px'
+      maxWidth: '300px',
+      className: 'project-popup'
     }).setHTML(`
       <div class="project__popup">
         ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
@@ -543,12 +529,14 @@ class ProjectMapManager {
           ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
           ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
         </div>
+        <a href="/groups/${project.slug}" class="project__popup-link"></a>
       </div>
     `);
 
     const marker = new mapboxgl.Marker({
       element: markerElement,
-      anchor: 'bottom'
+      anchor: 'bottom',
+      offset: [0, -5]
     })
       .setLngLat([project.longitude, project.latitude])
       .setPopup(popup)
@@ -556,12 +544,12 @@ class ProjectMapManager {
 
     // Show popup on hover
     markerElement.addEventListener('mouseenter', () => {
-      marker.getPopup().addTo(this.map);
+      popup.addTo(this.map);
     });
 
     markerElement.addEventListener('mouseleave', () => {
-      if (!marker.getPopup().isOpen()) {
-        marker.getPopup().remove();
+      if (!popup.isOpen()) {
+        popup.remove();
       }
     });
 
@@ -705,8 +693,10 @@ document.head.appendChild(style);
 // Add styles for project cards and markers
 const projectStyles = document.createElement('style');
 projectStyles.textContent = `
-  .project-card {
+.project-card {
     background-color: transparent;
+    text-decoration: none;
+    color: var(--_color---color-neutral-black-100);
     border-radius: 0px;
     position: relative;
     overflow: hidden;
@@ -717,7 +707,7 @@ projectStyles.textContent = `
     align-items: center;
     padding: 24px 0px;
     border-bottom: 1px solid var(--color--color-border-default);
-  }
+}
 
   .project-card__image-wrapper {
     width: 150px;
@@ -773,56 +763,6 @@ projectStyles.textContent = `
     color: var(--_color---color-neutral-black-100);
   }
 
-  .project-card__members {
-    display: flex;
-    align-items: center;
-    margin: 8px 0;
-    gap: 4px;
-  }
-
-  .member-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid white;
-    margin-left: -8px;
-  }
-
-  .member-avatar:first-child {
-    margin-left: 0;
-  }
-
-  .member-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .member-count {
-    background: #f5f5f5;
-    color: #666;
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 16px;
-    margin-left: 4px;
-  }
-
-  .project-card__link {
-    display: inline-block;
-    padding: 8px 16px;
-    background: #e74c3c;
-    color: white;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: background 0.3s;
-    margin-top: 8px;
-  }
-
-  .project-card__link:hover {
-    background: #d44133;
-  }
-
   .project-marker {
     width: 24px;
     height: 24px;
@@ -838,40 +778,21 @@ projectStyles.textContent = `
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
-  .project__popup {
-    max-width: 300px;
+  .project-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
 
-  .project__popup-img {
+  .project-popup .mapboxgl-popup-tip {
+    border-top-color: white;
+  }
+
+  #mapExpert {
     width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 4px 4px 0 0;
-  }
-
-  .project__popup-content {
-    padding: 12px;
-  }
-
-  .project__popup-content h4 {
-    margin: 0 0 8px;
-    font-size: 16px;
-    
-  }
-
-  .project__popup-content p {
-    margin: 0 0 8px;
-    font-size: 14px;
-    color: #666;
-  }
-
-  .project__popup-phase {
-    display: inline-block;
-    padding: 4px 8px;
-    color: var(--_color---color-neutral-black-100);
-    border: 1px solid var(--_color---color-neutral-black-100);
-    border-radius: 99px;
-    font-size: 14px;
+    height: 100%;
+    min-height: 400px;
   }
 `;
 document.head.appendChild(projectStyles);
