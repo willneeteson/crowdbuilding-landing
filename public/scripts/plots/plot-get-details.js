@@ -316,9 +316,21 @@ class PlotDetailsManager {
                     </div>
                     <div class="cb-detail-items">
                         ${data.faqs.map((faq, index) => `
-                            <div class="cb-detail-item">
-                                <div class="detail-label">${faq.data.title}</div>
-                                <div class="detail-value">${faq.data.text}</div>
+                            <div>
+                                <div data-hover="false" data-delay="0" class="dropdown w-dropdown">
+                                    <div class="dropdown-toggle-2 w-dropdown-toggle" id="w-dropdown-toggle-${index + 1}" 
+                                        aria-controls="w-dropdown-list-${index + 1}" aria-haspopup="menu" 
+                                        aria-expanded="false" role="button" tabindex="0">
+                                        <div class="icon-3 w-icon-dropdown-toggle" aria-hidden="true"></div>
+                                        <div class="text-block-6">${faq.data.title}</div>
+                                    </div>
+                                    <nav class="dropdown-list-2 w-dropdown-list" id="w-dropdown-list-${index + 1}" 
+                                        aria-labelledby="w-dropdown-toggle-${index + 1}">
+                                        <div class="w-richtext">
+                                            ${faq.data.text}
+                                        </div>
+                                    </nav>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -431,16 +443,20 @@ class PlotDetailsManager {
 
         if (faqs?.length) {
             container.innerHTML = faqs.map((faq, index) => `
-                <div class="dropdown-toggle-2 w-dropdown-toggle" id="w-dropdown-toggle-${index + 1}" 
-                    aria-controls="w-dropdown-list-${index + 1}" aria-haspopup="menu" 
-                    aria-expanded="false" role="button" tabindex="0">
-                    <div class="icon-3 w-icon-dropdown-toggle" aria-hidden="true"></div>
-                    <div class="text-block-6">${faq.data.title}</div>
-                </div>
-                <div class="dropdown-list-2 w-dropdown-list" id="w-dropdown-list-${index + 1}" 
-                    aria-labelledby="w-dropdown-toggle-${index + 1}">
-                    <div class="dropdown-content-2 w-dropdown-content">
-                        ${faq.data.text}
+                <div>
+                    <div data-hover="false" data-delay="0" class="dropdown w-dropdown">
+                        <div class="dropdown-toggle-2 w-dropdown-toggle" id="w-dropdown-toggle-${index + 1}" 
+                            aria-controls="w-dropdown-list-${index + 1}" aria-haspopup="menu" 
+                            aria-expanded="false" role="button" tabindex="0">
+                            <div class="icon-3 w-icon-dropdown-toggle" aria-hidden="true"></div>
+                            <div class="text-block-6">${faq.data.title}</div>
+                        </div>
+                        <nav class="dropdown-list-2 w-dropdown-list" id="w-dropdown-list-${index + 1}" 
+                            aria-labelledby="w-dropdown-toggle-${index + 1}">
+                            <div class="w-richtext">
+                                ${faq.data.text}
+                            </div>
+                        </nav>
                     </div>
                 </div>
             `).join('');
