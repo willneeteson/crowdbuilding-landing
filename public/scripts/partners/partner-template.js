@@ -488,7 +488,6 @@ class ProjectMapManager {
 
     container.innerHTML = projects.map(project => `
       <div class="project-card">
-        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project-card__image">` : ''}
         <div class="project-card__content">
           <h3>${project.title}</h3>
           ${project.subtitle ? `<p class="project-card__subtitle">${project.subtitle}</p>` : ''}
@@ -511,6 +510,11 @@ class ProjectMapManager {
           ` : ''}
           <a href="/groups/${project.slug}" class="project-card__link">Bekijk project</a>
         </div>
+        ${project.image ? `
+          <div class="project-card__image-wrapper">
+            <img src="${project.image.original_url}" alt="${project.title}" class="project-card__image">
+          </div>
+        ` : ''}
       </div>
     `).join('');
   }
@@ -678,27 +682,47 @@ document.head.appendChild(style);
 const projectStyles = document.createElement('style');
 projectStyles.textContent = `
   .project-card {
-    border-radius: 8px;
+    background-color: transparent;
+    border-radius: 0px;
+    position: relative;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 16px;
-    background: white;
-    transition: transform 0.2s, box-shadow 0.2s;
+    display: grid;
+    grid-template-columns: 1fr 150px;
+    gap: 24px;
+    align-content: center;
+    align-items: center;
+    padding: 24px 0px;
+    border-bottom: 1px solid var(--color--color-border-default);
   }
 
-  .project-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  .project-card__image-wrapper {
+    width: 150px;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    height: 110px;
   }
 
   .project-card__image {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
   }
 
   .project-card__content {
-    padding: 16px;
+    min-width: 0px;
+    padding: 0px;
+  }
+
+  .project-card__intro {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 8px 0;
+    color: #444;
+    font-size: 14px;
   }
 
   .project-card__content h3 {
@@ -708,15 +732,9 @@ projectStyles.textContent = `
   }
 
   .project-card__subtitle {
-    margin: 0 0 12px;
+    margin: 0 0 8px;
     color: #666;
     font-size: 16px;
-  }
-
-  .project-card__intro {
-    margin: 0 0 16px;
-    color: #444;
-    font-size: 14px;
   }
 
   .project-card__phase {
@@ -726,11 +744,11 @@ projectStyles.textContent = `
     color: white;
     border-radius: 4px;
     font-size: 12px;
-    margin-bottom: 12px;
+    margin: 8px 0;
   }
 
   .project-card__tags {
-    margin: 12px 0;
+    margin: 8px 0;
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
@@ -747,7 +765,7 @@ projectStyles.textContent = `
   .project-card__members {
     display: flex;
     align-items: center;
-    margin: 16px 0;
+    margin: 8px 0;
     gap: 4px;
   }
 
@@ -794,6 +812,13 @@ projectStyles.textContent = `
     background: #d44133;
   }
 
+  #groupContainer {
+    padding: 16px;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+
+  /* Keep existing marker and popup styles */
   .project-marker {
     width: 24px;
     height: 24px;
@@ -842,12 +867,6 @@ projectStyles.textContent = `
     color: white;
     border-radius: 4px;
     font-size: 12px;
-  }
-
-  #groupContainer {
-    padding: 16px;
-    max-height: 600px;
-    overflow-y: auto;
   }
 `;
 document.head.appendChild(projectStyles);
