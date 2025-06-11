@@ -469,7 +469,7 @@ class PlotDetailsManager {
     }
 
     initializeMap() {
-        const mapContainer = document.getElementById('plotMap');
+        const mapContainer = document.getElementById('innerMap');
         if (!mapContainer) return;
 
         this.mapManager = new PlotMapManager(mapContainer, this.plotData);
@@ -670,7 +670,7 @@ plotMapStyles.textContent = `
         color: #666;
     }
 
-    #plotMap {
+    #innerMap {
         width: 100%;
         height: 100%;
         min-height: 400px;
