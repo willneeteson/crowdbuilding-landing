@@ -147,7 +147,7 @@ console.log('Partner ID (from URL):', id);
   }
 
   async function displayFollowerCount() {
-    const apiUrl = `https://api.crowdbuilding.com/api/v1/${partnerType}/${id}`;
+    const apiUrl = `https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/followers`;
     try {
       const response = await fetch(apiUrl, {
         method: "GET",
