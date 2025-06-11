@@ -458,7 +458,7 @@ class ProjectMapManager {
 
   async loadPartnerProjects() {
     try {
-      const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/projects`);
+      const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/groups`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       
       const data = await response.json();
