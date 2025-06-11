@@ -632,11 +632,14 @@ class ProjectMapManager {
 
 // Initialize maps when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize ExpertMapManager (inner map) for all partner types
+  new ExpertMapManager();
+  
+  // Initialize ProjectMapManager (outer map) only for non-service-provider types
   const partnerType = document.body.getAttribute('partner-type');
-  if (partnerType === 'expert') {
-    new ExpertMapManager();
+  if (partnerType !== 'Expert') {
+    new ProjectMapManager();
   }
-  new ProjectMapManager();
 });
 
 class ContentManager {
