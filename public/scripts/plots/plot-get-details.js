@@ -330,15 +330,15 @@ class PlotDetailsManager {
 
     updateSidebarPlanning(data) {
         const openDateElement = document.getElementById('deadlineOpen');
-        const deadlineElement = document.getElementById('projectDeadline');
+        const deadlineElement = document.getElementById('deadlineClose');
         
         if (!openDateElement || !deadlineElement) return;
 
         const openDate = data.application_open_date ? new Date(data.application_open_date).toLocaleDateString('nl-NL') : 'Nog niet bekend';
         const deadline = data.application_deadline ? new Date(data.application_deadline).toLocaleDateString('nl-NL') : 'Nog niet bekend';
 
-        openDateElement.textContent = `Datum inschrijving open: ${openDate}`;
-        deadlineElement.textContent = `Sluitingsdatum inschrijving: ${deadline}`;
+        openDateElement.textContent = openDate;
+        deadlineElement.textContent = deadline;
     }
 
     updateSidebarLocation(data) {
