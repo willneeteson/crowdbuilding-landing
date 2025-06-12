@@ -58,6 +58,9 @@ class PlotDetailsManager {
         // Update sidebar contact
         this.updateSidebarContact(data);
 
+        // Update properties
+        this.updateProperties(data);
+
         // Update details section
         this.updateDetailsSection(data);
 
@@ -175,7 +178,7 @@ class PlotDetailsManager {
             deadlineNumber.textContent = diffDays;
             deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
-            if (deadlineWrapper) deadlineWrapper.style.display = 'block';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'inline-block';
         } else {
             deadlineCounter.style.display = 'none';
             if (signupBtn) signupBtn.style.display = 'none';
@@ -477,6 +480,62 @@ class PlotDetailsManager {
             container.style.display = 'block';
         } else {
             container.style.display = 'none';
+        }
+    }
+
+    updateProperties(data) {
+        // Type aanbod
+        const typeAanbodElement = document.getElementById('propertiesTypeAanbod');
+        if (typeAanbodElement) {
+            typeAanbodElement.textContent = data.type_of_provider || 'Type aanbod';
+        }
+
+        // Bebouwingstype
+        const bebouwingstypeElement = document.getElementById('propertiesBebouwingstype');
+        if (bebouwingstypeElement) {
+            bebouwingstypeElement.textContent = data.development_form?.name || 'Bebouwingstype';
+        }
+
+        // Eigendomstype
+        const eigendomstypeElement = document.getElementById('propertiesEigendomstype');
+        if (eigendomstypeElement) {
+            eigendomstypeElement.textContent = data.ownership_type?.name || 'Eigendomstype';
+        }
+
+        // Woonmilieu
+        const woonmilieuElement = document.getElementById('propertiesWoonmillieu');
+        if (woonmilieuElement) {
+            woonmilieuElement.textContent = data.living_environment?.name || 'Woonmilieu';
+        }
+
+        // Aantal woningen
+        const aantalWoningenElement = document.getElementById('propertiesAantalWoningen');
+        if (aantalWoningenElement) {
+            aantalWoningenElement.textContent = data.number_of_homes ? `${data.number_of_homes} woningen` : 'Aantal woningen';
+        }
+
+        // Minimum aantal woningen
+        const minAantalWoningenElement = document.getElementById('propertiesMinimumAantalWoningen');
+        if (minAantalWoningenElement) {
+            minAantalWoningenElement.textContent = data.minimum_number_of_homes ? `${data.minimum_number_of_homes} woningen` : 'Minimum aantal woningen';
+        }
+
+        // Maximum aantal woningen
+        const maxAantalWoningenElement = document.getElementById('propertiesMaximumAantalWoningen');
+        if (maxAantalWoningenElement) {
+            maxAantalWoningenElement.textContent = data.maximum_number_of_homes ? `${data.maximum_number_of_homes} woningen` : 'Maximum aantal woningen';
+        }
+
+        // Minimum prijs
+        const minPrijsElement = document.getElementById('propertiesMinimumPrijs');
+        if (minPrijsElement) {
+            minPrijsElement.textContent = data.minimum_price ? `€${data.minimum_price.toLocaleString('nl-NL')}` : 'Minimum prijs';
+        }
+
+        // Maximum prijs
+        const maxPrijsElement = document.getElementById('propertiesMaximumPrijs');
+        if (maxPrijsElement) {
+            maxPrijsElement.textContent = data.maximum_price ? `€${data.maximum_price.toLocaleString('nl-NL')}` : 'Maximum prijs';
         }
     }
 }
