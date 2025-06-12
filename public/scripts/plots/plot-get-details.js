@@ -541,19 +541,19 @@ class PlotDetailsManager {
         // Oppervlakte locatie
         const oppervlakteLocatieElement = document.getElementById('propertiesOppervlakteLocatie');
         if (oppervlakteLocatieElement) {
-            oppervlakteLocatieElement.textContent = data.plot_size ? `${data.plot_size} m²` : 'Oppervlakte locatie';
+            oppervlakteLocatieElement.textContent = data.surface_area ? `${data.surface_area} m²` : 'Oppervlakte locatie';
         }
 
         // Bebouwbaar oppervlakte
         const bebouwbaarOppervlakteElement = document.getElementById('propertiesBebouwbaarOppervlakte');
         if (bebouwbaarOppervlakteElement) {
-            bebouwbaarOppervlakteElement.textContent = data.buildable_area ? `${data.buildable_area} m²` : 'Bebouwbaar oppervlakte';
+            bebouwbaarOppervlakteElement.textContent = data.buildable_surface_area ? `${data.buildable_surface_area} m²` : 'Bebouwbaar oppervlakte';
         }
 
         // Maximum realiseerbaar woonoppervlakte
         const maxWoonoppervlakteElement = document.getElementById('propertiesMaximumRealiseerbaarWoonoppervlakte');
         if (maxWoonoppervlakteElement) {
-            maxWoonoppervlakteElement.textContent = data.max_living_area ? `${data.max_living_area} m²` : 'Maximum realiseerbaar woonoppervlakte';
+            maxWoonoppervlakteElement.textContent = data.maximum_realizable_living_area ? `${data.maximum_realizable_living_area} m²` : 'Maximum realiseerbaar woonoppervlakte';
         }
 
         // Hide elements that don't have data
@@ -567,9 +567,9 @@ class PlotDetailsManager {
             { element: maxAantalWoningenElement, data: data.max_number_of_homes },
             { element: minPrijsElement, data: data.min_price },
             { element: maxPrijsElement, data: data.max_price },
-            { element: oppervlakteLocatieElement, data: data.plot_size },
-            { element: bebouwbaarOppervlakteElement, data: data.buildable_area },
-            { element: maxWoonoppervlakteElement, data: data.max_living_area }
+            { element: oppervlakteLocatieElement, data: data.surface_area },
+            { element: bebouwbaarOppervlakteElement, data: data.buildable_surface_area },
+            { element: maxWoonoppervlakteElement, data: data.maximum_realizable_living_area }
         ];
 
         elements.forEach(({ element, data }) => {
