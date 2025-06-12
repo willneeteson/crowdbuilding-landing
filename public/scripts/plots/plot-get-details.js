@@ -389,7 +389,14 @@ class PlotDetailsManager {
         contactPhoneElement.textContent = data.phone || 'Telefoonnummer';
         
         if (data.website) {
-            websiteElement.innerHTML = `<a href="${data.website}" target="_blank">${data.website}</a>`;
+            try {
+                const url = new URL(data.website);
+                const displayUrl = url.hostname.replace(/^www\./, ''); // Remove www. if present
+                websiteElement.innerHTML = `<a href="${data.website}" target="_blank">${displayUrl}</a>`;
+            } catch (e) {
+                // If URL parsing fails, show the original website
+                websiteElement.innerHTML = `<a href="${data.website}" target="_blank">${data.website}</a>`;
+            }
         } else {
             websiteElement.textContent = 'Website';
         }
