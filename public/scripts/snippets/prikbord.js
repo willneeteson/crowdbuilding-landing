@@ -22,7 +22,17 @@ function detectPageType() {
     // First try to get from body attribute
     const bodyPageType = document.body.getAttribute('page-type');
     if (bodyPageType) {
-        return bodyPageType.toLowerCase();
+        const type = bodyPageType.toLowerCase();
+        if (type === 'provincie') return 'region';
+        return type;
+    }
+
+    // Check for partner-type attribute
+    const partnerType = document.body.getAttribute('partner-type');
+    if (partnerType) {
+        const type = partnerType.toLowerCase();
+        if (type === 'provincie') return 'region';
+        return type;
     }
 
     // Fallback to URL path analysis
