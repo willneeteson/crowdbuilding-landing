@@ -194,7 +194,7 @@ class PlotDetailsManager {
             if (deadlineNumber) deadlineNumber.textContent = diffDays;
             if (deadlineCounter) deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
-            if (deadlineWrapper) deadlineWrapper.style.display = 'block';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'inline-block';
         } else {
             console.log('Hiding deadline counter - deadline passed');
             if (deadlineCounter) deadlineCounter.style.display = 'none';
@@ -574,9 +574,16 @@ class PlotDetailsManager {
     }
 
     updateSignupProcedure(signupProcedure) {
+        console.log('Signup procedure data:', signupProcedure);
         const container = document.getElementById('tabContentPlotInschrijfprocedure');
         const tabButton = document.getElementById('tabBtnInschrijfprocedure');
         const contentElement = document.getElementById('contentInschrijfprocedure');
+        
+        console.log('Found elements:', {
+            container: !!container,
+            tabButton: !!tabButton,
+            contentElement: !!contentElement
+        });
         
         // Hide tab button if no signup procedure
         if (tabButton) {
