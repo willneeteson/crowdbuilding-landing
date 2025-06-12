@@ -182,12 +182,12 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
 }
 
 function setupModalHandler() {
-    // Add click handler to details group and all its children
-    const detailsGroup = document.querySelector('.project__sidebar-group.details');
-    if (detailsGroup) {
-        detailsGroup.style.cursor = 'pointer';
-        detailsGroup.addEventListener('click', function(e) {
-            console.log('Details group clicked');
+    // Add click handler to project details wrapper
+    const detailsWrapper = document.querySelector('#projectDetailsWrapper');
+    if (detailsWrapper) {
+        detailsWrapper.style.cursor = 'pointer';
+        detailsWrapper.addEventListener('click', function(e) {
+            console.log('Project details wrapper clicked');
             e.preventDefault();
             showModal();
         });
