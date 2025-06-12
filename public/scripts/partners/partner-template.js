@@ -589,7 +589,6 @@ class ProjectMapManager {
         <div class="project-card__content">
           <h3>${project.title}</h3>
           ${project.subtitle ? `<p class="project-card__subtitle">${project.subtitle}</p>` : ''}
-          ${project.phase ? `<div class="project-card__phase">${project.phase.name}</div>` : ''}
           ${project.housing_forms?.length ? `
             <div class="project-card__tags">
               ${project.housing_forms.map(form => `<span class="tag">${form.title}</span>`).join('')}

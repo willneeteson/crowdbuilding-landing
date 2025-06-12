@@ -416,25 +416,18 @@ class PlotDetailsManager {
         if (faqs?.length) {
             const faqStyles = `
                 .faq-item {
-                    border: 1px solid #e5e5e5;
-                    border-radius: 8px;
+                    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                     margin-bottom: 12px;
                     overflow: hidden;
                 }
                 .faq-question {
                     padding: 16px 20px;
-                    background: #f8f8f8;
+                    background: transparent;
                     cursor: pointer;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     transition: background-color 0.2s ease;
-                }
-                .faq-question:hover {
-                    background: #f0f0f0;
-                }
-                .faq-question.active {
-                    background: #e8e8e8;
                 }
                 .faq-icon {
                     width: 20px;
@@ -469,7 +462,6 @@ class PlotDetailsManager {
                     max-height: 0;
                     overflow: hidden;
                     transition: all 0.3s ease;
-                    background: white;
                 }
                 .faq-answer.active {
                     padding: 16px 20px;
