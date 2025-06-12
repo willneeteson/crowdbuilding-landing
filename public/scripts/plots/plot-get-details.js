@@ -1,7 +1,6 @@
 // Initialize plot details functionality
 class PlotDetailsManager {
     constructor() {
-        this.modalSystem = null;
         this.plotData = null;
         this.mapManager = null;
         this.init();
@@ -9,21 +8,10 @@ class PlotDetailsManager {
 
     async init() {
         try {
-            this.modalSystem = await window.waitForModalSystem();
-            await this.setupModal();
             await this.fetchPlotData();
-            this.setupEventListeners();
             this.initializeMap();
         } catch (error) {
             console.error('Error initializing plot details:', error);
-        }
-    }
-
-    async setupModal() {
-        this.modalSystem.createModal('Project Kenmerken', '', { id: 'projectDetailsModal' });
-        const modal = document.getElementById('projectDetailsModal');
-        if (modal) {
-            modal.classList.add('project-details-modal');
         }
     }
 
@@ -52,16 +40,6 @@ class PlotDetailsManager {
         return pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
     }
 
-    setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            const detailsGroup = e.target.closest('.project__sidebar-group.details');
-            if (detailsGroup) {
-                e.preventDefault();
-                this.showModal();
-            }
-        });
-    }
-
     updatePageElements(data) {
         // Update basic elements
         this.updateElement('.project-title', data.title);
@@ -79,6 +57,9 @@ class PlotDetailsManager {
         
         // Update sidebar contact
         this.updateSidebarContact(data);
+
+        // Update details section
+        this.updateDetailsSection(data);
 
         // Update deadline counter
         this.updateDeadlineCounter(data.application_deadline);
@@ -265,24 +246,12 @@ class PlotDetailsManager {
         return filename.split('.').pop().toUpperCase();
     }
 
-    showModal() {
-        if (!this.plotData) {
-            console.error('No plot data available');
-            return;
-        }
+    updateDetailsSection(data) {
+        const detailsWrapper = document.querySelector('.project__sidebar-group.details .project__sidebar-details-list');
+        if (!detailsWrapper) return;
 
-        const content = this.generateModalContent();
-        this.modalSystem.updateModalContent('projectDetailsModal', content);
-        this.modalSystem.showModal('projectDetailsModal');
-    }
-
-    generateModalContent() {
-        const data = this.plotData;
-        return `
+        detailsWrapper.innerHTML = `
             <div class="cb-details-grid">
-                <div class="section-header">
-                    <h3>Kenmerken</h3>
-                </div>
                 <div class="cb-detail-items">
                     ${this.generateDetailItem('Plaats', data.location)}
                     ${this.generateDetailItem('Projectfase', data.phase?.name)}
@@ -337,36 +306,6 @@ class PlotDetailsManager {
                         `).join('')}
                     </div>
                 ` : ''}
-            </div>
-        `;
-    }
-
-    generateDetailItem(label, value, suffix = '', isLink = false) {
-        if (!value) return '';
-        
-        let displayValue = value;
-        if (suffix) displayValue += ` ${suffix}`;
-        if (isLink) displayValue = `<a href="${value}" target="_blank">${value}</a>`;
-
-        return `
-            <div class="cb-detail-item">
-                <div class="detail-label">${label}</div>
-                <div class="detail-value">${displayValue}</div>
-            </div>
-        `;
-    }
-
-    generateTagsSection(title, items, property = 'name') {
-        if (!items?.length) return '';
-
-        return `
-            <div class="cb-detail-item">
-                <div class="detail-label">${title}</div>
-                <div class="detail-value">
-                    <div class="tags-list">
-                        ${items.map(item => `<div class="tag">${item[property]}</div>`).join('')}
-                    </div>
-                </div>
             </div>
         `;
     }
@@ -466,6 +405,36 @@ class PlotDetailsManager {
         } else {
             container.style.display = 'none';
         }
+    }
+
+    generateDetailItem(label, value, suffix = '', isLink = false) {
+        if (!value) return '';
+        
+        let displayValue = value;
+        if (suffix) displayValue += ` ${suffix}`;
+        if (isLink) displayValue = `<a href="${value}" target="_blank">${value}</a>`;
+
+        return `
+            <div class="cb-detail-item">
+                <div class="detail-label">${label}</div>
+                <div class="detail-value">${displayValue}</div>
+            </div>
+        `;
+    }
+
+    generateTagsSection(title, items, property = 'name') {
+        if (!items?.length) return '';
+
+        return `
+            <div class="cb-detail-item">
+                <div class="detail-label">${title}</div>
+                <div class="detail-value">
+                    <div class="tags-list">
+                        ${items.map(item => `<div class="tag">${item[property]}</div>`).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
     initializeMap() {
