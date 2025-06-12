@@ -468,7 +468,6 @@ class PlotDetailsManager {
                     max-height: 1000px;
                 }
                 .faq-answer-content {
-                    color: #666;
                     line-height: 1.6;
                 }
             `;
@@ -890,13 +889,11 @@ plotMapStyles.textContent = `
         margin: 0 0 8px 0;
         font-size: 14px;
         line-height: 1.5;
-        color: #666;
     }
 
     .plot__popup-address {
         font-size: 14px;
         line-height: 1.5;
-        color: #666;
     }
 
     #innerMap {
