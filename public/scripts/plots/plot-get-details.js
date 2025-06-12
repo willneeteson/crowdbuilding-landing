@@ -463,23 +463,28 @@ class PlotDetailsManager {
     updateSignupProcedure(signupProcedure) {
         const container = document.getElementById('tabContentPlotInschrijfprocedure');
         const tabButton = document.getElementById('tabBtnInschrijfprocedure');
+        const contentElement = document.getElementById('contentInschrijfprocedure');
         
         // Hide tab button if no signup procedure
         if (tabButton) {
             tabButton.style.display = (!signupProcedure) ? 'none' : 'inline-block';
         }
 
-        if (!container) return;
+        if (!container || !contentElement) return;
 
         if (signupProcedure) {
-            container.innerHTML = `
+            const content = `
                 <div class="w-richtext">
                     ${signupProcedure}
                 </div>
             `;
+            container.innerHTML = content;
+            contentElement.innerHTML = content;
             container.style.display = 'block';
+            contentElement.style.display = 'block';
         } else {
             container.style.display = 'none';
+            contentElement.style.display = 'none';
         }
     }
 
@@ -487,7 +492,13 @@ class PlotDetailsManager {
         // Type aanbod
         const typeAanbodElement = document.getElementById('propertiesTypeAanbod');
         if (typeAanbodElement) {
+            console.log('Type aanbod data:', data.offer_type);
             typeAanbodElement.textContent = data.offer_type?.name || 'Type aanbod';
+            // Also update the parent element's visibility
+            const parentElement = typeAanbodElement.closest('.project__sidebar-list-item');
+            if (parentElement) {
+                parentElement.style.display = data.offer_type?.name ? 'flex' : 'none';
+            }
         }
 
         // Bebouwingstype
@@ -558,7 +569,6 @@ class PlotDetailsManager {
 
         // Hide elements that don't have data
         const elements = [
-            { element: typeAanbodElement, data: data.offer_type?.name },
             { element: bebouwingstypeElement, data: data.building_type?.name },
             { element: eigendomstypeElement, data: data.property_type },
             { element: woonmilieuElement, data: data.living_environment?.name },
