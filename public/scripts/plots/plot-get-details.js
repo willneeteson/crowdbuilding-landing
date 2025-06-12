@@ -194,7 +194,7 @@ class PlotDetailsManager {
             if (deadlineNumber) deadlineNumber.textContent = diffDays;
             if (deadlineCounter) deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
-            if (deadlineWrapper) deadlineWrapper.style.display = 'inline-block';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'flex';
         } else {
             console.log('Hiding deadline counter - deadline passed');
             if (deadlineCounter) deadlineCounter.style.display = 'none';

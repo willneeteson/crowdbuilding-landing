@@ -354,8 +354,7 @@ class LikeButton {
         #followAvatarWrapper {
           display: flex;
           align-items: center;
-          gap: 8px;
-          margin-top: 8px;
+          gap: -8px;
         }
         .follower-avatar {
           width: 44px;
@@ -363,6 +362,7 @@ class LikeButton {
           border-radius: 50%;
           overflow: hidden;
           border: 2px solid #F2F0EA;
+          margin-right: -8px;
         }
         .follower-avatar img {
           width: 100%;
