@@ -318,7 +318,7 @@ class PlotDetailsManager {
     }
 
     updateSidebarStatus(data) {
-        const statusElement = document.getElementById('projectStatus');
+        const statusElement = document.getElementById('projectDevelopmentForm');
         if (!statusElement) return;
 
         statusElement.textContent = data.application_deadline_status?.name || 'Vooraankondiging';
@@ -338,7 +338,7 @@ class PlotDetailsManager {
     }
 
     updateSidebarLocation(data) {
-        const locationElement = document.getElementById('projectLocation');
+        const locationElement = document.getElementById('location');
         if (!locationElement) return;
 
         const address = data.address || {};
@@ -350,12 +350,12 @@ class PlotDetailsManager {
     }
 
     updateSidebarContact(data) {
-        const providerTypeElement = document.getElementById('projectProviderType');
-        const organizationElement = document.getElementById('projectOrganization');
-        const contactPersonElement = document.getElementById('projectContactPerson');
-        const contactEmailElement = document.getElementById('projectContactEmail');
-        const contactPhoneElement = document.getElementById('projectContactPhone');
-        const websiteElement = document.getElementById('projectWebsite');
+        const providerTypeElement = document.getElementById('contactTypeAanbieder');
+        const organizationElement = document.getElementById('contactOrganisatie');
+        const contactPersonElement = document.getElementById('contactNaam');
+        const contactEmailElement = document.getElementById('contactEmail');
+        const contactPhoneElement = document.getElementById('contactTel');
+        const websiteElement = document.getElementById('contactWebsite');
 
         if (!providerTypeElement || !organizationElement || !contactPersonElement || 
             !contactEmailElement || !contactPhoneElement || !websiteElement) return;
