@@ -77,6 +77,9 @@ class PlotDetailsManager {
             this.updateFAQs(data.faqs);
         }
 
+        // Update signup procedure
+        this.updateSignupProcedure(data.signup_procedure);
+
         // Update arrays with max items
         this.updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
         this.updateArrayElement('.project-target-audiences', data.target_audiences, 'name');
@@ -154,10 +157,12 @@ class PlotDetailsManager {
     updateDeadlineCounter(deadline) {
         const deadlineCounter = document.querySelector('.plot-deadline-counter');
         const deadlineNumber = document.querySelector('.deadline-number');
-        const signupBtn = document.querySelector('#plotSignupBtn');
+        const signupBtn = document.getElementById('plotSignupBtn');
+        const deadlineWrapper = document.getElementById('deadlineWrapper');
         
         if (!deadlineCounter || !deadlineNumber || !deadline) {
             if (deadlineCounter) deadlineCounter.style.display = 'none';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'none';
             return;
         }
 
@@ -170,9 +175,11 @@ class PlotDetailsManager {
             deadlineNumber.textContent = diffDays;
             deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'block';
         } else {
             deadlineCounter.style.display = 'none';
             if (signupBtn) signupBtn.style.display = 'none';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'none';
         }
     }
 
@@ -316,7 +323,7 @@ class PlotDetailsManager {
 
         statusWrapper.innerHTML = `
             <div class="project__sidebar-list-item">
-                <div class="project-development-form">${data.application_deadline_status?.name || 'Vooraankondiging'}</div>
+                <div class="project__detail-item project__detail-item--status">${data.application_deadline_status?.name || 'Vooraankondiging'}</div>
             </div>
         `;
     }
@@ -330,10 +337,10 @@ class PlotDetailsManager {
 
         planningWrapper.innerHTML = `
             <div class="project__sidebar-list-item">
-                <div class="project-development-form">Datum inschrijving open: ${openDate}</div>
+                <div class="project__detail-item project__detail-item--open-date">Datum inschrijving open: ${openDate}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">Sluitingsdatum inschrijving: ${deadline}</div>
+                <div class="project__detail-item project__detail-item--deadline">Sluitingsdatum inschrijving: ${deadline}</div>
             </div>
         `;
     }
@@ -358,28 +365,35 @@ class PlotDetailsManager {
 
         contactWrapper.innerHTML = `
             <div class="project__sidebar-list-item">
-                <div class="project-development-form">${data.provider_type?.name || 'Type aanbieder'}</div>
+                <div class="project__detail-item project__detail-item--provider-type">${data.provider_type?.name || 'Type aanbieder'}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">${data.organization || 'Organisatie'}</div>
+                <div class="project__detail-item project__detail-item--organization">${data.organization || 'Organisatie'}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">${data.contact_person || 'Naam'}</div>
+                <div class="project__detail-item project__detail-item--contact-person">${data.contact_person || 'Naam'}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">${data.contact_email || 'E-mailadres'}</div>
+                <div class="project__detail-item project__detail-item--contact-email">${data.contact_email || 'E-mailadres'}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">${data.contact_phone || 'Telefoonnummer'}</div>
+                <div class="project__detail-item project__detail-item--contact-phone">${data.contact_phone || 'Telefoonnummer'}</div>
             </div>
             <div class="project__sidebar-list-item">
-                <div class="project-phase">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Website'}</div>
+                <div class="project__detail-item project__detail-item--website">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Website'}</div>
             </div>
         `;
     }
 
     updateFAQs(faqs) {
-        const container = document.querySelector('#tabContentPlotFAQ');
+        const container = document.getElementById('tabContentPlotFAQ');
+        const tabButton = document.getElementById('tabBtnFAQ');
+        
+        // Hide tab button if no FAQs
+        if (tabButton) {
+            tabButton.style.display = (!faqs?.length) ? 'none' : 'inline-block';
+        }
+
         if (!container) return;
 
         if (faqs?.length) {
@@ -442,6 +456,29 @@ class PlotDetailsManager {
         if (!mapContainer) return;
 
         this.mapManager = new PlotMapManager(mapContainer, this.plotData);
+    }
+
+    updateSignupProcedure(signupProcedure) {
+        const container = document.getElementById('tabContentPlotInschrijfprocedure');
+        const tabButton = document.getElementById('tabBtnInschrijfprocedure');
+        
+        // Hide tab button if no signup procedure
+        if (tabButton) {
+            tabButton.style.display = (!signupProcedure) ? 'none' : 'inline-block';
+        }
+
+        if (!container) return;
+
+        if (signupProcedure) {
+            container.innerHTML = `
+                <div class="w-richtext">
+                    ${signupProcedure}
+                </div>
+            `;
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
     }
 }
 
