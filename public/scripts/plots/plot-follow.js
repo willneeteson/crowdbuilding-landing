@@ -30,6 +30,97 @@ class LikeButton {
     // Initialize button state
     this.setLoadingState(true);
     this.init();
+
+    // Add styles if not already present
+    if (!document.getElementById('like-button-styles')) {
+      const style = document.createElement('style');
+      style.id = 'like-button-styles';
+      style.textContent = `
+        .project__like-btn {
+          grid-column-gap: 6px;
+          grid-row-gap: 6px;
+          border: 2px solid var(--color--color-neutral-black-100);
+          color: var(--color--color-neutral-black-100);
+          border-radius: 99px;
+          justify-content: center;
+          align-items: center;
+          height: 44px;
+          padding-left: 14px;
+          padding-right: 16px;
+          text-decoration: none;
+          display: flex;
+          background: transparent;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .project__like-btn:hover {
+          background: var(--color--color-neutral-black-100);
+          color: white;
+        }
+
+        .project__like-btn.liked {
+          background: var(--color--color-neutral-black-100);
+          color: white;
+        }
+
+        .project__like-btn.loading {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .project__like-btn.error {
+          border-color: #e74c3c;
+          color: #e74c3c;
+        }
+
+        .project__like-heart {
+          width: 20px;
+          height: 20px;
+          transition: transform 0.2s ease;
+        }
+
+        .project__like-btn:hover .project__like-heart {
+          transform: scale(1.1);
+        }
+
+        .project__like-counter {
+          font-weight: 500;
+          font-size: 14px;
+        }
+
+        .project__like-btn.shimmer {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .project__like-btn.shimmer::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 
   /**
