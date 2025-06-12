@@ -80,6 +80,18 @@ class LikeButton {
           transition: transform 0.2s ease;
         }
 
+        .project__like-heart.liked {
+          display: none;
+        }
+
+        .project__like-btn.liked .project__like-heart.unliked {
+          display: none;
+        }
+
+        .project__like-btn.liked .project__like-heart.liked {
+          display: block;
+        }
+
         .project__like-btn:hover .project__like-heart {
           transform: scale(1.1);
         }
