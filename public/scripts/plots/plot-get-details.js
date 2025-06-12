@@ -487,7 +487,7 @@ class PlotDetailsManager {
         // Type aanbod
         const typeAanbodElement = document.getElementById('propertiesTypeAanbod');
         if (typeAanbodElement) {
-            typeAanbodElement.textContent = data.type_of_provider || 'Type aanbod';
+            typeAanbodElement.textContent = data.type_of_provider?.name || 'Type aanbod';
         }
 
         // Bebouwingstype
@@ -537,6 +537,25 @@ class PlotDetailsManager {
         if (maxPrijsElement) {
             maxPrijsElement.textContent = data.maximum_price ? `€${data.maximum_price.toLocaleString('nl-NL')}` : 'Maximum prijs';
         }
+
+        // Hide elements that don't have data
+        const elements = [
+            { element: typeAanbodElement, data: data.type_of_provider?.name },
+            { element: bebouwingstypeElement, data: data.development_form?.name },
+            { element: eigendomstypeElement, data: data.ownership_type?.name },
+            { element: woonmilieuElement, data: data.living_environment?.name },
+            { element: aantalWoningenElement, data: data.number_of_homes },
+            { element: minAantalWoningenElement, data: data.minimum_number_of_homes },
+            { element: maxAantalWoningenElement, data: data.maximum_number_of_homes },
+            { element: minPrijsElement, data: data.minimum_price },
+            { element: maxPrijsElement, data: data.maximum_price }
+        ];
+
+        elements.forEach(({ element, data }) => {
+            if (element) {
+                element.closest('.project__sidebar-list-item').style.display = data ? 'flex' : 'none';
+            }
+        });
     }
 }
 
