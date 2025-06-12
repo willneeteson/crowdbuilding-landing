@@ -178,6 +178,25 @@ class LikeButton {
       this.isFollowing = this.canUnfollow;
       
       this.updateUI(data.data?.followers_count || 0);
+
+      // Show notification message
+      const notificationContainer = document.querySelector('.notification-container');
+      if (notificationContainer) {
+        const message = this.isFollowing 
+          ? 'Je volgt nu dit project!' 
+          : 'Je volgt dit project niet meer.';
+        
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        
+        notificationContainer.appendChild(notification);
+        
+        // Remove notification after 3 seconds
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
       
     } catch (error) {
       console.error('Error toggling follow:', error);
