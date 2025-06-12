@@ -318,14 +318,10 @@ class PlotDetailsManager {
     }
 
     updateSidebarStatus(data) {
-        const statusWrapper = document.querySelector('.project__sidebar-group.status .project__sidebar-details-list');
-        if (!statusWrapper) return;
+        const statusElement = document.getElementById('projectStatus');
+        if (!statusElement) return;
 
-        statusWrapper.innerHTML = `
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--status">${data.application_deadline_status?.name || 'Vooraankondiging'}</div>
-            </div>
-        `;
+        statusElement.textContent = data.application_deadline_status?.name || 'Vooraankondiging';
     }
 
     updateSidebarPlanning(data) {
@@ -342,43 +338,39 @@ class PlotDetailsManager {
     }
 
     updateSidebarLocation(data) {
-        const locationWrapper = document.querySelector('.project__sidebar-group.locatie .project__sidebar-list-item');
-        if (!locationWrapper) return;
+        const locationElement = document.getElementById('projectLocation');
+        if (!locationElement) return;
 
         const address = data.address || {};
-        locationWrapper.innerHTML = `
-            <div class="project-phase">
-                ${address.street || ''} ${address.house_number || ''}<br>
-                ${address.postal_code || ''}<br>
-                ${address.city || ''}
-            </div>
+        locationElement.innerHTML = `
+            ${address.street || ''} ${address.house_number || ''}<br>
+            ${address.postal_code || ''}<br>
+            ${address.city || ''}
         `;
     }
 
     updateSidebarContact(data) {
-        const contactWrapper = document.querySelector('.project__sidebar-group.contact .project__sidebar-details-list');
-        if (!contactWrapper) return;
+        const providerTypeElement = document.getElementById('projectProviderType');
+        const organizationElement = document.getElementById('projectOrganization');
+        const contactPersonElement = document.getElementById('projectContactPerson');
+        const contactEmailElement = document.getElementById('projectContactEmail');
+        const contactPhoneElement = document.getElementById('projectContactPhone');
+        const websiteElement = document.getElementById('projectWebsite');
 
-        contactWrapper.innerHTML = `
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--provider-type">${data.provider_type?.name || 'Type aanbieder'}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--organization">${data.organization || 'Organisatie'}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--contact-person">${data.contact_person || 'Naam'}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--contact-email">${data.contact_email || 'E-mailadres'}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--contact-phone">${data.contact_phone || 'Telefoonnummer'}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--website">${data.website ? `<a href="${data.website}" target="_blank">${data.website}</a>` : 'Website'}</div>
-            </div>
-        `;
+        if (!providerTypeElement || !organizationElement || !contactPersonElement || 
+            !contactEmailElement || !contactPhoneElement || !websiteElement) return;
+
+        providerTypeElement.textContent = data.provider_type?.name || 'Type aanbieder';
+        organizationElement.textContent = data.organization || 'Organisatie';
+        contactPersonElement.textContent = data.contact_person || 'Naam';
+        contactEmailElement.textContent = data.contact_email || 'E-mailadres';
+        contactPhoneElement.textContent = data.contact_phone || 'Telefoonnummer';
+        
+        if (data.website) {
+            websiteElement.innerHTML = `<a href="${data.website}" target="_blank">${data.website}</a>`;
+        } else {
+            websiteElement.textContent = 'Website';
+        }
     }
 
     updateFAQs(faqs) {
