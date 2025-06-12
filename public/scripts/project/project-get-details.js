@@ -183,15 +183,15 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
 
 function setupModalHandler() {
     // Add click handler to details group and all its children
-    document.addEventListener('click', function(e) {
-        // Check if the clicked element or any of its parents have the details class
-        const detailsGroup = e.target.closest('.project__sidebar-group.details');
-        if (detailsGroup) {
-            console.log('Details group or child clicked');
+    const detailsGroup = document.querySelector('.project__sidebar-group.details');
+    if (detailsGroup) {
+        detailsGroup.style.cursor = 'pointer';
+        detailsGroup.addEventListener('click', function(e) {
+            console.log('Details group clicked');
             e.preventDefault();
             showModal();
-        }
-    });
+        });
+    }
 }
 
 function showModal() {
