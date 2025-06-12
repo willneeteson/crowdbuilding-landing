@@ -84,11 +84,6 @@ class LikeButton {
           transform: scale(1.1);
         }
 
-        .project__like-counter {
-          font-weight: 500;
-          font-size: 14px;
-        }
-
         .project__like-btn.shimmer {
           position: relative;
           overflow: hidden;
@@ -357,12 +352,12 @@ class LikeButton {
           gap: -8px;
         }
         .follower-avatar {
-          width: 44px;
-          height: 44px;
+          width: 46px;
+          height: 46px;
           border-radius: 50%;
           overflow: hidden;
           border: 2px solid #F2F0EA;
-          margin-right: -8px;
+          margin-right: -16px;
         }
         .follower-avatar img {
           width: 100%;
