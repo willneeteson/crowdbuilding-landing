@@ -44,7 +44,7 @@ class PlotDetailsManager {
         // Update basic elements
         this.updateElement('.project-title', data.title);
         this.updateElement('.project-subtitle', data.subtitle);
-        this.updateElement('.project-intro', data.intro, true);
+        this.updateElement('#contentIntroduction', data.intro, true);
         
         // Update sidebar status
         this.updateSidebarStatus(data);
@@ -129,7 +129,7 @@ class PlotDetailsManager {
     }
 
     updateDescriptions(descriptions) {
-        const container = document.querySelector('.project-descriptions');
+        const container = document.getElementById('contentDescriptions');
         if (!container) return;
 
         if (descriptions?.length) {
@@ -341,12 +341,7 @@ class PlotDetailsManager {
         const locationElement = document.getElementById('location');
         if (!locationElement) return;
 
-        const address = data.address || {};
-        locationElement.innerHTML = `
-            ${address.street || ''} ${address.house_number || ''}<br>
-            ${address.postal_code || ''}<br>
-            ${address.city || ''}
-        `;
+        locationElement.textContent = data.location || 'Locatie niet bekend';
     }
 
     updateSidebarContact(data) {
@@ -360,11 +355,11 @@ class PlotDetailsManager {
         if (!providerTypeElement || !organizationElement || !contactPersonElement || 
             !contactEmailElement || !contactPhoneElement || !websiteElement) return;
 
-        providerTypeElement.textContent = data.provider_type?.name || 'Type aanbieder';
-        organizationElement.textContent = data.organization || 'Organisatie';
-        contactPersonElement.textContent = data.contact_person || 'Naam';
-        contactEmailElement.textContent = data.contact_email || 'E-mailadres';
-        contactPhoneElement.textContent = data.contact_phone || 'Telefoonnummer';
+        providerTypeElement.textContent = data.type_of_provider || 'Type aanbieder';
+        organizationElement.textContent = data.organisation || 'Organisatie';
+        contactPersonElement.textContent = data.name || 'Naam';
+        contactEmailElement.textContent = data.email || 'E-mailadres';
+        contactPhoneElement.textContent = data.phone || 'Telefoonnummer';
         
         if (data.website) {
             websiteElement.innerHTML = `<a href="${data.website}" target="_blank">${data.website}</a>`;
