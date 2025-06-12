@@ -71,7 +71,7 @@ function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
     updateElement('.project-subtitle', data.subtitle);
-    updateElement('.project-intro', data.intro, true);
+    updateElement('#contentIntroduction', data.intro, true);
     updateElement('.project-location', data.location);
     
     // Update elements and their parent containers
@@ -82,7 +82,18 @@ function updatePageElements(data) {
 
     // Update descriptions if they exist
     if (data.info) {
-        updateDescriptions(data.info);
+        const container = document.querySelector('#contentDescription');
+        if (container && data.info.length > 0) {
+            container.innerHTML = data.info.map(desc => `
+                <div class="description-section">
+                    <h3>${desc.title}</h3>
+                    <div class="description-content">${desc.text}</div>
+                </div>
+            `).join('');
+            container.style.display = 'block';
+        } else if (container) {
+            container.style.display = 'none';
+        }
     }
 
     // Update arrays with max items and their parent containers
@@ -273,4 +284,4 @@ function showModal() {
     // Update modal content and show it
     window.modalSystem.updateModalContent('projectDetailsModal', content);
     window.modalSystem.showModal('projectDetailsModal');
-} 
+}
