@@ -329,20 +329,16 @@ class PlotDetailsManager {
     }
 
     updateSidebarPlanning(data) {
-        const planningWrapper = document.querySelector('.project__sidebar-group.planning .project__sidebar-details-list');
-        if (!planningWrapper) return;
+        const openDateElement = document.getElementById('projectOpenDate');
+        const deadlineElement = document.getElementById('projectDeadline');
+        
+        if (!openDateElement || !deadlineElement) return;
 
         const openDate = data.application_open_date ? new Date(data.application_open_date).toLocaleDateString('nl-NL') : 'Nog niet bekend';
         const deadline = data.application_deadline ? new Date(data.application_deadline).toLocaleDateString('nl-NL') : 'Nog niet bekend';
 
-        planningWrapper.innerHTML = `
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--open-date">Datum inschrijving open: ${openDate}</div>
-            </div>
-            <div class="project__sidebar-list-item">
-                <div class="project__detail-item project__detail-item--deadline">Sluitingsdatum inschrijving: ${deadline}</div>
-            </div>
-        `;
+        openDateElement.textContent = `Datum inschrijving open: ${openDate}`;
+        deadlineElement.textContent = `Sluitingsdatum inschrijving: ${deadline}`;
     }
 
     updateSidebarLocation(data) {
