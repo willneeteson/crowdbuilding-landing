@@ -487,7 +487,7 @@ class PlotDetailsManager {
         // Type aanbod
         const typeAanbodElement = document.getElementById('propertiesTypeAanbod');
         if (typeAanbodElement) {
-            typeAanbodElement.textContent = data.type_of_provider || 'Type aanbod';
+            typeAanbodElement.textContent = data.offer_type?.name || 'Type aanbod';
         }
 
         // Bebouwingstype
@@ -540,7 +540,7 @@ class PlotDetailsManager {
 
         // Hide elements that don't have data
         const elements = [
-            { element: typeAanbodElement, data: data.type_of_provider },
+            { element: typeAanbodElement, data: data.offer_type?.name },
             { element: bebouwingstypeElement, data: data.building_type?.name },
             { element: eigendomstypeElement, data: data.property_type },
             { element: woonmilieuElement, data: data.living_environment?.name },
