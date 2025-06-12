@@ -32,6 +32,7 @@ function detectPageType() {
     if (pathParts.includes('partner')) return 'partner';
     if (pathParts.includes('gemeente')) return 'gemeente';
     if (pathParts.includes('expert')) return 'expert';
+    if (pathParts.includes('provincie')) return 'region';
     
     return 'project'; // Default to project if we can't determine
 }
@@ -53,6 +54,8 @@ function getApiEndpoint() {
             return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts`;
         case 'expert':
             return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts`;
+        case 'region':
+            return `https://api.crowdbuilding.com/api/v1/regions/${pageSlug}/posts`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts`;
     }
@@ -70,6 +73,8 @@ function getPostEndpoint(postId) {
             return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}`;
         case 'expert':
             return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}`;
+        case 'region':
+            return `https://api.crowdbuilding.com/api/v1/regions/${pageSlug}/posts/${postId}`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}`;
     }
@@ -85,6 +90,10 @@ function getLikeEndpoint(postId) {
             return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}/like`;
         case 'gemeente':
             return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}/like`;
+        case 'expert':
+            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}/like`;
+        case 'region':
+            return `https://api.crowdbuilding.com/api/v1/regions/${pageSlug}/posts/${postId}/like`;
         default:
             return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/like`;
     }
