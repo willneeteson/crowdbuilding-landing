@@ -80,16 +80,19 @@ class LikeButton {
           transition: transform 0.2s ease;
         }
 
-        .project__like-heart.liked {
+        /* Hide the liked heart by default */
+        .project__like-heart.liked:not(.unliked) {
           display: none;
         }
 
+        /* When button is liked, hide the unliked heart */
         .project__like-btn.liked .project__like-heart.unliked {
-          display: none;
+          display: none !important;
         }
 
-        .project__like-btn.liked .project__like-heart.liked {
-          display: block;
+        /* When button is liked, show the liked heart */
+        .project__like-btn.liked .project__like-heart.liked:not(.unliked) {
+          display: block !important;
         }
 
         .project__like-btn:hover .project__like-heart {
