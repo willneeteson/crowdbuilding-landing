@@ -358,12 +358,11 @@ class LikeButton {
           margin-top: 8px;
         }
         .follower-avatar {
-          width: 32px;
-          height: 32px;
+          width: 44px;
+          height: 44px;
           border-radius: 50%;
           overflow: hidden;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          border: 2px solid #F2F0EA;
         }
         .follower-avatar img {
           width: 100%;
