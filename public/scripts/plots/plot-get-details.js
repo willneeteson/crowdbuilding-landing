@@ -329,7 +329,7 @@ class PlotDetailsManager {
     }
 
     updateSidebarPlanning(data) {
-        const openDateElement = document.getElementById('projectOpenDate');
+        const openDateElement = document.getElementById('deadlineOpen');
         const deadlineElement = document.getElementById('projectDeadline');
         
         if (!openDateElement || !deadlineElement) return;
