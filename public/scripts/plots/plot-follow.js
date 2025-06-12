@@ -144,7 +144,7 @@ class LikeButton {
       // Update follow state based on permissions
       this.isFollowing = this.canUnfollow;
       
-      this.updateUI(data.data?.followers_count || 0);
+      this.updateUI(data.data?.followers_count || 0, data.data?.followers || []);
     } catch (error) {
       console.error('Error checking follow status:', error);
     } finally {
@@ -177,7 +177,7 @@ class LikeButton {
       this.canUnfollow = data.data?.permissions?.can_unfollow || false;
       this.isFollowing = this.canUnfollow;
       
-      this.updateUI(data.data?.followers_count || 0);
+      this.updateUI(data.data?.followers_count || 0, data.data?.followers || []);
 
       // Show alert message
       const message = this.isFollowing 
@@ -199,8 +199,9 @@ class LikeButton {
   /**
    * Update the UI state
    * @param {number} count - The new follower count
+   * @param {Array} followers - Array of follower data
    */
-  updateUI(count) {
+  updateUI(count, followers = []) {
     // Update counter
     this.counter.textContent = count.toString();
     
@@ -215,6 +216,81 @@ class LikeButton {
     
     // Update button state based on permissions
     this.button.disabled = (!this.canFollow && !this.canUnfollow);
+
+    // Update follower avatars
+    this.updateFollowerAvatars(followers);
+  }
+
+  /**
+   * Update the follower avatars display
+   * @param {Array} followers - Array of follower data
+   */
+  updateFollowerAvatars(followers) {
+    const avatarWrapper = document.getElementById('followAvatarWrapper');
+    if (!avatarWrapper) return;
+
+    // Take the 5 most recent followers
+    const recentFollowers = followers.slice(0, 5);
+    
+    // Create avatar elements
+    const avatarHTML = recentFollowers.map(follower => {
+      const avatarUrl = follower.avatar_url || 'https://api.crowdbuilding.com/storage/default-avatar.png';
+      return `
+        <div class="follower-avatar">
+          <img src="${avatarUrl}" 
+               alt="${follower.name || 'Follower'}" 
+               onerror="this.src='https://api.crowdbuilding.com/storage/default-avatar.png'"
+               title="${follower.name || 'Follower'}"
+          >
+        </div>
+      `;
+    }).join('');
+
+    // Add remaining count if there are more followers
+    const remainingCount = followers.length - recentFollowers.length;
+    const remainingHTML = remainingCount > 0 
+      ? `<div class="follower-avatar remaining-count">+${remainingCount}</div>`
+      : '';
+
+    // Update the wrapper content
+    avatarWrapper.innerHTML = avatarHTML + remainingHTML;
+
+    // Add styles if not already present
+    if (!document.getElementById('follower-avatar-styles')) {
+      const style = document.createElement('style');
+      style.id = 'follower-avatar-styles';
+      style.textContent = `
+        #followAvatarWrapper {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-top: 8px;
+        }
+        .follower-avatar {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          overflow: hidden;
+          border: 2px solid white;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .follower-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .follower-avatar.remaining-count {
+          background: #f0f0f0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          color: #666;
+          font-weight: 500;
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 }
 
