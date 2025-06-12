@@ -584,7 +584,10 @@ class PlotDetailsManager {
 
         elements.forEach(({ element, data }) => {
             if (element) {
-                element.closest('.project__sidebar-list-item').style.display = data ? 'flex' : 'none';
+                const parentElement = element.closest('.project__sidebar-list-item');
+                if (parentElement) {
+                    parentElement.style.display = data ? 'flex' : 'none';
+                }
             }
         });
     }
