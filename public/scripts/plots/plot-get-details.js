@@ -398,6 +398,22 @@ class PlotDetailsManager {
                     </div>
                 </div>
             `).join('');
+
+            // Add click event listeners to all FAQ toggles
+            faqs.forEach((_, index) => {
+                const toggle = document.getElementById(`w-dropdown-toggle-${index + 1}`);
+                const list = document.getElementById(`w-dropdown-list-${index + 1}`);
+                
+                if (toggle && list) {
+                    toggle.addEventListener('click', () => {
+                        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+                        toggle.setAttribute('aria-expanded', !isExpanded);
+                        list.style.display = isExpanded ? 'none' : 'block';
+                        toggle.classList.toggle('w--open');
+                    });
+                }
+            });
+
             container.style.display = 'block';
         } else {
             container.style.display = 'none';
