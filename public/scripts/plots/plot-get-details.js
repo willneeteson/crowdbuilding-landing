@@ -487,19 +487,19 @@ class PlotDetailsManager {
         // Type aanbod
         const typeAanbodElement = document.getElementById('propertiesTypeAanbod');
         if (typeAanbodElement) {
-            typeAanbodElement.textContent = data.type_of_provider?.name || 'Type aanbod';
+            typeAanbodElement.textContent = data.type_of_provider || 'Type aanbod';
         }
 
         // Bebouwingstype
         const bebouwingstypeElement = document.getElementById('propertiesBebouwingstype');
         if (bebouwingstypeElement) {
-            bebouwingstypeElement.textContent = data.development_form?.name || 'Bebouwingstype';
+            bebouwingstypeElement.textContent = data.building_type?.name || 'Bebouwingstype';
         }
 
         // Eigendomstype
         const eigendomstypeElement = document.getElementById('propertiesEigendomstype');
         if (eigendomstypeElement) {
-            eigendomstypeElement.textContent = data.ownership_type?.name || 'Eigendomstype';
+            eigendomstypeElement.textContent = data.property_type || 'Eigendomstype';
         }
 
         // Woonmilieu
@@ -517,38 +517,38 @@ class PlotDetailsManager {
         // Minimum aantal woningen
         const minAantalWoningenElement = document.getElementById('propertiesMinimumAantalWoningen');
         if (minAantalWoningenElement) {
-            minAantalWoningenElement.textContent = data.minimum_number_of_homes ? `${data.minimum_number_of_homes} woningen` : 'Minimum aantal woningen';
+            minAantalWoningenElement.textContent = data.min_number_of_homes ? `${data.min_number_of_homes} woningen` : 'Minimum aantal woningen';
         }
 
         // Maximum aantal woningen
         const maxAantalWoningenElement = document.getElementById('propertiesMaximumAantalWoningen');
         if (maxAantalWoningenElement) {
-            maxAantalWoningenElement.textContent = data.maximum_number_of_homes ? `${data.maximum_number_of_homes} woningen` : 'Maximum aantal woningen';
+            maxAantalWoningenElement.textContent = data.max_number_of_homes ? `${data.max_number_of_homes} woningen` : 'Maximum aantal woningen';
         }
 
         // Minimum prijs
         const minPrijsElement = document.getElementById('propertiesMinimumPrijs');
         if (minPrijsElement) {
-            minPrijsElement.textContent = data.minimum_price ? `€${data.minimum_price.toLocaleString('nl-NL')}` : 'Minimum prijs';
+            minPrijsElement.textContent = data.min_price ? `€${data.min_price.toLocaleString('nl-NL')}` : 'Minimum prijs';
         }
 
         // Maximum prijs
         const maxPrijsElement = document.getElementById('propertiesMaximumPrijs');
         if (maxPrijsElement) {
-            maxPrijsElement.textContent = data.maximum_price ? `€${data.maximum_price.toLocaleString('nl-NL')}` : 'Maximum prijs';
+            maxPrijsElement.textContent = data.max_price ? `€${data.max_price.toLocaleString('nl-NL')}` : 'Maximum prijs';
         }
 
         // Hide elements that don't have data
         const elements = [
-            { element: typeAanbodElement, data: data.type_of_provider?.name },
-            { element: bebouwingstypeElement, data: data.development_form?.name },
-            { element: eigendomstypeElement, data: data.ownership_type?.name },
+            { element: typeAanbodElement, data: data.type_of_provider },
+            { element: bebouwingstypeElement, data: data.building_type?.name },
+            { element: eigendomstypeElement, data: data.property_type },
             { element: woonmilieuElement, data: data.living_environment?.name },
             { element: aantalWoningenElement, data: data.number_of_homes },
-            { element: minAantalWoningenElement, data: data.minimum_number_of_homes },
-            { element: maxAantalWoningenElement, data: data.maximum_number_of_homes },
-            { element: minPrijsElement, data: data.minimum_price },
-            { element: maxPrijsElement, data: data.maximum_price }
+            { element: minAantalWoningenElement, data: data.min_number_of_homes },
+            { element: maxAantalWoningenElement, data: data.max_number_of_homes },
+            { element: minPrijsElement, data: data.min_price },
+            { element: maxPrijsElement, data: data.max_price }
         ];
 
         elements.forEach(({ element, data }) => {
