@@ -383,36 +383,112 @@ class PlotDetailsManager {
         if (!container) return;
 
         if (faqs?.length) {
+            const faqStyles = `
+                .faq-item {
+                    border: 1px solid #e5e5e5;
+                    border-radius: 8px;
+                    margin-bottom: 12px;
+                    overflow: hidden;
+                }
+                .faq-question {
+                    padding: 16px 20px;
+                    background: #f8f8f8;
+                    cursor: pointer;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: background-color 0.2s ease;
+                }
+                .faq-question:hover {
+                    background: #f0f0f0;
+                }
+                .faq-question.active {
+                    background: #e8e8e8;
+                }
+                .faq-icon {
+                    width: 20px;
+                    height: 20px;
+                    position: relative;
+                    transition: transform 0.3s ease;
+                }
+                .faq-icon::before,
+                .faq-icon::after {
+                    content: '';
+                    position: absolute;
+                    background: #333;
+                    transition: transform 0.3s ease;
+                }
+                .faq-icon::before {
+                    width: 2px;
+                    height: 12px;
+                    top: 4px;
+                    left: 9px;
+                }
+                .faq-icon::after {
+                    width: 12px;
+                    height: 2px;
+                    top: 9px;
+                    left: 4px;
+                }
+                .faq-question.active .faq-icon::before {
+                    transform: rotate(90deg);
+                }
+                .faq-answer {
+                    padding: 0;
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: all 0.3s ease;
+                    background: white;
+                }
+                .faq-answer.active {
+                    padding: 16px 20px;
+                    max-height: 1000px;
+                }
+                .faq-answer-content {
+                    color: #666;
+                    line-height: 1.6;
+                }
+            `;
+
+            // Add styles to document
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = faqStyles;
+            document.head.appendChild(styleSheet);
+
             container.innerHTML = faqs.map((faq, index) => `
-                <div>
-                    <div data-hover="false" data-delay="0" class="dropdown w-dropdown">
-                        <div class="dropdown-toggle-2 w-dropdown-toggle" id="w-dropdown-toggle-${index + 1}" 
-                            aria-controls="w-dropdown-list-${index + 1}" aria-haspopup="menu" 
-                            aria-expanded="false" role="button" tabindex="0">
-                            <div class="icon-3 w-icon-dropdown-toggle" aria-hidden="true"></div>
-                            <div class="text-block-6">${faq.data.title}</div>
+                <div class="faq-item">
+                    <div class="faq-question" id="faq-question-${index}">
+                        <span>${faq.data.title}</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer" id="faq-answer-${index}">
+                        <div class="faq-answer-content">
+                            ${faq.data.text}
                         </div>
-                        <nav class="dropdown-list-2 w-dropdown-list" id="w-dropdown-list-${index + 1}" 
-                            aria-labelledby="w-dropdown-toggle-${index + 1}">
-                            <div class="w-richtext">
-                                ${faq.data.text}
-                            </div>
-                        </nav>
                     </div>
                 </div>
             `).join('');
 
-            // Add click event listeners to all FAQ toggles
+            // Add click event listeners
             faqs.forEach((_, index) => {
-                const toggle = document.getElementById(`w-dropdown-toggle-${index + 1}`);
-                const list = document.getElementById(`w-dropdown-list-${index + 1}`);
+                const question = document.getElementById(`faq-question-${index}`);
+                const answer = document.getElementById(`faq-answer-${index}`);
                 
-                if (toggle && list) {
-                    toggle.addEventListener('click', () => {
-                        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
-                        toggle.setAttribute('aria-expanded', !isExpanded);
-                        list.style.display = isExpanded ? 'none' : 'block';
-                        toggle.classList.toggle('w--open');
+                if (question && answer) {
+                    question.addEventListener('click', () => {
+                        const isActive = question.classList.contains('active');
+                        
+                        // Close all other FAQs
+                        document.querySelectorAll('.faq-question.active').forEach(q => {
+                            if (q !== question) {
+                                q.classList.remove('active');
+                                q.nextElementSibling.classList.remove('active');
+                            }
+                        });
+
+                        // Toggle current FAQ
+                        question.classList.toggle('active');
+                        answer.classList.toggle('active');
                     });
                 }
             });
