@@ -81,7 +81,7 @@ class PlotDetailsManager {
         }
 
         // Update signup procedure
-        this.updateSignupProcedure(data.signup_procedure);
+        this.updateSignupProcedure(data.application_procedure);
 
         // Update arrays with max items
         this.updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
@@ -163,7 +163,16 @@ class PlotDetailsManager {
         const signupBtn = document.getElementById('plotSignupBtn');
         const deadlineWrapper = document.getElementById('deadlineWrapper');
         
-        if (!deadlineCounter || !deadlineNumber || !deadline) {
+        console.log('Deadline data:', {
+            deadline,
+            deadlineCounter: !!deadlineCounter,
+            deadlineNumber: !!deadlineNumber,
+            signupBtn: !!signupBtn,
+            deadlineWrapper: !!deadlineWrapper
+        });
+
+        if (!deadline) {
+            console.log('No deadline provided');
             if (deadlineCounter) deadlineCounter.style.display = 'none';
             if (deadlineWrapper) deadlineWrapper.style.display = 'none';
             return;
@@ -174,13 +183,21 @@ class PlotDetailsManager {
         const diffTime = deadlineDate - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+        console.log('Deadline calculation:', {
+            today: today.toISOString(),
+            deadlineDate: deadlineDate.toISOString(),
+            diffDays
+        });
+
         if (diffDays > 0) {
-            deadlineNumber.textContent = diffDays;
-            deadlineCounter.style.display = 'block';
+            console.log('Showing deadline counter');
+            if (deadlineNumber) deadlineNumber.textContent = diffDays;
+            if (deadlineCounter) deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
-            if (deadlineWrapper) deadlineWrapper.style.display = 'inline-block';
+            if (deadlineWrapper) deadlineWrapper.style.display = 'block';
         } else {
-            deadlineCounter.style.display = 'none';
+            console.log('Hiding deadline counter - deadline passed');
+            if (deadlineCounter) deadlineCounter.style.display = 'none';
             if (signupBtn) signupBtn.style.display = 'none';
             if (deadlineWrapper) deadlineWrapper.style.display = 'none';
         }
@@ -244,8 +261,15 @@ class PlotDetailsManager {
 
         // Specific icons for different mime types
         if (mimeType === 'application/pdf') {
-            icon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-                <path d="M64 464H96v48H64c-35.3 0-64-28.7-64-64V64C0 28.7 28.7 0 64 0H229.5c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3V288H336V160H256c-17.7 0-32-14.3-32-32V48H64c-8.8 0-16 7.2-16 16V448c0 8.8 7.2 16 16 16zM176 352h32c30.9 0 56 25.1 56 56s-25.1 56-56 56H192v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 80c13.3 0 24-10.7 24-24s-10.7-24-24-24H192v48h16zm96-80h32c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H304c-8.8 0-16-7.2-16-16V368c0-8.8 7.2-16 16-16zm32 128c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16H320v96h16zm80-112c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48H432c-8.8 0-16-7.2-16-16V368zm32 112h8c8.8 0 16-7.2 16-16V400c0-8.8-7.2-16-16-16h-8v96z"/>
+            icon = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g clip-path="url(#clip0_216_20)">
+                    <path d="M2.5 18.75H4.375V20H2.5C1.12109 20 0 18.8789 0 17.5V2.5C0 1.12109 1.12109 0 2.5 0H8.59766C9.09375 0 9.57031 0.199219 9.92188 0.550781L14.4492 5.07422C14.8008 5.42578 15 5.90234 15 6.39844V11.875H13.75V7.5H9.375C8.33984 7.5 7.5 6.66016 7.5 5.625V1.25H2.5C1.80859 1.25 1.25 1.80859 1.25 2.5V17.5C1.25 18.1914 1.80859 18.75 2.5 18.75ZM13.7305 6.25C13.7031 6.14063 13.6484 6.03906 13.5664 5.96094L9.03906 1.43359C8.95703 1.35156 8.85937 1.29687 8.75 1.26953V5.625C8.75 5.96875 9.03125 6.25 9.375 6.25H13.7305ZM6.875 13.75H8.125C9.33203 13.75 10.3125 14.7305 10.3125 15.9375C10.3125 17.1445 9.33203 18.125 8.125 18.125H7.5V19.375C7.5 19.7188 7.21875 20 6.875 20C6.53125 20 6.25 19.7188 6.25 19.375V17.5V14.375C6.25 14.0312 6.53125 13.75 6.875 13.75ZM8.125 16.875C8.64453 16.875 9.0625 16.457 9.0625 15.9375C9.0625 15.418 8.64453 15 8.125 15H7.5V16.875H8.125ZM11.875 13.75H13.125C14.1602 13.75 15 14.5898 15 15.625V18.125C15 19.1602 14.1602 20 13.125 20H11.875C11.5312 20 11.25 19.7188 11.25 19.375V14.375C11.25 14.0312 11.5312 13.75 11.875 13.75ZM13.125 18.75C13.4688 18.75 13.75 18.4688 13.75 18.125V15.625C13.75 15.2812 13.4688 15 13.125 15H12.5V18.75H13.125ZM16.25 14.375C16.25 14.0312 16.5312 13.75 16.875 13.75H18.75C19.0938 13.75 19.375 14.0312 19.375 14.375C19.375 14.7188 19.0938 15 18.75 15H17.5V16.25H18.75C19.0938 16.25 19.375 16.5312 19.375 16.875C19.375 17.2188 19.0938 17.5 18.75 17.5H17.5V19.375C17.5 19.7188 17.2188 20 16.875 20C16.5312 20 16.25 19.7188 16.25 19.375V16.875V14.375Z" fill="#090F3F"/>
+                </g>
+                <defs>
+                    <clipPath id="clip0_216_20">
+                        <rect width="20" height="20" fill="white"/>
+                    </clipPath>
+                </defs>
             </svg>`;
         }
 
@@ -532,6 +556,12 @@ class PlotDetailsManager {
     initializeMap() {
         const mapContainer = document.getElementById('innerMap');
         if (!mapContainer) return;
+
+        // Hide map container if location data is not available
+        if (!this.plotData?.latitude || !this.plotData?.longitude) {
+            mapContainer.style.display = 'none';
+            return;
+        }
 
         this.mapManager = new PlotMapManager(mapContainer, this.plotData);
     }
