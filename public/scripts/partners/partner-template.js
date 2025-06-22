@@ -165,6 +165,12 @@ console.log('Partner ID (from URL):', id);
       // Update follower count
       document.getElementById("followerCount").textContent = followersCount;
       
+      // Show/hide the avatar wrapper based on follower count
+      const avatarWrapper = document.getElementById("followAvatarWrapper");
+      if (avatarWrapper) {
+        avatarWrapper.style.display = followersCount > 0 ? "block" : "none";
+      }
+      
       // Update avatars (still show only the first page of followers for avatars)
       const avatarContainers = document.querySelectorAll('.partner__followed-avatar:not(.number)');
       avatarContainers.forEach((container, index) => {
@@ -187,6 +193,13 @@ console.log('Partner ID (from URL):', id);
     } catch (error) {
       console.error("Failed to fetch follower count:", error);
       document.getElementById("followerCount").textContent = "0";
+      
+      // Hide avatar wrapper on error
+      const avatarWrapper = document.getElementById("followAvatarWrapper");
+      if (avatarWrapper) {
+        avatarWrapper.style.display = "none";
+      }
+      
       document.querySelectorAll('.partner__followed-avatar:not(.number)').forEach(container => {
         container.style.display = 'none';
       });
