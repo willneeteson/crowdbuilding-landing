@@ -160,12 +160,12 @@ console.log('Partner ID (from URL):', id);
 
       const data = await response.json();
       const followers = data.data || [];
-      const followersCount = followers.length;
+      const followersCount = data.meta?.total || followers.length;
 
       // Update follower count
       document.getElementById("followerCount").textContent = followersCount;
       
-      // Update avatars
+      // Update avatars (still show only the first page of followers for avatars)
       const avatarContainers = document.querySelectorAll('.partner__followed-avatar:not(.number)');
       avatarContainers.forEach((container, index) => {
         const follower = followers[index];
