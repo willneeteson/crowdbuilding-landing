@@ -719,15 +719,15 @@ class PlotDetailsManager {
         }
 
         const groupsHTML = groups.map(group => `
-            <div class="plot-group-item">
+            <a href="/groups/${group.id}" class="plot-group-item">
                 <div class="card__content-wrapper">
                     <h3>
-                        <a href="/groups/${group.id}" class="plot-group-link">${group.title}</a>
+                        <span class="plot-group-link">${group.title}</span>
                     </h3>
                     ${group.subtitle ? `<p>${group.subtitle}</p>` : ''}
                     ${group.intro ? `<div class="plot-group-intro">${group.intro}</div>` : ''}
-                    ${group.location ? `<p class="plot-group-location">📍 ${group.location}</p>` : ''}
-                    ${group.member_status ? `<p class="plot-group-status">${group.member_status.name}</p>` : ''}
+                    ${group.location ? `<p>${group.location}</p>` : ''}
+                    ${group.member_status ? `<p>${group.member_status.name}</p>` : ''}
                     ${group.housing_forms?.length ? `
                         <div class="plot-group-tags">
                             ${group.housing_forms.map(form => `<span class="tag">${form.title}</span>`).join('')}
@@ -739,7 +739,7 @@ class PlotDetailsManager {
                         <img src="${group.image.original_url}" alt="${group.title}" class="card__img">
                     </div>
                 ` : ''}
-            </div>
+            </a>
         `).join('');
 
         container.innerHTML = `
