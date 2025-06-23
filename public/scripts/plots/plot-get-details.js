@@ -83,6 +83,9 @@ class PlotDetailsManager {
         // Update signup procedure
         this.updateSignupProcedure(data.application_procedure);
 
+        // Update external application button
+        this.updateExternalApplicationButton(data);
+
         // Update arrays with max items
         this.updateArrayElement('.project-housing-forms', data.housing_forms, 'title');
         this.updateArrayElement('.project-target-audiences', data.target_audiences, 'name');
