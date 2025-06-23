@@ -91,6 +91,9 @@ class PlotDetailsManager {
         // Update images
         this.updateImages(data.images);
 
+        // Fetch and update groups/projects related to this plot
+        this.fetchPlotGroups();
+
         // Initialize admin display if available
         if (typeof window.fetchAdminsData === 'function') {
             window.fetchAdminsData();
@@ -701,6 +704,224 @@ class PlotDetailsManager {
                 }
             }
         });
+    }
+
+    fetchPlotGroups() {
+        const slug = this.getSlugFromUrl();
+        if (!slug) {
+            console.error('No slug found for fetching plot groups');
+            return;
+        }
+
+        fetch(`https://api.crowdbuilding.com/api/v1/plots/${slug}/groups`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Plot groups data:', data);
+                this.updatePlotGroups(data.data || []);
+            })
+            .catch(error => {
+                console.error('Error fetching plot groups:', error);
+            });
+    }
+
+    updatePlotGroups(groups) {
+        const container = document.getElementById('plotGroupsContainer');
+        if (!container) {
+            console.log('Plot groups container not found');
+            return;
+        }
+
+        if (!groups || groups.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        const groupsHTML = groups.map(group => `
+            <div class="plot-group-item">
+                <div class="plot-group-content">
+                    <h3 class="plot-group-title">
+                        <a href="/groups/${group.id}" class="plot-group-link">${group.title}</a>
+                    </h3>
+                    ${group.subtitle ? `<p class="plot-group-subtitle">${group.subtitle}</p>` : ''}
+                    ${group.intro ? `<div class="plot-group-intro">${group.intro}</div>` : ''}
+                    ${group.location ? `<p class="plot-group-location">📍 ${group.location}</p>` : ''}
+                    ${group.member_status ? `<p class="plot-group-status">${group.member_status.name}</p>` : ''}
+                    ${group.housing_forms?.length ? `
+                        <div class="plot-group-tags">
+                            ${group.housing_forms.map(form => `<span class="tag">${form.title}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+                ${group.image ? `
+                    <div class="plot-group-image-wrapper">
+                        <img src="${group.image.original_url}" alt="${group.title}" class="plot-group-image">
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+
+        container.innerHTML = `
+            <div class="plot-groups-section">
+                <h2>Projecten op deze kavel</h2>
+                <div class="plot-groups-list">
+                    ${groupsHTML}
+                </div>
+            </div>
+        `;
+
+        // Add styles for plot groups
+        this.addPlotGroupsStyles();
+
+        container.style.display = 'block';
+    }
+
+    addPlotGroupsStyles() {
+        // Check if styles already exist
+        if (document.getElementById('plot-groups-styles')) {
+            return;
+        }
+
+        const styles = document.createElement('style');
+        styles.id = 'plot-groups-styles';
+        styles.textContent = `
+            .plot-groups-section {
+                margin: 40px 0;
+                padding: 24px;
+                background: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            .plot-groups-section h2 {
+                margin: 0 0 24px 0;
+                font-size: 24px;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .plot-groups-list {
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
+            }
+
+            .plot-group-item {
+                display: grid;
+                grid-template-columns: 1fr 150px;
+                gap: 24px;
+                align-items: center;
+                padding: 24px;
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+
+            .plot-group-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+
+            .plot-group-content {
+                min-width: 0;
+            }
+
+            .plot-group-title {
+                margin: 0 0 8px 0;
+                font-size: 18px;
+                font-weight: 600;
+                line-height: 1.4;
+            }
+
+            .plot-group-link {
+                color: #333;
+                text-decoration: none;
+                transition: color 0.2s ease;
+            }
+
+            .plot-group-link:hover {
+                color: #e74c3c;
+            }
+
+            .plot-group-subtitle {
+                margin: 0 0 8px 0;
+                font-size: 16px;
+                color: #666;
+                line-height: 1.5;
+            }
+
+            .plot-group-intro {
+                margin: 0 0 12px 0;
+                font-size: 14px;
+                line-height: 1.6;
+                color: #555;
+            }
+
+            .plot-group-location {
+                margin: 0 0 8px 0;
+                font-size: 14px;
+                color: #666;
+            }
+
+            .plot-group-status {
+                margin: 0 0 12px 0;
+                font-size: 14px;
+                font-weight: 500;
+                color: #e74c3c;
+            }
+
+            .plot-group-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .plot-group-tags .tag {
+                padding: 4px 8px;
+                background: #f0f0f0;
+                border-radius: 99px;
+                font-size: 12px;
+                color: #666;
+                border: 1px solid #ddd;
+            }
+
+            .plot-group-image-wrapper {
+                width: 150px;
+                height: 110px;
+                border-radius: 4px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .plot-group-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.2s ease;
+            }
+
+            .plot-group-item:hover .plot-group-image {
+                transform: scale(1.05);
+            }
+
+            @media (max-width: 768px) {
+                .plot-group-item {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+
+                .plot-group-image-wrapper {
+                    width: 100%;
+                    height: 200px;
+                }
+            }
+        `;
+
+        document.head.appendChild(styles);
     }
 }
 
