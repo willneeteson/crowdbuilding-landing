@@ -905,7 +905,7 @@ class PlotDetailsManager {
             signupBtn.style.display = 'block';
             
             // Update button text to indicate external application
-            signupBtn.textContent = 'Externe inschrijving';
+            signupBtn.textContent = 'Inschrijven bij aanbieder';
             
             console.log('External application button configured:', {
                 href: signupBtn.href,
