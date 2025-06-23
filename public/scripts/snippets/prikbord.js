@@ -425,6 +425,23 @@ function renderPosts(posts, append = false) {
                 );
             });
         }
+        
+        // Fallback: check if current user is in the likes array by any means
+        if (!isLiked && post.likes && Array.isArray(post.likes)) {
+            isLiked = post.likes.some(like => {
+                // Check various possible structures
+                const likeUserId = like.id || like.user_id || like.user?.id || like.created_by?.id;
+                return likeUserId === currentUserId;
+            });
+        }
+        
+        // Debug logging
+        console.log(`Post ${post.id} like state:`, {
+            isLiked,
+            likesCount: post.likes_count,
+            likesArray: post.likes,
+            currentUserId
+        });
 
         const menuHtml = canDelete ? `
             <div class="post-menu">
@@ -478,6 +495,9 @@ function renderPosts(posts, append = false) {
     attachPostClickHandlers();
     attachMenuHandlers();
     attachLikeHandlers();
+
+    // Setup heart icons and handlers
+    setTimeout(fixAllHeartIcons, 1000);
 }
 
 // Helper functions for SVG heart icons
@@ -519,18 +539,58 @@ async function toggleLike(postId) {
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const data = await response.json();
         
-        // Determine if the post is now liked
+        console.log('Like response:', data);
+        
+        // Determine if the post is now liked based on the response
         let isLiked = false;
-        if (data.message) {
-            isLiked = !data.message.toLowerCase().includes('unlike') && 
-                     !data.message.toLowerCase().includes('niet meer') &&
-                     !data.message.toLowerCase().includes('removed');
-        } else if (data.data.likes_count !== undefined && previousCount !== undefined) {
-            isLiked = data.data.likes_count > previousCount;
+        
+        // First, try to determine from the response data structure
+        if (data.data) {
+            // Check if the response includes the updated like status
+            if (data.data.likes_count !== undefined) {
+                // If the like count increased, we liked it
+                isLiked = data.data.likes_count > previousCount;
+            } else if (data.data.liked !== undefined) {
+                // Direct like status from API
+                isLiked = data.data.liked;
+            } else if (data.data.likes && Array.isArray(data.data.likes)) {
+                // Check if current user is in the likes array
+                isLiked = data.data.likes.some(like => {
+                    const likeUserId = like.id || like.user_id || like.user?.id || like.created_by?.id;
+                    return likeUserId === currentUserId;
+                });
+            }
         }
         
+        // Fallback to message parsing if data structure doesn't help
+        if (data.message && !isLiked) {
+            const message = data.message.toLowerCase();
+            // If message indicates a like action (not an unlike)
+            isLiked = !message.includes('unlike') && 
+                     !message.includes('niet meer') &&
+                     !message.includes('removed') &&
+                     !message.includes('ontvolgd') &&
+                     !message.includes('unliked');
+        }
+        
+        // If we still can't determine, assume it's a toggle from current state
+        if (isLiked === false && data.message) {
+            const likeButton = document.querySelector(`.post-like-button[data-post-id="${postId}"]`);
+            const wasLiked = likeButton && likeButton.classList.contains('liked');
+            // If it was liked before and we got a success response, it's now unliked
+            // If it wasn't liked before and we got a success response, it's now liked
+            isLiked = !wasLiked;
+        }
+        
+        console.log(`Post ${postId} like state after toggle:`, {
+            isLiked,
+            previousCount,
+            newCount: data.data?.likes_count,
+            message: data.message
+        });
+        
         // Update UI
-        updateLikeButtonState(postId, isLiked, data.data.likes_count);
+        updateLikeButtonState(postId, isLiked, data.data?.likes_count || previousCount);
         
         return data.data;
     } catch (error) {
@@ -942,7 +1002,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Setup heart icons and handlers
             setTimeout(fixAllHeartIcons, 1000);
-            addDirectLikeClickHandler();
         } else {
             console.warn('No user ID found, post fetching skipped');
             const container = document.getElementById('groupPosts');
@@ -958,30 +1017,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
-
-function addDirectLikeClickHandler() {
-    // This handler is for direct likes that don't go through the modal
-    document.addEventListener('click', async (e) => {
-        const likeButton = e.target.closest('.post-like-button');
-        if (!likeButton) return;
-        
-        e.preventDefault();
-        e.stopPropagation();
-        
-        const postId = likeButton.getAttribute('data-post-id');
-        if (!postId) return;
-        
-        try {
-            likeButton.disabled = true;
-            await toggleLike(postId);
-        } catch (error) {
-            console.error('Error handling direct like click:', error);
-            alert('Like actie mislukt. Probeer het opnieuw.');
-        } finally {
-            likeButton.disabled = false;
-        }
-    });
-}
 
 function updateLoadMoreButton() {
     const loadMoreContainer = document.querySelector('.load-more-container');
@@ -1197,4 +1232,16 @@ window.attachLikeHandlers = attachLikeHandlers;
 window.attachPostClickHandlers = attachPostClickHandlers;
 window.attachMenuHandlers = attachMenuHandlers;
 window.attachCommentLikeHandlers = attachCommentLikeHandlers;
-window.fixAllHearts = fixAllHeartIcons; 
+window.fixAllHearts = fixAllHeartIcons;
+window.toggleLike = toggleLike; // Make toggleLike available for debugging
+window.testLikeFunction = async (postId) => {
+    console.log('Testing like function for post:', postId);
+    try {
+        const result = await toggleLike(postId);
+        console.log('Like test result:', result);
+        return result;
+    } catch (error) {
+        console.error('Like test error:', error);
+        throw error;
+    }
+}; 
