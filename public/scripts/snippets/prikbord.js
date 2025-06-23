@@ -91,22 +91,8 @@ function getPostEndpoint(postId) {
 }
 
 function getLikeEndpoint(postId) {
-    switch (pageType) {
-        case 'project':
-            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/like`;
-        case 'plot':
-            return `https://api.crowdbuilding.com/api/v1/plots/${pageSlug}/posts/${postId}/like`;
-        case 'partner':
-            return `https://api.crowdbuilding.com/api/v1/partners/${pageSlug}/posts/${postId}/like`;
-        case 'gemeente':
-            return `https://api.crowdbuilding.com/api/v1/region-areas/${pageSlug}/posts/${postId}/like`;
-        case 'expert':
-            return `https://api.crowdbuilding.com/api/v1/service-providers/${pageSlug}/posts/${postId}/like`;
-        case 'region':
-            return `https://api.crowdbuilding.com/api/v1/regions/${pageSlug}/posts/${postId}/like`;
-        default:
-            return `https://api.crowdbuilding.com/api/v1/groups/${pageSlug}/posts/${postId}/like`;
-    }
+    // Use the same pattern as comments - posts are global entities
+    return `https://api.crowdbuilding.com/api/v1/posts/${postId}/like`;
 }
 
 function getCommentEndpoint(postId) {
