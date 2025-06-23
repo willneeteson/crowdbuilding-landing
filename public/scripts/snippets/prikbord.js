@@ -128,6 +128,20 @@ function formatDate(dateString) {
     });
 }
 
+function convertUrlsToLinks(text) {
+    // URL regex pattern that matches http/https URLs
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    
+    // Replace URLs with clickable links
+    return text.replace(urlRegex, (url) => {
+        // Clean up the URL (remove trailing punctuation that might be part of the text)
+        const cleanUrl = url.replace(/[.,;!?]+$/, '');
+        const punctuation = url.slice(cleanUrl.length);
+        
+        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="post-link">${cleanUrl}</a>${punctuation}`;
+    });
+}
+
 // ===============================
 // Post Creation Functionality
 // ===============================
@@ -459,7 +473,7 @@ function renderPosts(posts, append = false) {
                 </div>
             </div>
             <div class="post-body">
-                <p>${post.body}</p>
+                <p>${convertUrlsToLinks(post.body)}</p>
                 ${postImages}
             </div>
             <div class="post-footer">
@@ -860,6 +874,17 @@ function addStyles() {
             stroke: currentColor !important;
         }
         
+        .post-link {
+            color: #007bff;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+        
+        .post-link:hover {
+            color: #0056b3;
+            text-decoration: none;
+        }
+        
         .load-more-container {
             display: flex;
             flex-direction: column;
@@ -1105,7 +1130,7 @@ function createCommentForm(postId) {
                 <img class="post-avatar comment-avatar" src="${data.data.created_by.avatar_url}" alt="${data.data.created_by.name}" data-user-id="${data.data.created_by.id}">
                 <div class="comment-content">
                     <h5 data-user-id="${data.data.created_by.id}">${data.data.created_by.name}</h5>
-                    <p>${data.data.body}</p>
+                    <p>${convertUrlsToLinks(data.data.body)}</p>
                     <div class="comment-footer">
                         <time datetime="${data.data.created_at}">${formatDate(data.data.created_at)}</time>
                         <button class="comment-like-button" data-comment-id="${data.data.id}" data-liked="false">
@@ -1194,7 +1219,7 @@ function renderComments(comments, container) {
             <img class="post-avatar comment-avatar" src="${comment.created_by.avatar_url}" alt="${comment.created_by.name}" data-user-id="${comment.created_by.id}">
             <div class="comment-content">
                 <h5 data-user-id="${comment.created_by.id}">${comment.created_by.name}</h5>
-                <p>${comment.body}</p>
+                <p>${convertUrlsToLinks(comment.body)}</p>
                 <div class="comment-footer">
                     <time datetime="${comment.created_at}">${formatDate(comment.created_at)}</time>
                     <button class="comment-like-button" data-comment-id="${comment.id}" data-liked="${comment.likes?.some(like => like.id === currentUserId || like.user_id === currentUserId) ? 'true' : 'false'}">
