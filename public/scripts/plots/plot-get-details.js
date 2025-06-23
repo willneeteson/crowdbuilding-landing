@@ -91,8 +91,8 @@ class PlotDetailsManager {
         // Update images
         this.updateImages(data.images);
 
-        // Fetch and update groups/projects related to this plot
-        this.fetchPlotGroups();
+        // Update groups/projects related to this plot (using data from plot response)
+        this.updatePlotGroups(data.groups || []);
 
         // Initialize admin display if available
         if (typeof window.fetchAdminsData === 'function') {
@@ -704,29 +704,6 @@ class PlotDetailsManager {
                 }
             }
         });
-    }
-
-    fetchPlotGroups() {
-        const slug = this.getSlugFromUrl();
-        if (!slug) {
-            console.error('No slug found for fetching plot groups');
-            return;
-        }
-
-        fetch(`https://api.crowdbuilding.com/api/v1/plots/${slug}/groups`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Plot groups data:', data);
-                this.updatePlotGroups(data.data || []);
-            })
-            .catch(error => {
-                console.error('Error fetching plot groups:', error);
-            });
     }
 
     updatePlotGroups(groups) {
