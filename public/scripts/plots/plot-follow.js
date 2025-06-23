@@ -330,6 +330,15 @@ class LikeButton {
     const avatarWrapper = document.getElementById('followAvatarWrapper');
     if (!avatarWrapper) return;
 
+    // Hide wrapper if no followers
+    if (!followers || followers.length === 0) {
+      avatarWrapper.style.display = 'none';
+      return;
+    }
+
+    // Show wrapper if there are followers
+    avatarWrapper.style.display = 'flex';
+
     // Take the 5 most recent followers
     const recentFollowers = followers.slice(0, 5);
     
