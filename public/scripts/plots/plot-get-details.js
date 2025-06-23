@@ -587,21 +587,27 @@ class PlotDetailsManager {
             tabButton.style.display = (!signupProcedure) ? 'none' : 'inline-block';
         }
 
-        if (!container || !contentElement) return;
+        // Update the main content element if it exists
+        if (contentElement && signupProcedure) {
+            contentElement.innerHTML = signupProcedure;
+            contentElement.style.display = 'block';
+            console.log('Updated contentInschrijfprocedure with HTML content');
+        } else if (contentElement) {
+            contentElement.style.display = 'none';
+        }
 
-        if (signupProcedure) {
+        // Update the tab container if it exists
+        if (container && signupProcedure) {
             const content = `
                 <div class="w-richtext">
                     ${signupProcedure}
                 </div>
             `;
             container.innerHTML = content;
-            contentElement.innerHTML = content;
             container.style.display = 'block';
-            contentElement.style.display = 'block';
-        } else {
+            console.log('Updated tabContentPlotInschrijfprocedure with HTML content');
+        } else if (container) {
             container.style.display = 'none';
-            contentElement.style.display = 'none';
         }
     }
 

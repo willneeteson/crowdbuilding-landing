@@ -388,15 +388,14 @@ class LikeButton {
           height: 100%;
           object-fit: cover;
         }
-        .follower-avatar.remaining-count {
-          background: #f0f0f0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-          color: #666;
-          font-weight: 500;
-        }
+      .follower-avatar.remaining-count {
+      background: #E0DDD8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 500;
+      }
       `;
       document.head.appendChild(style);
     }
