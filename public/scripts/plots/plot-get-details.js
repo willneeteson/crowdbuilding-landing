@@ -867,8 +867,48 @@ class PlotDetailsManager {
     }
 
     updateExternalApplicationButton(data) {
-        const signupBtn = document.getElementById('plotSignupBtn');
-        if (!signupBtn) return;
+        let signupBtn = document.getElementById('plotSignupBtn');
+        
+        console.log('Looking for plotSignupBtn element:', {
+            elementFound: !!signupBtn,
+            element: signupBtn,
+            allButtons: document.querySelectorAll('button, a[href]'),
+            allElementsWithId: Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+        });
+        
+        // If button doesn't exist, create it
+        if (!signupBtn) {
+            console.log('plotSignupBtn element not found, creating it dynamically');
+            
+            // Try to find a good place to insert the button
+            const deadlineWrapper = document.getElementById('deadlineWrapper');
+            const deadlineCounter = document.querySelector('.plot-deadline-counter');
+            
+            if (deadlineWrapper) {
+                signupBtn = document.createElement('a');
+                signupBtn.id = 'plotSignupBtn';
+                signupBtn.className = 'button w-button';
+                signupBtn.textContent = 'Inschrijven';
+                signupBtn.style.display = 'none';
+                
+                // Insert after the deadline wrapper
+                deadlineWrapper.appendChild(signupBtn);
+                console.log('Created plotSignupBtn and inserted into deadlineWrapper');
+            } else if (deadlineCounter) {
+                signupBtn = document.createElement('a');
+                signupBtn.id = 'plotSignupBtn';
+                signupBtn.className = 'button w-button';
+                signupBtn.textContent = 'Inschrijven';
+                signupBtn.style.display = 'none';
+                
+                // Insert after the deadline counter
+                deadlineCounter.parentNode.insertBefore(signupBtn, deadlineCounter.nextSibling);
+                console.log('Created plotSignupBtn and inserted after deadlineCounter');
+            } else {
+                console.warn('Could not find suitable location to create plotSignupBtn');
+                return;
+            }
+        }
 
         console.log('External application data:', {
             hasExternal: data.has_external_plot_application,
@@ -891,7 +931,8 @@ class PlotDetailsManager {
             console.log('External application button configured:', {
                 href: signupBtn.href,
                 target: signupBtn.target,
-                display: signupBtn.style.display
+                display: signupBtn.style.display,
+                textContent: signupBtn.textContent
             });
         } else {
             // Hide button if no external application is available
