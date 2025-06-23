@@ -1376,7 +1376,6 @@ button.post-menu-item.delete {
 
 .document-item {
     width: 100%;
-    border: solid 1.5px var(--_color---color-neutral-black-100);
     border-radius: 12px;
     color: var(--_color---color-neutral-black-100);
     background: white;
@@ -1389,10 +1388,11 @@ button.post-menu-item.delete {
 .document-icon {
     width: 24px;
     height: 24px;
+    margin-top: 10px;
 }
 
 a.document-link {
-    padding: 8px 16px;
+    padding: 16px 24px;
     display: flex;
     gap: 12px;
     text-decoration: none;
