@@ -282,8 +282,8 @@ class LikeButton {
 
       // Show alert message
       const message = this.isFollowing 
-        ? 'Je volgt nu dit kavel!' 
-        : 'Je volgt dit kavel niet meer.';
+        ? 'Je volgt nu deze kavel!' 
+        : 'Je volgt deze kavel niet meer.';
       
       window.alert(message);
       

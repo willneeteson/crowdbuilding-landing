@@ -720,11 +720,11 @@ class PlotDetailsManager {
 
         const groupsHTML = groups.map(group => `
             <div class="plot-group-item">
-                <div class="plot-group-content">
-                    <h3 class="plot-group-title">
+                <div class="card__content-wrapper">
+                    <h3>
                         <a href="/groups/${group.id}" class="plot-group-link">${group.title}</a>
                     </h3>
-                    ${group.subtitle ? `<p class="plot-group-subtitle">${group.subtitle}</p>` : ''}
+                    ${group.subtitle ? `<p>${group.subtitle}</p>` : ''}
                     ${group.intro ? `<div class="plot-group-intro">${group.intro}</div>` : ''}
                     ${group.location ? `<p class="plot-group-location">📍 ${group.location}</p>` : ''}
                     ${group.member_status ? `<p class="plot-group-status">${group.member_status.name}</p>` : ''}
@@ -735,20 +735,17 @@ class PlotDetailsManager {
                     ` : ''}
                 </div>
                 ${group.image ? `
-                    <div class="plot-group-image-wrapper">
-                        <img src="${group.image.original_url}" alt="${group.title}" class="plot-group-image">
+                    <div class="card__img-wrapper">
+                        <img src="${group.image.original_url}" alt="${group.title}" class="card__img">
                     </div>
                 ` : ''}
             </div>
         `).join('');
 
         container.innerHTML = `
-            <div class="plot-groups-section">
-                <h2>Projecten op deze kavel</h2>
                 <div class="plot-groups-list">
                     ${groupsHTML}
                 </div>
-            </div>
         `;
 
         // Add styles for plot groups
