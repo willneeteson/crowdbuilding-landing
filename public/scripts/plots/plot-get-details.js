@@ -865,6 +865,40 @@ class PlotDetailsManager {
 
         document.head.appendChild(styles);
     }
+
+    updateExternalApplicationButton(data) {
+        const signupBtn = document.getElementById('plotSignupBtn');
+        if (!signupBtn) return;
+
+        console.log('External application data:', {
+            hasExternal: data.has_external_plot_application,
+            externalUrl: data.external_plot_application_url
+        });
+
+        // Check if external application is available
+        if (data.has_external_plot_application && data.external_plot_application_url) {
+            // Convert button to link with external URL
+            signupBtn.href = data.external_plot_application_url;
+            signupBtn.target = '_blank';
+            signupBtn.rel = 'noopener noreferrer';
+            signupBtn.style.display = 'block';
+            
+            // Update button text if needed
+            if (signupBtn.textContent === 'Inschrijven' || signupBtn.textContent === 'Sign up') {
+                signupBtn.textContent = 'Externe inschrijving';
+            }
+            
+            console.log('External application button configured:', {
+                href: signupBtn.href,
+                target: signupBtn.target,
+                display: signupBtn.style.display
+            });
+        } else {
+            // Hide button if no external application is available
+            signupBtn.style.display = 'none';
+            console.log('External application not available, hiding button');
+        }
+    }
 }
 
 class PlotMapManager {
