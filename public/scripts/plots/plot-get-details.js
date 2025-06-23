@@ -708,6 +708,13 @@ class PlotDetailsManager {
 
     updatePlotGroups(groups) {
         const container = document.getElementById('plotGroupsContainer');
+        const tabButton = document.getElementById('tabBtnProjects');
+        
+        // Hide tab button if no groups
+        if (tabButton) {
+            tabButton.style.display = (!groups || groups.length === 0) ? 'none' : 'inline-block';
+        }
+        
         if (!container) {
             console.log('Plot groups container not found');
             return;
@@ -763,20 +770,6 @@ class PlotDetailsManager {
         const styles = document.createElement('style');
         styles.id = 'plot-groups-styles';
         styles.textContent = `
-            .plot-groups-section {
-                margin: 40px 0;
-                padding: 24px;
-                background: #f8f9fa;
-                border-radius: 8px;
-            }
-
-            .plot-groups-section h2 {
-                margin: 0 0 24px 0;
-                font-size: 24px;
-                font-weight: 600;
-                color: #333;
-            }
-
             .plot-groups-list {
                 display: flex;
                 flex-direction: column;
@@ -790,35 +783,16 @@ class PlotDetailsManager {
                 align-items: center;
                 padding: 24px;
                 background: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                border-radius: 12px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
+                text-decoration: none;
+                border: 1px solid #e0e0e0;
             }
 
             .plot-group-item:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            }
-
-            .plot-group-content {
-                min-width: 0;
-            }
-
-            .plot-group-title {
-                margin: 0 0 8px 0;
-                font-size: 18px;
-                font-weight: 600;
-                line-height: 1.4;
-            }
-
-            .plot-group-link {
-                color: #333;
-                text-decoration: none;
-                transition: color 0.2s ease;
-            }
-
-            .plot-group-link:hover {
-                color: #e74c3c;
             }
 
             .plot-group-subtitle {
