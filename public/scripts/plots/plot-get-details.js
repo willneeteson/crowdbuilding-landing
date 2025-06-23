@@ -788,6 +788,7 @@ class PlotDetailsManager {
                 transition: transform 0.2s ease, box-shadow 0.2s ease;
                 text-decoration: none;
                 border: 1px solid #e0e0e0;
+                color: var(--_color---color-neutral-black-100);
             }
 
             .plot-group-item:hover {
@@ -806,13 +807,6 @@ class PlotDetailsManager {
                 margin: 0 0 12px 0;
                 font-size: 14px;
                 line-height: 1.6;
-                color: #555;
-            }
-
-            .plot-group-location {
-                margin: 0 0 8px 0;
-                font-size: 14px;
-                color: #666;
             }
 
             .plot-group-status {
