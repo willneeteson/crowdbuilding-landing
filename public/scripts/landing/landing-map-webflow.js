@@ -125,30 +125,35 @@ function createMarker(feature, map) {
   const markerElement = document.createElement("div");
   markerElement.className = "custom-marker";
 
-  const popupHTML = feature.properties.link 
-    ? `<a href="${feature.properties.link}" class="marker__popup-link">
-        <div class="marker__popup">
-          <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
-          <div class="marker__popup-content">
-            <h4>${feature.properties.title}</h4>
-            <p>${feature.properties.description}</p>
-          </div>
-        </div>
-      </a>`
-    : `<div class="marker__popup">
-        <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
-        <div class="marker__popup-content">
-          <h4>${feature.properties.title}</h4>
-          <p>${feature.properties.description}</p>
-        </div>
-      </div>`;
+  const popupHTML = `
+    <div class="marker__popup">
+      <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
+      <div class="marker__popup-content">
+        <h4>${feature.properties.title}</h4>
+        <p>${feature.properties.description}</p>
+      </div>
+    </div>
+  `;
 
-  new mapboxgl.Marker(markerElement)
+  const marker = new mapboxgl.Marker(markerElement)
     .setLngLat(feature.geometry.coordinates)
     .setPopup(
       new mapboxgl.Popup({ offset: 24 }).setHTML(popupHTML)
     )
     .addTo(map);
+
+  // Add click functionality to the popup if link exists
+  if (feature.properties.link) {
+    marker.getPopup().on('open', () => {
+      const popupElement = marker.getPopup().getElement();
+      if (popupElement) {
+        popupElement.style.cursor = 'pointer';
+        popupElement.addEventListener('click', () => {
+          window.open(feature.properties.link, '_blank');
+        });
+      }
+    });
+  }
 }
 
 // Initialize search bar functionality
