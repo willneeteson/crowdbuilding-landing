@@ -101,6 +101,7 @@ function getDynamicMarkers() {
         const title = item.querySelector(".map__project-name")?.textContent;
         const description = item.querySelector(".map__project-description")?.textContent;
         const image = item.querySelector(".map__project-img")?.textContent || DEFAULT_IMAGE;
+        const slug = item.querySelector(".map__project-slug")?.textContent;
 
         return !isNaN(lat) && !isNaN(long)
           ? {
@@ -108,7 +109,7 @@ function getDynamicMarkers() {
               geometry: { type: "Point", coordinates: [long, lat] },
               properties: { 
                 title, 
-                link: null, // No link in new structure
+                link: slug ? `https://crowdbuilding.com/groups/${slug}` : null,
                 description, 
                 image 
               },
@@ -130,6 +131,7 @@ function createMarker(feature, map) {
       <div class="marker__popup-content">
         <h4>${feature.properties.title}</h4>
         <p>${feature.properties.description}</p>
+        ${feature.properties.link ? `<a href="${feature.properties.link}" class="marker__popup-link">Bekijk project</a>` : ''}
       </div>
     </div>
   `;
@@ -194,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Redirect to new page with the search query
-      window.location.href = `https://app.crowdbuilding.com/discover?search=${searchQuery}&per_page=12#groups`;
+      window.location.href = `https://crowdbuilding.com/discover?location%2C+name_contain=${searchQuery}`;
     });
 
     console.log("✅ Search bar initialized successfully.");
