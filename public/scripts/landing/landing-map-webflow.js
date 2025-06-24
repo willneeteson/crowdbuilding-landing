@@ -125,16 +125,23 @@ function createMarker(feature, map) {
   const markerElement = document.createElement("div");
   markerElement.className = "custom-marker";
 
-  const popupHTML = `
-    <div class="marker__popup">
-      <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
-      <div class="marker__popup-content">
-        <h4>${feature.properties.title}</h4>
-        <p>${feature.properties.description}</p>
-        ${feature.properties.link ? `<a href="${feature.properties.link}" class="marker__popup-link">Bekijk project</a>` : ''}
-      </div>
-    </div>
-  `;
+  const popupHTML = feature.properties.link 
+    ? `<a href="${feature.properties.link}" class="marker__popup-link">
+        <div class="marker__popup">
+          <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
+          <div class="marker__popup-content">
+            <h4>${feature.properties.title}</h4>
+            <p>${feature.properties.description}</p>
+          </div>
+        </div>
+      </a>`
+    : `<div class="marker__popup">
+        <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
+        <div class="marker__popup-content">
+          <h4>${feature.properties.title}</h4>
+          <p>${feature.properties.description}</p>
+        </div>
+      </div>`;
 
   new mapboxgl.Marker(markerElement)
     .setLngLat(feature.geometry.coordinates)
