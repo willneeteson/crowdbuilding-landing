@@ -252,98 +252,64 @@ console.log('Partner ID (from URL):', id);
   }
 })();
 
-// Map configuration
-const MAP_CONFIG = {
-  accessToken: 'pk.eyJ1Ijoid2lsbG5lZXRlc29uIiwiYSI6ImNtMDJpZGM0eTAxbmkyanF1bTI2ZDByczQifQ.irtx4lkDC9cUXHtRIgBJVg',
-  style: 'mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq',
-  center: [5.2, 52.55],
-  zoom: 7.5,
-  minZoom: 6,
-  maxZoom: 10,
-  bounds: [[2, 50], [8, 53]]
-};
-
-class ExpertMapManager {
+// Partner Map Manager using shared MapManager
+class PartnerMapManager {
   constructor() {
-    this.map = null;
-    this.markers = new Map();
+    this.expertMap = null;
+    this.projectMap = null;
     this.init();
   }
 
   init() {
+    // Initialize ExpertMapManager (inner map) for all partner types
+    this.initExpertMap();
+    
+    // Initialize ProjectMapManager (outer map) only for non-service-provider types
+    const partnerType = document.body.getAttribute('partner-type');
+    if (partnerType !== 'Expert') {
+      this.initProjectMap();
+    }
+  }
+
+  initExpertMap() {
     const mapContainer = document.getElementById('mapSidebar');
     if (!mapContainer) return;
 
-    mapboxgl.accessToken = MAP_CONFIG.accessToken;
-    
-    this.map = new mapboxgl.Map({
-      container: 'mapSidebar',
-      style: MAP_CONFIG.style,
-      center: MAP_CONFIG.center,
-      zoom: MAP_CONFIG.zoom,
-      minZoom: MAP_CONFIG.minZoom,
-      maxZoom: MAP_CONFIG.maxZoom,
-      language: 'nl',
-      localize: true,
-      zoomAnimationOptions: { duration: 300 },
-      pitchWithRotate: false,
-      dragRotate: false,
-      touchZoomRotate: false
+    this.expertMap = new MapManager('mapSidebar', {
+      disableScrollZoom: true,
+      enableTouchControls: true,
+      enableResizeHandler: true,
+      enableNavigationControl: false,
+      autoCenterOnData: false,
+      enableMarkerHighlighting: false
     });
 
-    this.map.setMaxBounds(MAP_CONFIG.bounds);
-    this.setupZoomControls();
-    this.setupMarkers();
-  }
-
-  setupZoomControls() {
-    this.map.scrollZoom.disable();
-    this.setupTouchControls(this.map);
-  }
-
-  setupTouchControls(map) {
-    let isPinching = false;
-    const canvas = map.getCanvas();
-
-    canvas.addEventListener('wheel', (event) => {
-      if (event.ctrlKey) {
-        map.scrollZoom.enable();
-      } else {
-        map.scrollZoom.disable();
-      }
-    });
-
-    canvas.addEventListener('touchstart', (event) => {
-      if (event.touches.length === 2) {
-        isPinching = true;
-        map.scrollZoom.enable();
-      }
-    });
-
-    canvas.addEventListener('touchend', () => {
-      isPinching = false;
-      map.scrollZoom.disable();
-    });
-
-    canvas.addEventListener('touchmove', (event) => {
-      if (event.touches.length !== 2) {
-        isPinching = false;
-        map.scrollZoom.disable();
-      }
+    // Wait for map to be ready, then load markers
+    mapContainer.addEventListener('mapReady', () => {
+      this.loadExpertMarkers();
     });
   }
 
-  setupMarkers() {
-    this.map.on('load', () => {
-      const geojsonData = this.getDynamicMarkers();
-      this.clearMarkers();
-      geojsonData.features.forEach(feature => {
-        this.createMarker(feature);
-      });
+  initProjectMap() {
+    const mapContainer = document.getElementById('mapExpert');
+    if (!mapContainer) return;
+
+    this.projectMap = new MapManager('mapExpert', {
+      disableScrollZoom: true,
+      enableTouchControls: true,
+      enableResizeHandler: true,
+      enableNavigationControl: false,
+      autoCenterOnData: false,
+      enableMarkerHighlighting: false
+    });
+
+    // Wait for map to be ready, then load projects
+    mapContainer.addEventListener('mapReady', () => {
+      this.loadPartnerProjects();
     });
   }
 
-  getDynamicMarkers() {
+  loadExpertMarkers() {
     const features = [];
     document.querySelectorAll('.marker__item').forEach(item => {
       const lat = parseFloat(item.querySelector('.marker.lat')?.textContent);
@@ -357,216 +323,30 @@ class ExpertMapManager {
         features.push({
           type: "Feature",
           geometry: { type: "Point", coordinates: [long, lat] },
-          properties: { title, link, description, image }
+          properties: { 
+            title, 
+            link, 
+            description, 
+            image,
+            popupHTML: `
+              <img src="${image}" class="marker__popup-img"/>
+              <div class="marker__popup-content">
+                <h4>${title}</h4>
+                <p>${description}</p>
+              </div>
+              <a href="${link}" class="marker__popup-link"></a>
+            `
+          }
         });
       }
     });
 
-    return {
-      type: "FeatureCollection",
-      features
-    };
-  }
-
-  createMarker(feature) {
-    const { coordinates } = feature.geometry;
-    const { title, link, description, image } = feature.properties;
-
-    const markerElement = document.createElement('div');
-    markerElement.className = 'custom-marker';
-
-    const marker = new mapboxgl.Marker(markerElement)
-      .setLngLat(coordinates)
-      .setPopup(
-        new mapboxgl.Popup({ offset: 24 })
-          .setHTML(`
-            <img src="${image}" class="marker__popup-img"/>
-            <div class="marker__popup-content">
-              <h4>${title}</h4>
-              <p>${description}</p>
-            </div>
-            <a href="${link}" class="marker__popup-link"></a>
-          `)
-      )
-      .addTo(this.map);
-
-    this.markers.set(coordinates.join(','), marker);
-  }
-
-  clearMarkers() {
-    this.markers.forEach(marker => marker.remove());
-    this.markers.clear();
-  }
-}
-
-class ProjectMapManager {
-  constructor() {
-    this.map = null;
-    this.markers = new Map();
-    this.boundHandleResize = this.handleResize.bind(this);
-    this.init();
-  }
-
-  init() {
-    const mapContainer = document.getElementById('mapExpert');
-    if (!mapContainer) return;
-
-    this.initializeMap(mapContainer);
-    this.setupEventListeners();
-  }
-
-  initializeMap(container) {
-    mapboxgl.accessToken = MAP_CONFIG.accessToken;
-    
-    this.map = new mapboxgl.Map({
-      container: container,
-      style: MAP_CONFIG.style,
-      center: MAP_CONFIG.center,
-      zoom: MAP_CONFIG.zoom,
-      minZoom: MAP_CONFIG.minZoom,
-      maxZoom: MAP_CONFIG.maxZoom,
-      language: 'nl',
-      localize: true,
-      zoomAnimationOptions: { duration: 300 },
-      pitchWithRotate: false,
-      dragRotate: false,
-      touchZoomRotate: false,
-      clickTolerance: 3
-    });
-
-    this.map.setMaxBounds(MAP_CONFIG.bounds);
-    this.map.scrollZoom.disable();
-  }
-
-  setupEventListeners() {
-    // Map click handler to close popups
-    this.map.on('click', this.closeAllPopups.bind(this));
-
-    // Map load handler
-    this.map.on('load', () => {
-      this.loadPartnerProjects();
-      this.map.resize();
-    });
-
-    // Touch and zoom controls
-    this.setupTouchControls();
-
-    // Resize handler
-    window.addEventListener('resize', this.boundHandleResize);
-  }
-
-  setupTouchControls() {
-    let isPinching = false;
-    const canvas = this.map.getCanvas();
-
-    const handleWheel = (event) => {
-      this.map.scrollZoom[event.ctrlKey ? 'enable' : 'disable']();
-    };
-
-    const handleTouchStart = (event) => {
-      if (event.touches.length === 2) {
-        isPinching = true;
-        this.map.scrollZoom.enable();
-      }
-    };
-
-    const handleTouchEnd = () => {
-      isPinching = false;
-      this.map.scrollZoom.disable();
-    };
-
-    const handleTouchMove = (event) => {
-      if (event.touches.length !== 2 && isPinching) {
-        isPinching = false;
-        this.map.scrollZoom.disable();
-      }
-    };
-
-    canvas.addEventListener('wheel', handleWheel);
-    canvas.addEventListener('touchstart', handleTouchStart);
-    canvas.addEventListener('touchend', handleTouchEnd);
-    canvas.addEventListener('touchmove', handleTouchMove);
-
-    // Store event listeners for cleanup
-    this._touchListeners = {
-      wheel: handleWheel,
-      touchstart: handleTouchStart,
-      touchend: handleTouchEnd,
-      touchmove: handleTouchMove,
-      canvas
-    };
-  }
-
-  handleResize() {
-    if (this.map) {
-      this.map.resize();
+    if (this.expertMap) {
+      this.expertMap.addMarkers(features, {
+        className: 'custom-marker',
+        popupClassName: 'custom-popup'
+      });
     }
-  }
-
-  closeAllPopups() {
-    this.markers.forEach(marker => {
-      if (marker.getPopup().isOpen()) {
-        marker.getPopup().remove();
-      }
-    });
-  }
-
-  createMarkerElement() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'project-marker-wrapper';
-
-    const marker = document.createElement('div');
-    marker.className = 'custom-marker project-marker';
-
-    wrapper.appendChild(marker);
-    return wrapper;
-  }
-
-  createPopup(project) {
-    return new mapboxgl.Popup({
-      offset: 25,
-      closeButton: true,
-      maxWidth: '300px',
-      className: 'project-popup',
-      closeOnClick: false,
-      focusAfterOpen: false
-    }).setHTML(`
-      <div class="project__popup">
-        ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
-        <div class="project__popup-content">
-          <h4>${project.title}</h4>
-          ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
-          ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
-        </div>
-        <a href="/groups/${project.slug}" class="project__popup-link"></a>
-      </div>
-    `);
-  }
-
-  createProjectMarker(project) {
-    if (!project.latitude || !project.longitude) return;
-
-    const markerElement = this.createMarkerElement();
-    const popup = this.createPopup(project);
-
-    const marker = new mapboxgl.Marker({
-      element: markerElement,
-      anchor: 'center'
-    })
-      .setLngLat([project.longitude, project.latitude])
-      .setPopup(popup)
-      .addTo(this.map);
-
-    const handleClick = (e) => {
-      e.stopPropagation();
-      this.closeAllPopups();
-      if (!popup.isOpen()) {
-        popup.addTo(this.map);
-      }
-    };
-
-    markerElement.addEventListener('click', handleClick);
-    this.markers.set(project.id, { marker, handleClick });
   }
 
   async loadPartnerProjects() {
@@ -576,21 +356,48 @@ class ProjectMapManager {
       
       const { data: projects = [] } = await response.json();
 
-      this.clearMarkers();
-      projects.forEach(project => this.createProjectMarker(project));
+      // Convert projects to GeoJSON features
+      const features = projects
+        .filter(project => project.latitude && project.longitude)
+        .map(project => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [project.longitude, project.latitude],
+          },
+          properties: {
+            id: project.id,
+            title: project.title,
+            description: project.subtitle || "No description available",
+            image: project.image?.original_url || "https://cdn.prod.website-files.com/66dffceb975388322f140196/67bcaf8a62d1172be49c4000_e21844b19f5eee45e161d9c34c5fc437_cb_placeholder.jpg",
+            link: `/groups/${project.slug}`,
+            phase: project.phase,
+            popupHTML: `
+              <div class="project__popup">
+                ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
+                <div class="project__popup-content">
+                  <h4>${project.title}</h4>
+                  ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
+                  ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
+                </div>
+                <a href="/groups/${project.slug}" class="project__popup-link"></a>
+              </div>
+            `
+          },
+        }));
+
+      if (this.projectMap) {
+        this.projectMap.addMarkers(features, {
+          className: 'project-marker',
+          popupClassName: 'project-popup'
+        });
+      }
+
       this.updateProjectList(projects);
 
     } catch (error) {
       console.error('Error loading partner projects:', error);
     }
-  }
-
-  clearMarkers() {
-    this.markers.forEach(({ marker, handleClick }) => {
-      marker.remove();
-      marker.getElement().removeEventListener('click', handleClick);
-    });
-    this.markers.clear();
   }
 
   updateProjectList(projects) {
@@ -618,38 +425,20 @@ class ProjectMapManager {
   }
 
   destroy() {
-    // Remove event listeners
-    window.removeEventListener('resize', this.boundHandleResize);
-    
-    if (this._touchListeners) {
-      const { wheel, touchstart, touchend, touchmove, canvas } = this._touchListeners;
-      canvas.removeEventListener('wheel', wheel);
-      canvas.removeEventListener('touchstart', touchstart);
-      canvas.removeEventListener('touchend', touchend);
-      canvas.removeEventListener('touchmove', touchmove);
+    if (this.expertMap) {
+      this.expertMap.destroy();
+      this.expertMap = null;
     }
-
-    // Clear markers
-    this.clearMarkers();
-
-    // Remove map
-    if (this.map) {
-      this.map.remove();
-      this.map = null;
+    if (this.projectMap) {
+      this.projectMap.destroy();
+      this.projectMap = null;
     }
   }
 }
 
 // Initialize maps when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize ExpertMapManager (inner map) for all partner types
-  new ExpertMapManager();
-  
-  // Initialize ProjectMapManager (outer map) only for non-service-provider types
-  const partnerType = document.body.getAttribute('partner-type');
-  if (partnerType !== 'Expert') {
-    new ProjectMapManager();
-  }
+  new PartnerMapManager();
 });
 
 class ContentManager {
@@ -809,13 +598,27 @@ projectStyles.textContent = `
     border: 1.5px solid var(--_color---color-neutral-black-100);
   }
 
-  .project-marker-wrapper {
-    padding: 8px;
-    cursor: pointer;
+  /* Custom marker styles for expert map */
+  .custom-marker {
+    width: 24px;
+    height: 24px;
+    background: #3498db;
+    border: 2px solid white;
     border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: transform 0.2s;
+    cursor: pointer;
   }
 
+  .custom-marker:hover {
+    transform: scale(1.1);
+  }
+
+  .custom-marker:active {
+    transform: scale(0.95);
+  }
+
+  /* Project marker styles */
   .project-marker {
     width: 24px;
     height: 24px;
@@ -824,15 +627,44 @@ projectStyles.textContent = `
     border-radius: 50%;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: transform 0.2s;
-    pointer-events: none;
+    cursor: pointer;
   }
 
-  .project-marker-wrapper:hover .project-marker {
+  .project-marker:hover {
     transform: scale(1.1);
   }
 
-  .project-marker-wrapper:active .project-marker {
+  .project-marker:active {
     transform: scale(0.95);
+  }
+
+  /* Popup styles */
+  .custom-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
+  }
+
+  .custom-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .custom-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
   }
 
   .project-popup .mapboxgl-popup-content {
@@ -900,6 +732,38 @@ projectStyles.textContent = `
   }
 
   .project__popup-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .marker__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+
+  .marker__popup-content {
+    padding: 16px;
+  }
+
+  .marker__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .marker__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+  }
+
+  .marker__popup-link {
     position: absolute;
     top: 0;
     left: 0;
