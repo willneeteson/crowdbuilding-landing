@@ -180,6 +180,19 @@ class MapManager {
         markerElement.className = markerOptions.className;
         console.log('Created marker element with class:', markerElement.className);
 
+        // Force apply the styles to ensure they're visible
+        markerElement.style.width = '24px';
+        markerElement.style.height = '24px';
+        markerElement.style.background = '#e74c3c';
+        markerElement.style.border = '2px solid white';
+        markerElement.style.borderRadius = '50%';
+        markerElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        markerElement.style.cursor = 'pointer';
+        markerElement.style.position = 'relative';
+        markerElement.style.zIndex = '1';
+        
+        console.log('Applied inline styles to marker element');
+
         const popup = new mapboxgl.Popup({ 
             offset: markerOptions.popupOffset,
             className: markerOptions.popupClassName,
@@ -203,12 +216,14 @@ class MapManager {
             .addTo(this.map);
 
         console.log('Marker added to map. Element:', markerElement);
-        console.log('Marker element styles:', {
-            width: markerElement.style.width,
-            height: markerElement.style.height,
-            background: markerElement.style.background,
-            display: markerElement.style.display,
-            position: markerElement.style.position
+        console.log('Marker element computed styles:', {
+            width: window.getComputedStyle(markerElement).width,
+            height: window.getComputedStyle(markerElement).height,
+            background: window.getComputedStyle(markerElement).background,
+            display: window.getComputedStyle(markerElement).display,
+            position: window.getComputedStyle(markerElement).position,
+            opacity: window.getComputedStyle(markerElement).opacity,
+            visibility: window.getComputedStyle(markerElement).visibility
         });
 
         // Add click functionality if link exists
