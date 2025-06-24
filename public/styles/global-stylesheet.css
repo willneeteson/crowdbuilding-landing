@@ -362,3 +362,98 @@ button.splide__arrow.splide__arrow {
     height: 100%;
     min-height: 400px;
 }
+
+/* ==========================================================================
+   Plot-specific Map Styles (now available for all maps)
+   ========================================================================== */
+
+.plot-marker {
+    width: 24px;
+    height: 24px;
+    background: #e74c3c;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    position: absolute;
+    transform-origin: center;
+    pointer-events: auto;
+}
+
+.plot-marker:hover {
+    transform: scale(1.1);
+}
+
+/* Prevent any unwanted animations during map interactions */
+.mapboxgl-marker {
+    transition: none !important;
+}
+
+.mapboxgl-marker-anchor-center {
+    transform-origin: center !important;
+}
+
+.plot-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
+}
+
+.plot-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.plot-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.plot__popup {
+    position: relative;
+}
+
+.plot__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.plot__popup-content {
+    padding: 16px;
+}
+
+.plot__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.plot__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.plot__popup-address {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#innerMap {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
