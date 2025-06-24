@@ -1,4 +1,5 @@
 // Initialize plot details functionality
+// This file depends on the shared MapManager from map.js
 class PlotDetailsManager {
     constructor() {
         this.plotData = null;
@@ -567,7 +568,63 @@ class PlotDetailsManager {
             return;
         }
 
-        this.mapManager = new PlotMapManager(mapContainer, this.plotData);
+        // Use the shared MapManager instead of PlotMapManager
+        this.mapManager = new MapManager('innerMap', {
+            center: [this.plotData.longitude, this.plotData.latitude],
+            zoom: 14,
+            minZoom: 6,
+            maxZoom: 18,
+            disableScrollZoom: true,
+            enableTouchControls: true,
+            enableResizeHandler: true,
+            enableNavigationControl: false,
+            autoCenterOnData: false
+        });
+
+        // Create a single marker for the plot
+        const plotFeature = {
+            type: "Feature",
+            geometry: {
+                type: "Point",
+                coordinates: [this.plotData.longitude, this.plotData.latitude],
+            },
+            properties: {
+                id: this.plotData.id || 'plot-marker',
+                title: this.plotData.title,
+                description: this.plotData.subtitle || "Plot location",
+                image: this.plotData.image?.original_url || "https://cdn.prod.website-files.com/66dffceb975388322f140196/67bcaf8a62d1172be49c4000_e21844b19f5eee45e161d9c34c5fc437_cb_placeholder.jpg",
+                popupHTML: this.generatePlotPopupHTML(),
+                className: 'plot-marker',
+                popupClassName: 'plot-popup'
+            },
+        };
+
+        // Wait for map to be ready before adding marker
+        mapContainer.addEventListener('mapReady', () => {
+            this.mapManager.addMarkers([plotFeature], {
+                className: 'plot-marker',
+                popupClassName: 'plot-popup',
+                popupOffset: 25
+            });
+        });
+    }
+
+    generatePlotPopupHTML() {
+        return `
+            <div class="plot__popup">
+                ${this.plotData.image ? `<img src="${this.plotData.image.original_url}" alt="${this.plotData.title}" class="plot__popup-img"/>` : ''}
+                <div class="plot__popup-content">
+                    <h4>${this.plotData.title}</h4>
+                    ${this.plotData.subtitle ? `<p>${this.plotData.subtitle}</p>` : ''}
+                    ${this.plotData.address ? `
+                        <div class="plot__popup-address">
+                            ${this.plotData.address.street} ${this.plotData.address.house_number}<br>
+                            ${this.plotData.address.postal_code} ${this.plotData.address.city}
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
     }
 
     updateSignupProcedure(signupProcedure) {
@@ -917,122 +974,6 @@ class PlotDetailsManager {
             // Hide button if no external application is available
             signupBtn.style.display = 'none';
             console.log('External application not available, hiding button');
-        }
-    }
-}
-
-class PlotMapManager {
-    constructor(container, plotData) {
-        this.map = null;
-        this.container = container;
-        this.plotData = plotData;
-        this.marker = null;
-        this.init();
-    }
-
-    init() {
-        if (!this.container || !this.plotData?.latitude || !this.plotData?.longitude) return;
-
-        mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsbG5lZXRlc29uIiwiYSI6ImNtMDJpZGM0eTAxbmkyanF1bTI2ZDByczQifQ.irtx4lkDC9cUXHtRIgBJVg';
-        
-        this.map = new mapboxgl.Map({
-            container: this.container,
-            style: 'mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq',
-            center: [this.plotData.longitude, this.plotData.latitude],
-            zoom: 14,
-            minZoom: 6,
-            maxZoom: 18,
-            language: 'nl',
-            localize: true,
-            zoomAnimationOptions: { duration: 300 },
-            pitchWithRotate: false,
-            dragRotate: false,
-            touchZoomRotate: false
-        });
-
-        this.setupMapControls();
-        this.createMarker();
-    }
-
-    setupMapControls() {
-        this.map.scrollZoom.disable();
-        this.setupTouchControls();
-    }
-
-    setupTouchControls() {
-        let isPinching = false;
-        const canvas = this.map.getCanvas();
-
-        canvas.addEventListener('wheel', (event) => {
-            if (event.ctrlKey) {
-                this.map.scrollZoom.enable();
-            } else {
-                this.map.scrollZoom.disable();
-            }
-        });
-
-        canvas.addEventListener('touchstart', (event) => {
-            if (event.touches.length === 2) {
-                isPinching = true;
-                this.map.scrollZoom.enable();
-            }
-        });
-
-        canvas.addEventListener('touchend', () => {
-            isPinching = false;
-            this.map.scrollZoom.disable();
-        });
-
-        canvas.addEventListener('touchmove', (event) => {
-            if (event.touches.length !== 2) {
-                isPinching = false;
-                this.map.scrollZoom.disable();
-            }
-        });
-    }
-
-    createMarker() {
-        const markerElement = document.createElement('div');
-        markerElement.className = 'plot-marker';
-
-        const popup = new mapboxgl.Popup({
-            offset: 25,
-            closeButton: true,
-            maxWidth: '300px',
-            className: 'plot-popup',
-            closeOnClick: false
-        }).setHTML(`
-            <div class="plot__popup">
-                ${this.plotData.image ? `<img src="${this.plotData.image.original_url}" alt="${this.plotData.title}" class="plot__popup-img"/>` : ''}
-                <div class="plot__popup-content">
-                    <h4>${this.plotData.title}</h4>
-                    ${this.plotData.subtitle ? `<p>${this.plotData.subtitle}</p>` : ''}
-                    ${this.plotData.address ? `
-                        <div class="plot__popup-address">
-                            ${this.plotData.address.street} ${this.plotData.address.house_number}<br>
-                            ${this.plotData.address.postal_code} ${this.plotData.address.city}
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-        `);
-
-        this.marker = new mapboxgl.Marker({
-            element: markerElement,
-            anchor: 'center'
-        })
-            .setLngLat([this.plotData.longitude, this.plotData.latitude])
-            .setPopup(popup)
-            .addTo(this.map);
-    }
-
-    destroy() {
-        if (this.marker) {
-            this.marker.remove();
-        }
-        if (this.map) {
-            this.map.remove();
-            this.map = null;
         }
     }
 }

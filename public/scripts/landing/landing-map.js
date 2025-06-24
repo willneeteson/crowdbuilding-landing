@@ -28,8 +28,8 @@ function initializeMap() {
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/willneeteson/cm02jz7we007b01r6d69f99cq",
-    center: [5.2, 52.55], // Back to original center
-    zoom: 7.5, // Back to original zoom
+    center: [5.2, 52.55],
+    zoom: 7.5,
     minZoom: 6,
     maxZoom: 10,
     pitchWithRotate: false,
@@ -65,14 +65,12 @@ function initializeMap() {
   });
 
   // Ensure markers load after the map is fully initialized
-  map.on("load", async () => {
+  map.on("load", () => {
     console.log("Map is ready, loading markers...");
-    try {
-      const geojsonData = await getDynamicMarkers();
+    setTimeout(() => {
+      const geojsonData = getDynamicMarkers();
       geojsonData.features.forEach((feature) => createMarker(feature, map));
-    } catch (error) {
-      console.error('Error loading markers:', error);
-    }
+    }, 500); // Short delay to avoid race conditions
   });
 }
 
@@ -91,52 +89,35 @@ if (mapElement) {
 }
 
 // Load Markers After Map is Fully Initialized
-async function getDynamicMarkers() {
+function getDynamicMarkers() {
   const DEFAULT_IMAGE = "https://cdn.prod.website-files.com/66dffceb975388322f140196/6834726b5dcff52c6de834fb_cb_group-image-placeholder.webp";
   
-  try {
-    let allGroups = [];
-    let currentPage = 1;
-    let hasMorePages = true;
+  return {
+    type: "FeatureCollection",
+    features: Array.from(document.querySelectorAll(".w-dyn-item"))
+      .map((item) => {
+        const lat = parseFloat(item.querySelector(".map__project-lat")?.textContent);
+        const long = parseFloat(item.querySelector(".map__project-long")?.textContent);
+        const title = item.querySelector(".map__project-name")?.textContent;
+        const description = item.querySelector(".map__project-description")?.textContent;
+        const image = item.querySelector(".map__project-img")?.textContent || DEFAULT_IMAGE;
+        const slug = item.querySelector(".map__project-slug")?.textContent;
 
-    // Fetch all pages
-    while (hasMorePages) {
-      const response = await fetch(`https://api.crowdbuilding.com/api/v1/groups?page=${currentPage}`);
-      const data = await response.json();
-      
-      allGroups = allGroups.concat(data.data);
-      
-      // Check if there are more pages
-      hasMorePages = currentPage < data.meta.last_page;
-      currentPage++;
-    }
-    
-    return {
-      type: "FeatureCollection",
-      features: allGroups
-        .filter(group => group.latitude && group.longitude && group.location_found)
-        .map(group => ({
-          type: "Feature",
-          geometry: { 
-            type: "Point", 
-            coordinates: [group.longitude, group.latitude] 
-          },
-          properties: { 
-            title: group.title,
-            link: `https://crowdbuilding.com/groups/${group.id}`,
-            description: group.subtitle || group.intro?.replace(/<[^>]*>/g, '') || '',
-            image: group.image?.conversions?.thumb?.url || group.image?.original_url || DEFAULT_IMAGE,
-            location: group.location
-          },
-        })),
-    };
-  } catch (error) {
-    console.error('Error fetching groups:', error);
-    return {
-      type: "FeatureCollection",
-      features: []
-    };
-  }
+        return !isNaN(lat) && !isNaN(long)
+          ? {
+              type: "Feature",
+              geometry: { type: "Point", coordinates: [long, lat] },
+              properties: { 
+                title, 
+                link: slug ? `https://crowdbuilding.com/groups/${slug}` : null,
+                description, 
+                image 
+              },
+            }
+          : null;
+      })
+      .filter(Boolean),
+  };
 }
 
 function createMarker(feature, map) {
@@ -144,19 +125,41 @@ function createMarker(feature, map) {
   const markerElement = document.createElement("div");
   markerElement.className = "custom-marker";
 
-  new mapboxgl.Marker(markerElement)
+  const popupHTML = `
+    <div class="marker__popup">
+      <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
+      <div class="marker__popup-content">
+        <h4>${feature.properties.title}</h4>
+        <p>${feature.properties.description}</p>
+      </div>
+    </div>
+  `;
+
+  const marker = new mapboxgl.Marker(markerElement)
     .setLngLat(feature.geometry.coordinates)
     .setPopup(
-      new mapboxgl.Popup({ offset: 24 }).setHTML(`
-        <img src="${feature.properties.image}" class="marker__popup-img"/>
-        <div class="marker__popup-content">
-          <h4>${feature.properties.title}</h4>
-          <p>${feature.properties.description}</p>
-        </div>
-        <a href="${feature.properties.link}" class="marker__popup-link"></a>
-      `)
+      new mapboxgl.Popup({ offset: 24 }).setHTML(popupHTML)
     )
     .addTo(map);
+
+  // Add click functionality to the popup if link exists
+  if (feature.properties.link) {
+    marker.getPopup().on('open', () => {
+      const popupElement = marker.getPopup().getElement();
+      if (popupElement) {
+        const popupContent = popupElement.querySelector('.marker__popup');
+        if (popupContent) {
+          popupContent.style.cursor = 'pointer';
+          popupContent.addEventListener('click', (e) => {
+            // Don't trigger if clicking on the close button
+            if (!e.target.closest('.mapboxgl-popup-close-button')) {
+              window.location.href = feature.properties.link;
+            }
+          });
+        }
+      }
+    });
+  }
 }
 
 // Initialize search bar functionality
@@ -211,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Redirect to new page with the search query
-      window.location.href = `https://crowdbuilding.com/discover?location%2C+name_contain=${searchQuery}`;
+      window.location.href = `https://crowdbuilding.com/discover?sort_date=desc&location%2C+name%2C+provincie_equal=${searchQuery}`;
     });
 
     console.log("✅ Search bar initialized successfully.");
