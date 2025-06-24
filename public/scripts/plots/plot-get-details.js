@@ -1,5 +1,27 @@
 // Initialize plot details functionality
 // This file depends on the shared MapManager from map.js
+
+// Ensure MapManager is available before initializing
+async function ensureMapManager() {
+    if (typeof MapManager !== 'undefined') {
+        return Promise.resolve();
+    }
+    
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = '/scripts/snippets/map.js';
+        script.onload = () => {
+            console.log('MapManager loaded successfully');
+            resolve();
+        };
+        script.onerror = () => {
+            console.error('Failed to load MapManager');
+            reject(new Error('Failed to load MapManager'));
+        };
+        document.head.appendChild(script);
+    });
+}
+
 class PlotDetailsManager {
     constructor() {
         this.plotData = null;
@@ -9,6 +31,7 @@ class PlotDetailsManager {
 
     async init() {
         try {
+            await ensureMapManager();
             await this.fetchPlotData();
             this.initializeMap();
         } catch (error) {
