@@ -274,25 +274,32 @@ class PartnerMapManager {
   }
 
   async loadMapDependency() {
-    // Check if MapManager is already available
+    // Check if MapManager is already available (since map.js is loaded in HTML)
     if (window.MapManager) {
+      console.log('MapManager already available');
       return;
     }
 
-    // Load map.js if not already loaded
+    // If MapManager is not available, wait a bit and check again
     return new Promise((resolve) => {
-      const script = document.createElement('script');
-      // Use absolute path that matches the Vercel deployment
-      script.src = '/scripts/snippets/map.js';
-      script.onload = () => {
-        console.log('MapManager loaded for partner template');
-        resolve();
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      const checkMapManager = () => {
+        attempts++;
+        if (window.MapManager) {
+          console.log('MapManager found after waiting');
+          resolve();
+        } else if (attempts < maxAttempts) {
+          console.log(`Waiting for MapManager... attempt ${attempts}`);
+          setTimeout(checkMapManager, 100);
+        } else {
+          console.error('MapManager not available after waiting');
+          resolve();
+        }
       };
-      script.onerror = () => {
-        console.error('Failed to load map.js');
-        resolve();
-      };
-      document.head.appendChild(script);
+      
+      checkMapManager();
     });
   }
 
