@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Redirect to new page with the search query
-      window.location.href = `https://crowdbuilding.com/discover?location%2C+name_contain=${searchQuery}`;
+      window.location.href = `https://crowdbuilding.com/discover?sort_date=desc&location%2C+name%2C+provincie_equal=${searchQuery}`;
     });
 
     console.log("✅ Search bar initialized successfully.");
