@@ -96,14 +96,24 @@ function getDynamicMarkers() {
     type: "FeatureCollection",
     features: Array.from(document.querySelectorAll(".w-dyn-item"))
       .map((item) => {
-        const lat = parseFloat(item.querySelector(".map__project-lat")?.textContent);
-        const long = parseFloat(item.querySelector(".map__project-long")?.textContent);
-        const title = item.querySelector(".map__project-name")?.textContent;
-        const description = item.querySelector(".map__project-description")?.textContent;
-        const image = item.querySelector(".map__project-img")?.textContent || DEFAULT_IMAGE;
-        const slug = item.querySelector(".map__project-slug")?.textContent;
+        // Get all div elements within the w-dyn-item
+        const divs = item.querySelectorAll("div");
+        
+        // Extract data from the divs based on the structure:
+        // div[0] = title
+        // div[1] = description  
+        // div[2] = latitude
+        // div[3] = longitude
+        // div[4] = image URL
+        // div[5] = slug (if available)
+        const title = divs[0]?.textContent?.trim();
+        const description = divs[1]?.textContent?.trim();
+        const lat = parseFloat(divs[2]?.textContent?.trim());
+        const long = parseFloat(divs[3]?.textContent?.trim());
+        const image = divs[4]?.textContent?.trim() || DEFAULT_IMAGE;
+        const slug = divs[5]?.textContent?.trim();
 
-        return !isNaN(lat) && !isNaN(long)
+        return !isNaN(lat) && !isNaN(long) && title
           ? {
               type: "Feature",
               geometry: { type: "Point", coordinates: [long, lat] },
@@ -142,21 +152,19 @@ function createMarker(feature, map) {
     )
     .addTo(map);
 
-  // Add click functionality to the popup if link exists
+  // Add click functionality to the entire popup if link exists
   if (feature.properties.link) {
     marker.getPopup().on('open', () => {
       const popupElement = marker.getPopup().getElement();
       if (popupElement) {
-        const popupContent = popupElement.querySelector('.marker__popup');
-        if (popupContent) {
-          popupContent.style.cursor = 'pointer';
-          popupContent.addEventListener('click', (e) => {
-            // Don't trigger if clicking on the close button
-            if (!e.target.closest('.mapboxgl-popup-close-button')) {
-              window.location.href = feature.properties.link;
-            }
-          });
-        }
+        // Make the entire popup clickable
+        popupElement.style.cursor = 'pointer';
+        popupElement.addEventListener('click', (e) => {
+          // Don't trigger if clicking on the close button
+          if (!e.target.closest('.mapboxgl-popup-close-button')) {
+            window.location.href = feature.properties.link;
+          }
+        });
       }
     });
   }
