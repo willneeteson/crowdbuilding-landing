@@ -623,13 +623,26 @@ class PlotDetailsManager {
         };
 
         // Wait for map to be ready before adding marker
-        mapContainer.addEventListener('mapReady', () => {
-            this.mapManager.addMarkers([plotFeature], {
-                className: 'plot-marker',
-                popupClassName: 'plot-popup',
-                popupOffset: 25
-            });
-        });
+        const handleMapReady = () => {
+            // Add a small delay to ensure map is fully rendered
+            setTimeout(() => {
+                this.mapManager.addMarkers([plotFeature], {
+                    className: 'plot-marker',
+                    popupClassName: 'plot-popup',
+                    popupOffset: 25
+                });
+            }, 100);
+        };
+
+        // Listen for the mapReady event
+        mapContainer.addEventListener('mapReady', handleMapReady, { once: true });
+        
+        // Fallback: if mapReady event doesn't fire, try after a delay
+        setTimeout(() => {
+            if (this.mapManager && this.mapManager.map && this.mapManager.map.isStyleLoaded()) {
+                handleMapReady();
+            }
+        }, 2000);
     }
 
     generatePlotPopupHTML() {
@@ -1012,10 +1025,22 @@ plotMapStyles.textContent = `
         border-radius: 50%;
         box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         transition: transform 0.2s;
+        position: absolute;
+        transform-origin: center;
+        pointer-events: auto;
     }
 
     .plot-marker:hover {
         transform: scale(1.1);
+    }
+
+    /* Prevent any unwanted animations during map interactions */
+    .mapboxgl-marker {
+        transition: none !important;
+    }
+
+    .mapboxgl-marker-anchor-center {
+        transform-origin: center !important;
     }
 
     .plot-popup .mapboxgl-popup-content {
