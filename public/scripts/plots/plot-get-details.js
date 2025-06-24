@@ -984,35 +984,61 @@ class PlotDetailsManager {
             return;
         }
 
-        console.log('External application data:', {
-            hasExternal: data.has_external_plot_application,
-            externalUrl: data.external_plot_application_url
+        console.log('Application type data:', {
+            applicationType: data.application_type,
+            applicationTypeName: data.application_type?.name,
+            website: data.website
         });
 
-        // Check if external application is available
-        if (data.has_external_plot_application && data.external_plot_application_url) {
-            // Update the existing button with external URL
-            signupBtn.href = data.external_plot_application_url;
+        // Hide button if application_type is null or not set
+        if (!data.application_type || !data.application_type.name) {
+            signupBtn.style.display = 'none';
+            console.log('Application type is null or not set, hiding button');
+            return;
+        }
+
+        // Check application type and configure button accordingly
+        if (data.application_type.name === "Externe inschrijving") {
+            // External application - use website from API
+            if (data.website) {
+                signupBtn.href = data.website;
+                signupBtn.target = '_blank';
+                signupBtn.rel = 'noopener noreferrer';
+                signupBtn.style.display = 'block';
+                signupBtn.textContent = 'Externe inschrijving';
+                
+                console.log('External application button configured:', {
+                    href: signupBtn.href,
+                    target: signupBtn.target,
+                    display: signupBtn.style.display,
+                    textContent: signupBtn.textContent
+                });
+            } else {
+                // Hide button if no website is available
+                signupBtn.style.display = 'none';
+                console.log('External application type but no website available, hiding button');
+            }
+        } else if (data.application_type.name === "Officiële inschrijving") {
+            // Official application - use Google.com
+            signupBtn.href = 'https://www.google.com';
             signupBtn.target = '_blank';
             signupBtn.rel = 'noopener noreferrer';
             signupBtn.style.display = 'block';
+            signupBtn.textContent = 'Officiële inschrijving';
             
-            // Update button text to indicate external application
-            signupBtn.textContent = 'Inschrijven bij aanbieder';
-            
-            console.log('External application button configured:', {
+            console.log('Official application button configured:', {
                 href: signupBtn.href,
                 target: signupBtn.target,
                 display: signupBtn.style.display,
                 textContent: signupBtn.textContent
             });
         } else {
-            // Hide button if no external application is available
+            // Hide button if no valid application type is available
             signupBtn.style.display = 'none';
-            console.log('External application not available, hiding button');
+            console.log('No valid application type available, hiding button');
         }
     }
 }
 
-// Initialize when DOM is ready
+ // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => new PlotDetailsManager()); 
