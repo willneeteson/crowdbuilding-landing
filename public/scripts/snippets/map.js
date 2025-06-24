@@ -33,6 +33,14 @@ class MapManager {
         };
         
         this.boundHandleResize = this.handleResize.bind(this);
+        this.boundHandleTabVisibility = this.handleTabVisibility.bind(this);
+        
+        // Track this map manager globally
+        if (!window.mapManagers) {
+            window.mapManagers = new Map();
+        }
+        window.mapManagers.set(containerId, this);
+        
         this.init();
     }
 
@@ -114,11 +122,37 @@ class MapManager {
             window.addEventListener('resize', this.boundHandleResize);
         }
 
+        // Set up Intersection Observer for tab visibility
+        this.setupIntersectionObserver();
+
         // Dispatch ready event
         this.map.on('load', () => {
             this.map.resize();
             this.container.dispatchEvent(new CustomEvent('mapReady', { detail: { map: this.map, mapManager: this } }));
         });
+    }
+
+    setupIntersectionObserver() {
+        if (!this.container) return;
+        
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    console.log(`Map ${this.containerId} became visible`);
+                    // Small delay to ensure the container is fully visible
+                    setTimeout(() => {
+                        if (this.map) {
+                            this.map.resize();
+                            console.log(`Map ${this.containerId} resized after becoming visible`);
+                        }
+                    }, 150);
+                }
+            });
+        }, {
+            threshold: 0.1 // Trigger when 10% of the map is visible
+        });
+        
+        this.intersectionObserver.observe(this.container);
     }
 
     setupTouchControls() {
@@ -379,7 +413,20 @@ class MapManager {
 
     handleResize() {
         if (this.map) {
+            console.log('Handling map resize...');
             this.map.resize();
+        }
+    }
+
+    // Method to handle tab visibility changes
+    handleTabVisibility() {
+        if (this.map) {
+            console.log('Handling tab visibility change...');
+            // Small delay to ensure the tab is fully visible
+            setTimeout(() => {
+                this.map.resize();
+                console.log('Map resized after tab visibility change');
+            }, 100);
         }
     }
 
@@ -415,6 +462,17 @@ class MapManager {
             canvas.removeEventListener('touchmove', touchmove);
         }
 
+        // Clean up Intersection Observer
+        if (this.intersectionObserver) {
+            this.intersectionObserver.disconnect();
+            this.intersectionObserver = null;
+        }
+
+        // Remove from global tracking
+        if (window.mapManagers) {
+            window.mapManagers.delete(this.containerId);
+        }
+
         // Clear markers
         this.clearMarkers();
 
@@ -433,6 +491,24 @@ window.createMap = (containerId, options = {}) => {
 
 // Expose MapManager class globally
 window.MapManager = MapManager;
+
+// Global function to handle tab visibility changes
+window.handleMapTabVisibility = (containerId) => {
+    const mapManager = window.mapManagers?.get(containerId);
+    if (mapManager) {
+        mapManager.handleTabVisibility();
+    }
+};
+
+// Global function to resize all maps (useful for tab switches)
+window.resizeAllMaps = () => {
+    if (window.mapManagers) {
+        window.mapManagers.forEach((mapManager, containerId) => {
+            console.log(`Resizing map: ${containerId}`);
+            mapManager.handleTabVisibility();
+        });
+    }
+};
 
 // Helper function for API token management using the auth module
 window.getApiToken = async () => {
