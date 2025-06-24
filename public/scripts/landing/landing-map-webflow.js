@@ -147,10 +147,16 @@ function createMarker(feature, map) {
     marker.getPopup().on('open', () => {
       const popupElement = marker.getPopup().getElement();
       if (popupElement) {
-        popupElement.style.cursor = 'pointer';
-        popupElement.addEventListener('click', () => {
-          window.open(feature.properties.link, '_blank');
-        });
+        const popupContent = popupElement.querySelector('.marker__popup');
+        if (popupContent) {
+          popupContent.style.cursor = 'pointer';
+          popupContent.addEventListener('click', (e) => {
+            // Don't trigger if clicking on the close button
+            if (!e.target.closest('.mapboxgl-popup-close-button')) {
+              window.open(feature.properties.link, '_blank');
+            }
+          });
+        }
       }
     });
   }
