@@ -94,14 +94,13 @@ function getDynamicMarkers() {
   
   return {
     type: "FeatureCollection",
-    features: Array.from(document.querySelectorAll(".marker__item"))
+    features: Array.from(document.querySelectorAll(".w-dyn-item"))
       .map((item) => {
-        const lat = parseFloat(item.querySelector(".marker.lat")?.textContent);
-        const long = parseFloat(item.querySelector(".marker.long")?.textContent);
-        const title = item.querySelector(".marker.title")?.textContent;
-        const link = item.querySelector(".marker.link")?.textContent;
-        const description = item.querySelector(".marker.short-description")?.textContent;
-        const image = item.querySelector(".marker.image")?.src || DEFAULT_IMAGE;
+        const lat = parseFloat(item.querySelector(".map__project-lat")?.textContent);
+        const long = parseFloat(item.querySelector(".map__project-long")?.textContent);
+        const title = item.querySelector(".map__project-name")?.textContent;
+        const description = item.querySelector(".map__project-description")?.textContent;
+        const image = item.querySelector(".map__project-img")?.textContent || DEFAULT_IMAGE;
 
         return !isNaN(lat) && !isNaN(long)
           ? {
@@ -109,7 +108,7 @@ function getDynamicMarkers() {
               geometry: { type: "Point", coordinates: [long, lat] },
               properties: { 
                 title, 
-                link: link ? `https://app.crowdbuilding.com/groups/${link}` : link, 
+                link: null, // No link in new structure
                 description, 
                 image 
               },
@@ -125,17 +124,20 @@ function createMarker(feature, map) {
   const markerElement = document.createElement("div");
   markerElement.className = "custom-marker";
 
+  const popupHTML = `
+    <div class="marker__popup">
+      <img src="${feature.properties.image}" class="marker__popup-img" alt="${feature.properties.title}"/>
+      <div class="marker__popup-content">
+        <h4>${feature.properties.title}</h4>
+        <p>${feature.properties.description}</p>
+      </div>
+    </div>
+  `;
+
   new mapboxgl.Marker(markerElement)
     .setLngLat(feature.geometry.coordinates)
     .setPopup(
-      new mapboxgl.Popup({ offset: 24 }).setHTML(`
-        <img src="${feature.properties.image}" class="marker__popup-img"/>
-        <div class="marker__popup-content">
-          <h4>${feature.properties.title}</h4>
-          <p>${feature.properties.description}</p>
-        </div>
-        <a href="${feature.properties.link}" class="marker__popup-link"></a>
-      `)
+      new mapboxgl.Popup({ offset: 24 }).setHTML(popupHTML)
     )
     .addTo(map);
 }
