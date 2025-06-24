@@ -384,11 +384,7 @@ button.splide__arrow.splide__arrow {
     transform: scale(1.1);
 }
 
-/* Prevent any unwanted animations during map interactions */
-.mapboxgl-marker {
-    transition: none !important;
-}
-
+/* Ensure proper marker positioning and interaction */
 .mapboxgl-marker-anchor-center {
     transform-origin: center !important;
 }
