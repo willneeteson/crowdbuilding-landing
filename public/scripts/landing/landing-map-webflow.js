@@ -153,7 +153,7 @@ function createMarker(feature, map) {
           popupContent.addEventListener('click', (e) => {
             // Don't trigger if clicking on the close button
             if (!e.target.closest('.mapboxgl-popup-close-button')) {
-              window.open(feature.properties.link, '_blank');
+              window.location.href = feature.properties.link;
             }
           });
         }
