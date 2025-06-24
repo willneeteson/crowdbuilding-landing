@@ -83,6 +83,7 @@ button.splide__arrow.splide__arrow {
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
+    animation: markerAppear 0.3s ease-out;
 }
 
 .custom-marker:hover {
@@ -227,10 +228,6 @@ button.splide__arrow.splide__arrow {
         opacity: 1;
         transform: scale(1);
     }
-}
-
-.custom-marker {
-    animation: markerAppear 0.3s ease-out;
 }
 
 /* Different marker types */

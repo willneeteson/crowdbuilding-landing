@@ -164,15 +164,21 @@ class MapManager {
     }
 
     createMarker(feature, options = {}) {
+        console.log('Creating marker for:', feature.properties.title);
+        console.log('Feature coordinates:', feature.geometry.coordinates);
+        
         const markerOptions = {
             className: 'custom-marker',
             popupOffset: 24,
             popupClassName: 'custom-popup',
             ...options
         };
+        
+        console.log('Marker options:', markerOptions);
 
         const markerElement = document.createElement("div");
         markerElement.className = markerOptions.className;
+        console.log('Created marker element with class:', markerElement.className);
 
         const popup = new mapboxgl.Popup({ 
             offset: markerOptions.popupOffset,
@@ -195,6 +201,15 @@ class MapManager {
             .setLngLat(feature.geometry.coordinates)
             .setPopup(popup)
             .addTo(this.map);
+
+        console.log('Marker added to map. Element:', markerElement);
+        console.log('Marker element styles:', {
+            width: markerElement.style.width,
+            height: markerElement.style.height,
+            background: markerElement.style.background,
+            display: markerElement.style.display,
+            position: markerElement.style.position
+        });
 
         // Add click functionality if link exists
         if (feature.properties.link) {
@@ -242,6 +257,24 @@ class MapManager {
             if (firstFeature) {
                 this.map.setCenter(firstFeature.geometry.coordinates);
             }
+        }
+
+        // Add a simple test marker to see if markers work at all
+        if (features.length === 0) {
+            console.log('No features provided, adding test marker...');
+            const testFeature = {
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: this.map.getCenter()
+                },
+                properties: {
+                    title: "Test Marker",
+                    description: "This is a test marker",
+                    image: "https://cdn.prod.website-files.com/66dffceb975388322f140196/67bcaf8a62d1172be49c4000_e21844b19f5eee45e161d9c34c5fc437_cb_placeholder.jpg"
+                }
+            };
+            features.push(testFeature);
         }
 
         features.forEach((feature, index) => {
