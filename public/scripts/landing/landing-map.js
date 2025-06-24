@@ -96,22 +96,13 @@ function getDynamicMarkers() {
     type: "FeatureCollection",
     features: Array.from(document.querySelectorAll(".w-dyn-item"))
       .map((item) => {
-        // Get all div elements within the w-dyn-item
-        const divs = item.querySelectorAll("div");
-        
-        // Extract data from the divs based on the structure:
-        // div[0] = title
-        // div[1] = description  
-        // div[2] = latitude
-        // div[3] = longitude
-        // div[4] = image URL
-        // div[5] = slug (if available)
-        const title = divs[0]?.textContent?.trim();
-        const description = divs[1]?.textContent?.trim();
-        const lat = parseFloat(divs[2]?.textContent?.trim());
-        const long = parseFloat(divs[3]?.textContent?.trim());
-        const image = divs[4]?.textContent?.trim() || DEFAULT_IMAGE;
-        const slug = divs[5]?.textContent?.trim();
+        // Extract data using specific CSS classes
+        const title = item.querySelector(".map__project-name")?.textContent?.trim();
+        const description = item.querySelector(".map__project-description")?.textContent?.trim();
+        const lat = parseFloat(item.querySelector(".map__project-lat")?.textContent?.trim());
+        const long = parseFloat(item.querySelector(".map__project-long")?.textContent?.trim());
+        const image = item.querySelector(".map__project-img")?.textContent?.trim() || DEFAULT_IMAGE;
+        const slug = item.querySelector(".map__project-slug")?.textContent?.trim();
 
         return !isNaN(lat) && !isNaN(long) && title
           ? {
