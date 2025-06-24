@@ -191,6 +191,7 @@ class PlotDetailsManager {
         const deadlineCounter = document.querySelector('.plot-deadline-counter');
         const deadlineNumber = document.querySelector('.deadline-number');
         const signupBtn = document.getElementById('plotSignupBtn');
+        const signupBtnClosed = document.getElementById('plotSignupBtnClosed');
         const deadlineWrapper = document.getElementById('deadlineWrapper');
         
         console.log('Deadline data:', {
@@ -198,6 +199,7 @@ class PlotDetailsManager {
             deadlineCounter: !!deadlineCounter,
             deadlineNumber: !!deadlineNumber,
             signupBtn: !!signupBtn,
+            signupBtnClosed: !!signupBtnClosed,
             deadlineWrapper: !!deadlineWrapper
         });
 
@@ -205,6 +207,8 @@ class PlotDetailsManager {
             console.log('No deadline provided');
             if (deadlineCounter) deadlineCounter.style.display = 'none';
             if (deadlineWrapper) deadlineWrapper.style.display = 'none';
+            if (signupBtn) signupBtn.style.display = 'none';
+            if (signupBtnClosed) signupBtnClosed.style.display = 'none';
             return;
         }
 
@@ -224,11 +228,13 @@ class PlotDetailsManager {
             if (deadlineNumber) deadlineNumber.textContent = diffDays;
             if (deadlineCounter) deadlineCounter.style.display = 'block';
             if (signupBtn) signupBtn.style.display = 'block';
+            if (signupBtnClosed) signupBtnClosed.style.display = 'none';
             if (deadlineWrapper) deadlineWrapper.style.display = 'flex';
         } else {
-            console.log('Hiding deadline counter - deadline passed');
+            console.log('Showing closed button - deadline passed');
             if (deadlineCounter) deadlineCounter.style.display = 'none';
             if (signupBtn) signupBtn.style.display = 'none';
+            if (signupBtnClosed) signupBtnClosed.style.display = 'block';
             if (deadlineWrapper) deadlineWrapper.style.display = 'none';
         }
     }
@@ -970,10 +976,11 @@ class PlotDetailsManager {
 
     updateExternalApplicationButton(data) {
         const signupBtn = document.getElementById('plotSignupBtn');
+        const signupBtnClosed = document.getElementById('plotSignupBtnClosed');
         
-        console.log('Looking for plotSignupBtn element:', {
-            elementFound: !!signupBtn,
-            element: signupBtn,
+        console.log('Looking for plot signup buttons:', {
+            signupBtnFound: !!signupBtn,
+            signupBtnClosedFound: !!signupBtnClosed,
             currentHref: signupBtn?.href,
             currentText: signupBtn?.textContent,
             currentDisplay: signupBtn?.style.display
@@ -983,6 +990,26 @@ class PlotDetailsManager {
             console.warn('plotSignupBtn element not found in DOM');
             return;
         }
+
+        // Check if deadline has passed
+        const deadline = data.application_deadline;
+        if (deadline) {
+            const today = new Date();
+            const deadlineDate = new Date(deadline);
+            const diffTime = deadlineDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays <= 0) {
+                // Deadline has passed - show closed button, hide regular button
+                if (signupBtn) signupBtn.style.display = 'none';
+                if (signupBtnClosed) signupBtnClosed.style.display = 'block';
+                console.log('Deadline has passed, showing closed button');
+                return;
+            }
+        }
+
+        // Deadline hasn't passed or no deadline - proceed with regular button logic
+        if (signupBtnClosed) signupBtnClosed.style.display = 'none';
 
         console.log('Application type data:', {
             applicationType: data.application_type,
