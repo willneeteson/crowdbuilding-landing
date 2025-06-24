@@ -257,10 +257,12 @@ class PartnerMapManager {
   constructor() {
     this.expertMap = null;
     this.projectMap = null;
-    this.init();
   }
 
-  init() {
+  async init() {
+    // Load map.js dependency first
+    await this.loadMapDependency();
+    
     // Initialize ExpertMapManager (inner map) for all partner types
     this.initExpertMap();
     
@@ -271,9 +273,37 @@ class PartnerMapManager {
     }
   }
 
+  async loadMapDependency() {
+    // Check if MapManager is already available
+    if (window.MapManager) {
+      return;
+    }
+
+    // Load map.js if not already loaded
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = '/scripts/snippets/map.js';
+      script.onload = () => {
+        console.log('MapManager loaded for partner template');
+        resolve();
+      };
+      script.onerror = () => {
+        console.error('Failed to load map.js');
+        resolve();
+      };
+      document.head.appendChild(script);
+    });
+  }
+
   initExpertMap() {
     const mapContainer = document.getElementById('mapSidebar');
     if (!mapContainer) return;
+
+    // Check if MapManager is available
+    if (!window.MapManager) {
+      console.error('MapManager not available');
+      return;
+    }
 
     this.expertMap = new MapManager('mapSidebar', {
       disableScrollZoom: true,
@@ -293,6 +323,12 @@ class PartnerMapManager {
   initProjectMap() {
     const mapContainer = document.getElementById('mapExpert');
     if (!mapContainer) return;
+
+    // Check if MapManager is available
+    if (!window.MapManager) {
+      console.error('MapManager not available');
+      return;
+    }
 
     this.projectMap = new MapManager('mapExpert', {
       disableScrollZoom: true,
@@ -437,8 +473,9 @@ class PartnerMapManager {
 }
 
 // Initialize maps when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-  new PartnerMapManager();
+document.addEventListener('DOMContentLoaded', async () => {
+  const partnerMapManager = new PartnerMapManager();
+  await partnerMapManager.init();
 });
 
 class ContentManager {
