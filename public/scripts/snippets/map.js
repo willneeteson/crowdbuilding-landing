@@ -230,6 +230,9 @@ class MapManager {
 
     // Enhanced method to add markers with better data handling
     addMarkers(features, options = {}) {
+        console.log('MapManager.addMarkers called with:', features.length, 'features');
+        console.log('Options:', options);
+        
         // Clear existing markers first
         this.clearMarkers();
 
@@ -241,15 +244,22 @@ class MapManager {
             }
         }
 
-        features.forEach(feature => {
-            if (!feature.geometry?.coordinates) return;
+        features.forEach((feature, index) => {
+            if (!feature.geometry?.coordinates) {
+                console.log(`Skipping feature ${index} - no coordinates`);
+                return;
+            }
             
+            console.log(`Creating marker ${index + 1}:`, feature.properties.title, 'at', feature.geometry.coordinates);
             const marker = this.createMarker(feature, options);
             const markerId = feature.properties.id || feature.properties.title || `marker-${Date.now()}-${Math.random()}`;
             
             this.markers.set(markerId, marker);
             this.markerElements.push(marker);
+            console.log(`Marker ${index + 1} created successfully`);
         });
+        
+        console.log('Total markers added:', this.markers.size);
     }
 
     // Method to add markers from API data (like the preferred implementation)

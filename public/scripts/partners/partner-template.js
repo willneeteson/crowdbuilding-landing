@@ -346,13 +346,20 @@ class PartnerMapManager {
 
   loadExpertMarkers() {
     const features = [];
-    document.querySelectorAll('.marker__item').forEach(item => {
+    console.log('Loading expert markers...');
+    
+    const markerItems = document.querySelectorAll('.marker__item');
+    console.log('Found marker items:', markerItems.length);
+    
+    markerItems.forEach((item, index) => {
       const lat = parseFloat(item.querySelector('.marker.lat')?.textContent);
       const long = parseFloat(item.querySelector('.marker.long')?.textContent);
       const title = item.querySelector('.marker.title')?.textContent;
       const link = item.querySelector('.marker.link')?.textContent;
       const description = item.querySelector('.marker.short-description')?.textContent;
       const image = item.querySelector('.marker.image')?.src;
+
+      console.log(`Marker ${index + 1}:`, { lat, long, title, link, description, image });
 
       if (!isNaN(lat) && !isNaN(long) && title) {
         features.push({
@@ -373,59 +380,84 @@ class PartnerMapManager {
             `
           }
         });
+      } else {
+        console.log(`Skipping marker ${index + 1} - invalid data:`, { lat, long, title });
       }
     });
 
+    console.log('Created features:', features.length);
+
     if (this.expertMap) {
+      console.log('Adding markers to expert map...');
       this.expertMap.addMarkers(features, {
         className: 'custom-marker',
         popupClassName: 'custom-popup'
       });
+    } else {
+      console.error('Expert map not available');
     }
   }
 
   async loadPartnerProjects() {
     try {
+      console.log('Loading partner projects...');
+      console.log('Partner type:', partnerType, 'ID:', id);
+      
       const response = await fetch(`https://api.crowdbuilding.com/api/v1/${partnerType}/${id}/groups`);
       if (!response.ok) throw new Error('Failed to fetch projects');
       
       const { data: projects = [] } = await response.json();
+      console.log('Fetched projects:', projects.length);
 
       // Convert projects to GeoJSON features
       const features = projects
-        .filter(project => project.latitude && project.longitude)
-        .map(project => ({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: [project.longitude, project.latitude],
-          },
-          properties: {
-            id: project.id,
-            title: project.title,
-            description: project.subtitle || "No description available",
-            image: project.image?.original_url || "https://cdn.prod.website-files.com/66dffceb975388322f140196/67bcaf8a62d1172be49c4000_e21844b19f5eee45e161d9c34c5fc437_cb_placeholder.jpg",
-            link: `/groups/${project.slug}`,
-            phase: project.phase,
-            popupHTML: `
-              <div class="project__popup">
-                ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
-                <div class="project__popup-content">
-                  <h4>${project.title}</h4>
-                  ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
-                  ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
+        .filter(project => {
+          const hasCoords = project.latitude && project.longitude;
+          if (!hasCoords) {
+            console.log('Skipping project without coordinates:', project.title);
+          }
+          return hasCoords;
+        })
+        .map(project => {
+          console.log('Processing project:', project.title, 'at', project.latitude, project.longitude);
+          return {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [project.longitude, project.latitude],
+            },
+            properties: {
+              id: project.id,
+              title: project.title,
+              description: project.subtitle || "No description available",
+              image: project.image?.original_url || "https://cdn.prod.website-files.com/66dffceb975388322f140196/67bcaf8a62d1172be49c4000_e21844b19f5eee45e161d9c34c5fc437_cb_placeholder.jpg",
+              link: `/groups/${project.slug}`,
+              phase: project.phase,
+              popupHTML: `
+                <div class="project__popup">
+                  ${project.image ? `<img src="${project.image.original_url}" alt="${project.title}" class="project__popup-img"/>` : ''}
+                  <div class="project__popup-content">
+                    <h4>${project.title}</h4>
+                    ${project.subtitle ? `<p>${project.subtitle}</p>` : ''}
+                    ${project.phase ? `<div class="project__popup-phase">${project.phase.name}</div>` : ''}
+                  </div>
+                  <a href="/groups/${project.slug}" class="project__popup-link"></a>
                 </div>
-                <a href="/groups/${project.slug}" class="project__popup-link"></a>
-              </div>
-            `
-          },
-        }));
+              `
+            },
+          };
+        });
+
+      console.log('Created features:', features.length);
 
       if (this.projectMap) {
+        console.log('Adding markers to project map...');
         this.projectMap.addMarkers(features, {
           className: 'project-marker',
           popupClassName: 'project-popup'
         });
+      } else {
+        console.error('Project map not available');
       }
 
       this.updateProjectList(projects);
