@@ -282,7 +282,8 @@ class PartnerMapManager {
     // Load map.js if not already loaded
     return new Promise((resolve) => {
       const script = document.createElement('script');
-      script.src = '/scripts/snippets/map.js';
+      // Use relative path that should work from any domain
+      script.src = '../snippets/map.js';
       script.onload = () => {
         console.log('MapManager loaded for partner template');
         resolve();
