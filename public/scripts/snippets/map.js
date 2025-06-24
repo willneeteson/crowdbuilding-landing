@@ -373,6 +373,9 @@ window.createMap = (containerId, options = {}) => {
     return new MapManager(containerId, options);
 };
 
+// Expose MapManager class globally
+window.MapManager = MapManager;
+
 // Helper function for API token management using the auth module
 window.getApiToken = async () => {
     // Check if auth module is available
