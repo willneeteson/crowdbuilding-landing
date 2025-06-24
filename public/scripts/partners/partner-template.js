@@ -257,11 +257,12 @@ class PartnerMapManager {
   constructor() {
     this.expertMap = null;
     this.projectMap = null;
+    this.init();
   }
 
   async init() {
-    // Load map.js dependency first
-    await this.loadMapDependency();
+    // Load map.js dependency first using the same approach as plot-get-details.js
+    await this.ensureMapManager();
     
     // Initialize ExpertMapManager (inner map) for all partner types
     this.initExpertMap();
@@ -273,33 +274,23 @@ class PartnerMapManager {
     }
   }
 
-  async loadMapDependency() {
-    // Check if MapManager is already available (since map.js is loaded in HTML)
-    if (window.MapManager) {
-      console.log('MapManager already available');
-      return;
+  async ensureMapManager() {
+    if (typeof MapManager !== 'undefined') {
+      return Promise.resolve();
     }
-
-    // If MapManager is not available, wait a bit and check again
-    return new Promise((resolve) => {
-      let attempts = 0;
-      const maxAttempts = 10;
-      
-      const checkMapManager = () => {
-        attempts++;
-        if (window.MapManager) {
-          console.log('MapManager found after waiting');
-          resolve();
-        } else if (attempts < maxAttempts) {
-          console.log(`Waiting for MapManager... attempt ${attempts}`);
-          setTimeout(checkMapManager, 100);
-        } else {
-          console.error('MapManager not available after waiting');
-          resolve();
-        }
+    
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/scripts/snippets/map.js';
+      script.onload = () => {
+        console.log('MapManager loaded successfully for partner template');
+        resolve();
       };
-      
-      checkMapManager();
+      script.onerror = () => {
+        console.error('Failed to load MapManager for partner template');
+        reject(new Error('Failed to load MapManager'));
+      };
+      document.head.appendChild(script);
     });
   }
 
@@ -481,9 +472,8 @@ class PartnerMapManager {
 }
 
 // Initialize maps when DOM is ready
-document.addEventListener('DOMContentLoaded', async () => {
-  const partnerMapManager = new PartnerMapManager();
-  await partnerMapManager.init();
+document.addEventListener('DOMContentLoaded', () => {
+  new PartnerMapManager();
 });
 
 class ContentManager {
