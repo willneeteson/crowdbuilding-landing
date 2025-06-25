@@ -69,6 +69,59 @@
             avatar: document.getElementById('navUserAvatar')
         },
 
+        // Cache for avatar data
+        avatarCache: {
+            url: null,
+            name: null,
+            lastUpdated: null
+        },
+
+        /**
+         * Load avatar from cache
+         */
+        loadAvatarFromCache() {
+            try {
+                const cached = localStorage.getItem('userAvatar');
+                if (cached) {
+                    const data = JSON.parse(cached);
+                    this.avatarCache = data;
+                    return data;
+                }
+            } catch (error) {
+                console.warn('Error loading avatar from cache:', error);
+            }
+            return null;
+        },
+
+        /**
+         * Save avatar to cache
+         */
+        saveAvatarToCache(profile) {
+            try {
+                const cacheData = {
+                    url: profile.avatar_url,
+                    name: profile.name,
+                    lastUpdated: Date.now()
+                };
+                this.avatarCache = cacheData;
+                localStorage.setItem('userAvatar', JSON.stringify(cacheData));
+            } catch (error) {
+                console.warn('Error saving avatar to cache:', error);
+            }
+        },
+
+        /**
+         * Clear avatar cache
+         */
+        clearAvatarCache() {
+            try {
+                localStorage.removeItem('userAvatar');
+                this.avatarCache = { url: null, name: null, lastUpdated: null };
+            } catch (error) {
+                console.warn('Error clearing avatar cache:', error);
+            }
+        },
+
         /**
          * Fetch user profile data including avatar
          * @returns {Promise<Object|null>} User profile data or null if not available
@@ -77,6 +130,7 @@
             try {
                 // Check if user is logged in
                 if (!window.auth || !(await window.auth.isUserLoggedIn())) {
+                    this.clearAvatarCache();
                     return null;
                 }
 
@@ -124,25 +178,45 @@
             }
 
             if (profile && profile.avatar_url) {
+                // Save to cache
+                this.saveAvatarToCache(profile);
+                
                 // Show avatar with user's image
                 this.elements.avatar.style.display = 'block';
                 
                 // Update the existing img element instead of replacing it
                 this.elements.avatar.src = profile.avatar_url;
                 this.elements.avatar.alt = profile.name || 'User Avatar';
-                this.elements.avatar.style.cssText = `
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    border: 2px solid #ffffff;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    display: block;
-                `;
             } else {
                 // Hide the avatar when no profile/avatar is available
                 this.elements.avatar.style.display = 'none';
+                this.clearAvatarCache();
             }
+        },
+
+        /**
+         * Display cached avatar immediately
+         */
+        displayCachedAvatar() {
+            const cached = this.loadAvatarFromCache();
+            if (cached && cached.url) {
+                if (this.elements.avatar) {
+                    this.elements.avatar.style.display = 'block';
+                    this.elements.avatar.src = cached.url;
+                    this.elements.avatar.alt = cached.name || 'User Avatar';
+                    this.elements.avatar.style.cssText = `
+                        width: 32px;
+                        height: 32px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        border: 2px solid #ffffff;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        display: block;
+                    `;
+                }
+                return true;
+            }
+            return false;
         },
 
         /**
@@ -244,7 +318,10 @@
          * Initialize notifications functionality
          */
         async init() {
-            // Initial load
+            // Display cached avatar immediately
+            this.displayCachedAvatar();
+            
+            // Initial load (background refresh)
             await this.refresh();
 
             // Set up periodic refresh (every 30 seconds)
