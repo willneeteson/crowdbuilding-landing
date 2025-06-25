@@ -18,6 +18,10 @@
                 SIGNUP: 'signup',
                 SIGNIN: 'signin'
             }
+        },
+        API: {
+            BASE_URL: 'https://api.crowdbuilding.com/api/v1',
+            NOTIFICATIONS_ENDPOINT: '/profile/notifications/unread/count'
         }
     };
 
@@ -54,6 +58,123 @@
             );
         });
     }
+
+    /**
+     * Notifications Module
+     * Handles fetching and displaying unread notification counts
+     */
+    const Notifications = {
+        elements: {
+            container: document.getElementById('navUserNotifications')
+        },
+
+        /**
+         * Fetch unread notifications count from API
+         * @returns {Promise<number>} Number of unread notifications
+         */
+        async fetchUnreadCount() {
+            try {
+                // Check if user is logged in
+                if (!window.auth || !(await window.auth.isUserLoggedIn())) {
+                    return 0;
+                }
+
+                // Get API token
+                const token = await window.auth.getApiToken();
+                if (!token) {
+                    console.warn('No API token available for notifications request');
+                    return 0;
+                }
+
+                const response = await fetch(
+                    `${CONFIG.API.BASE_URL}${CONFIG.API.NOTIFICATIONS_ENDPOINT}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.error('Failed to fetch notifications:', response.status, response.statusText);
+                    return 0;
+                }
+
+                const data = await response.json();
+                return data.data || 0;
+
+            } catch (error) {
+                console.error('Error fetching unread notifications count:', error);
+                return 0;
+            }
+        },
+
+        /**
+         * Update the notification count display
+         * @param {number} count - Number of unread notifications
+         */
+        updateDisplay(count) {
+            if (!this.elements.container) {
+                console.warn('Notification container #navUserNotifications not found');
+                return;
+            }
+
+            // Clear existing content
+            this.elements.container.innerHTML = '';
+
+            if (count > 0) {
+                // Create notification badge
+                const badge = document.createElement('span');
+                badge.className = 'notification-badge';
+                badge.textContent = count > 99 ? '99+' : count.toString();
+                badge.style.cssText = `
+                    background-color: #ff4444;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    min-width: 18px;
+                    text-align: center;
+                    display: inline-block;
+                    line-height: 1.2;
+                `;
+                
+                this.elements.container.appendChild(badge);
+            }
+        },
+
+        /**
+         * Refresh notifications count
+         */
+        async refresh() {
+            const count = await this.fetchUnreadCount();
+            this.updateDisplay(count);
+        },
+
+        /**
+         * Initialize notifications functionality
+         */
+        async init() {
+            // Initial load
+            await this.refresh();
+
+            // Set up periodic refresh (every 30 seconds)
+            setInterval(() => {
+                this.refresh();
+            }, 30000);
+
+            // Refresh on page focus (when user returns to tab)
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    this.refresh();
+                }
+            });
+        }
+    };
 
     /**
      * Authentication Modal Module
@@ -142,10 +263,23 @@
     };
 
     // Initialize all functionality
-    function init() {
+    async function init() {
         try {
             initAnimations();
             AuthModal.init();
+            
+            // Wait for auth module to be available before initializing notifications
+            if (typeof window.auth !== 'undefined') {
+                await Notifications.init();
+            } else {
+                // If auth module isn't loaded yet, wait for it
+                const checkAuth = setInterval(() => {
+                    if (typeof window.auth !== 'undefined') {
+                        clearInterval(checkAuth);
+                        Notifications.init();
+                    }
+                }, 100);
+            }
         } catch (error) {
             console.error('Error initializing global functionality:', error);
         }
