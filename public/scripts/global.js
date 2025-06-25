@@ -425,18 +425,6 @@
                 const badge = document.createElement('span');
                 badge.className = 'notification-badge';
                 badge.textContent = count > 99 ? '99+' : count.toString();
-                badge.style.cssText = `
-                    background-color: #ff4444;
-                    color: white;
-                    border-radius: 50%;
-                    padding: 2px 6px;
-                    font-size: 12px;
-                    font-weight: bold;
-                    min-width: 18px;
-                    text-align: center;
-                    display: inline-block;
-                    line-height: 1.2;
-                `;
                 
                 this.elements.container.appendChild(badge);
             } else {
