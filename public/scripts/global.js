@@ -204,15 +204,6 @@
                     this.elements.avatar.style.display = 'block';
                     this.elements.avatar.src = cached.url;
                     this.elements.avatar.alt = cached.name || 'User Avatar';
-                    this.elements.avatar.style.cssText = `
-                        width: 32px;
-                        height: 32px;
-                        border-radius: 50%;
-                        object-fit: cover;
-                        border: 2px solid #ffffff;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        display: block;
-                    `;
                 }
                 return true;
             }
