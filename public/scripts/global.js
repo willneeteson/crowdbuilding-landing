@@ -65,7 +65,86 @@
      */
     const Notifications = {
         elements: {
-            container: document.getElementById('navUserNotifications')
+            container: document.getElementById('navUserNotifications'),
+            avatar: document.getElementById('navUserAvatar')
+        },
+
+        /**
+         * Fetch user profile data including avatar
+         * @returns {Promise<Object|null>} User profile data or null if not available
+         */
+        async fetchUserProfile() {
+            try {
+                // Check if user is logged in
+                if (!window.auth || !(await window.auth.isUserLoggedIn())) {
+                    return null;
+                }
+
+                // Get API token
+                const token = await window.auth.getApiToken();
+                if (!token) {
+                    console.warn('No API token available for profile request');
+                    return null;
+                }
+
+                const response = await fetch(
+                    `${CONFIG.API.BASE_URL}/profile`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.error('Failed to fetch user profile:', response.status, response.statusText);
+                    return null;
+                }
+
+                const data = await response.json();
+                return data.data || null;
+
+            } catch (error) {
+                console.error('Error fetching user profile:', error);
+                return null;
+            }
+        },
+
+        /**
+         * Update avatar display
+         * @param {Object} profile - User profile data
+         */
+        updateAvatar(profile) {
+            if (!this.elements.avatar) {
+                console.warn('Avatar container #navUserAvatar not found');
+                return;
+            }
+
+            if (profile && profile.avatar_url) {
+                // Show avatar with user's image
+                this.elements.avatar.style.display = 'block';
+                this.elements.avatar.innerHTML = '';
+                
+                const img = document.createElement('img');
+                img.src = profile.avatar_url;
+                img.alt = profile.name || 'User Avatar';
+                img.style.cssText = `
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    object-fit: cover;
+                    border: 2px solid #ffffff;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                `;
+                
+                this.elements.avatar.appendChild(img);
+            } else {
+                // Show default avatar or hide
+                this.elements.avatar.style.display = 'none';
+            }
         },
 
         /**
@@ -122,11 +201,11 @@
                 return;
             }
 
-            // Clear existing content
-            this.elements.container.innerHTML = '';
-
             if (count > 0) {
-                // Create notification badge
+                // Show the container and create notification badge
+                this.elements.container.style.display = 'block';
+                this.elements.container.innerHTML = '';
+                
                 const badge = document.createElement('span');
                 badge.className = 'notification-badge';
                 badge.textContent = count > 99 ? '99+' : count.toString();
@@ -144,15 +223,23 @@
                 `;
                 
                 this.elements.container.appendChild(badge);
+            } else {
+                // Hide the container when no notifications
+                this.elements.container.style.display = 'none';
             }
         },
 
         /**
-         * Refresh notifications count
+         * Refresh notifications count and avatar
          */
         async refresh() {
-            const count = await this.fetchUnreadCount();
+            const [count, profile] = await Promise.all([
+                this.fetchUnreadCount(),
+                this.fetchUserProfile()
+            ]);
+            
             this.updateDisplay(count);
+            this.updateAvatar(profile);
         },
 
         /**
