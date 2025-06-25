@@ -419,7 +419,7 @@
 
             if (count > 0) {
                 // Show the container and create notification badge
-                this.elements.container.style.display = 'block';
+                this.elements.container.style.display = 'flex';
                 this.elements.container.innerHTML = '';
                 
                 const badge = document.createElement('span');
