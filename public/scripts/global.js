@@ -126,23 +126,21 @@
             if (profile && profile.avatar_url) {
                 // Show avatar with user's image
                 this.elements.avatar.style.display = 'block';
-                this.elements.avatar.innerHTML = '';
                 
-                const img = document.createElement('img');
-                img.src = profile.avatar_url;
-                img.alt = profile.name || 'User Avatar';
-                img.style.cssText = `
+                // Update the existing img element instead of replacing it
+                this.elements.avatar.src = profile.avatar_url;
+                this.elements.avatar.alt = profile.name || 'User Avatar';
+                this.elements.avatar.style.cssText = `
                     width: 32px;
                     height: 32px;
                     border-radius: 50%;
                     object-fit: cover;
                     border: 2px solid #ffffff;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    display: block;
                 `;
-                
-                this.elements.avatar.appendChild(img);
             } else {
-                // Show default avatar or hide
+                // Hide the avatar when no profile/avatar is available
                 this.elements.avatar.style.display = 'none';
             }
         },
