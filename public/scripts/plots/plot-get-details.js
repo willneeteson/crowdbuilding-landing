@@ -1046,8 +1046,7 @@ class PlotDetailsManager {
                 console.log('External application type but no website available, hiding button');
             }
         } else if (data.application_type.name === "Officiële inschrijving") {
-            // Official application - use Google.com
-            signupBtn.href = 'https://www.google.com';
+            signupBtn.href = 'https://plot.crowdbuilding.com';
             signupBtn.target = '_blank';
             signupBtn.rel = 'noopener noreferrer';
             signupBtn.style.display = 'block';
