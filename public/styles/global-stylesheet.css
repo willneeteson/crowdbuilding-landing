@@ -1,0 +1,479 @@
+/**
+ * Global Styles
+ * Contains global styles, variables, and utility classes
+ */
+
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+:root {
+    --box-shadow-primary: 0px 0px 1px rgba(0, 0, 0, 0.25), 0px 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Card Styles
+   ========================================================================== */
+.card__item img {
+    transition: transform 0.4s ease-in-out;
+}
+
+.card__item:hover img {
+    transform: scale(1.1);
+}
+
+.card__text-wrapper {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Region List Styles
+   ========================================================================== */
+.regions__list {
+    display: flex;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   Splide Carousel Styles
+   ========================================================================== */
+.splide__arrows.splide__arrows--ltr {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+button.splide__arrow.splide__arrow {
+    position: static;
+    transform: translateY(0);
+}
+
+/* ==========================================================================
+   Map Styles
+   ========================================================================== */
+
+/* Base marker styles */
+.custom-marker {
+    width: 24px !important;
+    height: 24px !important;
+    background: #e74c3c !important;
+    border: 2px solid white !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer !important;
+    animation: markerAppear 0.3s ease-out;
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.custom-marker:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Highlighted marker state */
+.custom-marker.highlight-marker {
+    transform: scale(1.2);
+    background: #f39c12;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    border-color: #fff;
+    z-index: 1000;
+}
+
+/* Popup styles */
+.custom-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
+    max-width: 300px;
+}
+
+.custom-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease;
+}
+
+.custom-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+/* Popup content styles */
+.marker__popup {
+    position: relative;
+}
+
+.marker__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.marker__popup-content {
+    padding: 16px;
+}
+
+.marker__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: #333;
+}
+
+.marker__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.marker__popup-address {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #888;
+    margin-top: 8px;
+}
+
+/* Card link overlay for clickable popups */
+.card__link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+/* Map container styles */
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .custom-marker {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .custom-marker.highlight-marker {
+        transform: scale(1.15);
+    }
+    
+    .custom-popup .mapboxgl-popup-content {
+        min-width: 200px;
+        max-width: 250px;
+    }
+    
+    .marker__popup-img {
+        height: 120px;
+    }
+    
+    .marker__popup-content {
+        padding: 12px;
+    }
+    
+    .marker__popup-content h4 {
+        font-size: 14px;
+    }
+    
+    .marker__popup-content p {
+        font-size: 13px;
+    }
+}
+
+/* Animation for marker appearance */
+@keyframes markerAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Different marker types */
+.custom-marker.project-marker {
+    background: #3498db;
+}
+
+.custom-marker.plot-marker {
+    background: #e74c3c;
+}
+
+.custom-marker.partner-marker {
+    background: #9b59b6;
+}
+
+.custom-marker.woonvorm-marker {
+    background: #f39c12;
+}
+
+/* Loading state for map */
+.map-loading {
+    position: relative;
+}
+
+.map-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Project-specific popup styles */
+.project-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
+}
+
+.project-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.project-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.project__popup {
+    position: relative;
+}
+
+.project__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.project__popup-content {
+    padding: 16px;
+}
+
+.project__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.project__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #666;
+}
+
+.project__popup-phase {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #f5f5f5;
+    border-radius: 99px;
+    font-size: 12px;
+    color: #333;
+}
+
+.project__popup-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.marker__popup-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#mapExpert {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* ==========================================================================
+   Plot-specific Map Styles (now available for all maps)
+   ========================================================================== */
+
+.plot-marker {
+    width: 24px;
+    height: 24px;
+    background: #e74c3c;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    position: absolute;
+    transform-origin: center;
+    pointer-events: auto;
+}
+
+.plot-marker:hover {
+    transform: scale(1.1);
+}
+
+/* Ensure proper marker positioning and interaction */
+.mapboxgl-marker-anchor-center {
+    transform-origin: center !important;
+}
+
+.plot-popup .mapboxgl-popup-content {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 250px;
+}
+
+.plot-popup .mapboxgl-popup-close-button {
+    padding: 8px;
+    font-size: 16px;
+    color: #666;
+    background: white;
+    border-radius: 50%;
+    margin: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.plot-popup .mapboxgl-popup-close-button:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.plot__popup {
+    position: relative;
+}
+
+.plot__popup-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.plot__popup-content {
+    padding: 16px;
+}
+
+.plot__popup-content h4 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    line-height: 1.4;
+}
+
+.plot__popup-content p {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.plot__popup-address {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#innerMap {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+}
+
+/* Ensure Mapbox marker container doesn't interfere */
+.mapboxgl-marker {
+    pointer-events: auto !important;
+}
+
+.mapboxgl-marker .custom-marker {
+    width: 24px !important;
+    height: 24px !important;
+    background: #e74c3c !important;
+    border: 2px solid white !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer !important;
+    animation: markerAppear 0.3s ease-out;
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}

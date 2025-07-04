@@ -1,0 +1,70 @@
+/**
+ * Global Styles
+ * Contains global styles, variables, and utility classes
+ */
+
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+:root {
+    --box-shadow-primary: 0px 0px 1px rgba(0, 0, 0, 0.25), 0px 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* ==========================================================================
+   Base Styles
+   ========================================================================== */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+html.no-scroll,
+body.no-scroll {
+    overflow: hidden;
+}
+
+/* ==========================================================================
+   Card Styles
+   ========================================================================== */
+.card__item img {
+    transition: transform 0.4s ease-in-out;
+}
+
+.card__item:hover img {
+    transform: scale(1.1);
+}
+
+.card__text-wrapper {
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Region List Styles
+   ========================================================================== */
+.regions__list {
+    display: flex;
+    gap: 8px;
+}
+
+/* ==========================================================================
+   Splide Carousel Styles
+   ========================================================================== */
+.splide__arrows.splide__arrows--ltr {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+}
+
+button.splide__arrow.splide__arrow {
+    position: static;
+    transform: translateY(0);
+}
