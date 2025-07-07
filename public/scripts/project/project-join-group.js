@@ -238,18 +238,11 @@ async function joinGroup(answers = {}) {
 
 // Function to update UI elements after joining
 function updateGroupUI(isJoined) {
-    const joinButton = document.querySelector('.join-group-button');
-    if (joinButton) {
-        if (isJoined) {
-            joinButton.textContent = 'Je bent lid';
-            joinButton.classList.add('joined');
-            joinButton.disabled = true;
-        } else {
-            joinButton.textContent = 'Aanmelden interesselijst';
-            joinButton.classList.remove('joined');
-            joinButton.disabled = false;
-        }
-    }
+    // This function is kept for backward compatibility but now uses the new membership-based logic
+    console.log('updateGroupUI called with isJoined:', isJoined);
+    
+    // Instead of manually setting button state, trigger a refresh of the membership-based state
+    initializeButtonState();
 }
 
 // Function to fetch group data and questions
@@ -319,51 +312,11 @@ async function fetchGroupData() {
 
 // Function to check membership status and update UI
 async function checkMembershipStatus() {
-    const joinButton = document.querySelector('.join-group-button');
-    if (joinButton) {
-        joinButton.disabled = true;
-        joinButton.textContent = 'Laden...';
-    }
-    try {
-        const apiToken = await window.auth.getApiToken();
-        if (!apiToken) {
-            if (joinButton) {
-                joinButton.disabled = false;
-                joinButton.textContent = 'Aanmelden interesselijst';
-            }
-            return;
-        }
-
-        // Get group ID from URL
-        const groupId = getGroupId();
-
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiToken}`
-        };
-
-        // Call the group API to get membership info
-        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${groupId}`, {
-            method: 'GET',
-            headers: headers
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            // Use is_member boolean from data.data
-            if (data.data && data.data.is_member) {
-                updateGroupUI(true);
-            } else {
-                updateGroupUI(false);
-            }
-        } else {
-            updateGroupUI(false);
-        }
-    } catch (error) {
-        console.error('Error checking membership status:', error);
-        updateGroupUI(false);
-    }
+    console.log('checkMembershipStatus called - using new membership-based logic');
+    
+    // This function is kept for backward compatibility but now uses the new membership-based logic
+    // The actual membership checking and UI updating is now handled by initializeButtonState()
+    await initializeButtonState();
 }
 
 // Function to get expected button text based on membership
