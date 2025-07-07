@@ -240,7 +240,7 @@ function updateTagsContainer(interests, targetAudiences) {
         // Show the parent cell item
         const parentCell = tagsContainer.closest('.cell__item');
         if (parentCell) {
-            parentCell.style.display = 'flex';
+            parentCell.style.display = 'grid';
         }
     } else {
         tagsContainer.style.display = 'none';
