@@ -60,7 +60,7 @@ function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
     updateElement('.project-subtitle', data.subtitle);
-    updateElement('#contentIntroduction', data.intro, true);
+    updateDataDetail('description', data.intro);
     
     // Update data-detail attributes for project characteristics
     updateDataDetail('plaats', data.location);
@@ -69,6 +69,10 @@ function updatePageElements(data) {
     updateDataDetail('huishoudens', data.number_of_homes);
     updateDataDetail('aantal-woningen', data.number_of_homes);
     updateDataDetail('woonmilieu', data.housing_forms?.map(form => form.title).join(', '));
+    updateDataDetail('member-count', data.followers_count);
+    updateDataDetail('contact-email', data.contact_email);
+    updateDataDetail('contact-name', data.contact_name);
+    updateDataDetail('project-status', data.phase?.name);
     
     // Update tags container
     updateTagsContainer(data.interests, data.target_audiences);
@@ -170,23 +174,25 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
 }
 
 function updateDataDetail(detailName, value) {
-    const element = document.querySelector(`[data-detail="${detailName}"]`);
-    if (element && value) {
-        element.textContent = value;
-        element.style.display = 'block';
-        // Show the parent cell item
-        const parentCell = element.closest('.cell__item');
-        if (parentCell) {
-            parentCell.style.display = 'flex';
+    const elements = document.querySelectorAll(`[data-detail="${detailName}"]`);
+    elements.forEach(element => {
+        if (element && value) {
+            element.textContent = value;
+            element.style.display = 'block';
+            // Show the parent cell item
+            const parentCell = element.closest('.cell__item');
+            if (parentCell) {
+                parentCell.style.display = 'flex';
+            }
+        } else if (element) {
+            element.style.display = 'none';
+            // Hide the parent cell item if no value
+            const parentCell = element.closest('.cell__item');
+            if (parentCell) {
+                parentCell.style.display = 'none';
+            }
         }
-    } else if (element) {
-        element.style.display = 'none';
-        // Hide the parent cell item if no value
-        const parentCell = element.closest('.cell__item');
-        if (parentCell) {
-            parentCell.style.display = 'none';
-        }
-    }
+    });
 }
 
 function updateTagsContainer(interests, targetAudiences) {
