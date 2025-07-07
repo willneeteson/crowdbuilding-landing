@@ -60,7 +60,7 @@ function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
     updateElement('.project-subtitle', data.subtitle);
-    updateDataDetail('description', data.intro);
+    updateDataDetail('description', data.intro, true);
     
     // Update data-detail attributes for project characteristics
     updateDataDetail('plaats', data.location);
@@ -173,16 +173,20 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
     }
 }
 
-function updateDataDetail(detailName, value) {
+function updateDataDetail(detailName, value, isHTML = false) {
     const elements = document.querySelectorAll(`[data-detail="${detailName}"]`);
     elements.forEach(element => {
         if (element && value) {
-            element.textContent = value;
+            if (isHTML) {
+                element.innerHTML = value;
+            } else {
+                element.textContent = value;
+            }
             element.style.display = 'block';
             // Show the parent cell item
             const parentCell = element.closest('.cell__item');
             if (parentCell) {
-                parentCell.style.display = 'flex';
+                parentCell.style.display = 'grid';
             }
         } else if (element) {
             element.style.display = 'none';
