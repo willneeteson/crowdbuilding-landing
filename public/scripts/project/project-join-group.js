@@ -378,6 +378,9 @@ function updateButtonState(joinButton, membership) {
     
     // Update group chat button visibility based on membership
     updateGroupChatButtonVisibility(membership);
+    
+    // Update like button visibility based on membership
+    updateLikeButtonVisibility(membership);
 }
 
 // Function to update group chat button visibility based on membership
@@ -401,6 +404,30 @@ function updateGroupChatButtonVisibility(membership) {
         groupChatButton.style.display = 'none';
         groupChatButton.style.visibility = 'hidden';
         console.log('Hiding group chat button - user is not a member or is an applicant');
+    }
+}
+
+// Function to update like button visibility based on membership
+function updateLikeButtonVisibility(membership) {
+    console.log('=== UPDATING LIKE BUTTON VISIBILITY ===');
+    console.log('Membership for like button:', membership);
+    
+    const likeButton = document.querySelector('#buttonLike');
+    
+    if (!likeButton) {
+        console.log('Like button (#buttonLike) not found');
+        return;
+    }
+    
+    // Hide button if user is a member (not just an applicant), otherwise show it
+    if (membership && membership.id && membership.role !== 'applicant') {
+        likeButton.style.display = 'none';
+        likeButton.style.visibility = 'hidden';
+        console.log('Hiding like button - user is a member');
+    } else {
+        likeButton.style.display = 'block';
+        likeButton.style.visibility = 'visible';
+        console.log('Showing like button - user is not a member or is an applicant');
     }
 }
 
@@ -431,6 +458,9 @@ function updateJoinButton(membership) {
     
     // Also update group chat button visibility directly in case join button is not found
     updateGroupChatButtonVisibility(membership);
+    
+    // Also update like button visibility directly in case join button is not found
+    updateLikeButtonVisibility(membership);
 }
 
 // Function to temporarily set button to pending state after join
@@ -547,6 +577,9 @@ async function initializeButtonState() {
         setupButtonMonitoring(null);
         // Ensure group chat button is hidden when no membership
         updateGroupChatButtonVisibility(null);
+        
+        // Ensure like button is shown when no membership
+        updateLikeButtonVisibility(null);
     }
 }
 
