@@ -169,6 +169,7 @@
 }
 
 .join-group-button {
+    width: 100%;
     background-color: var(--color-primary);
     color: white;
     padding: 12px 28px;
@@ -177,8 +178,6 @@
     font-size: 1.1em;
     cursor: pointer;
     transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
-    margin: 10px 0;
 }
 
 .join-group-button:hover:not(:disabled):not(.joined) {

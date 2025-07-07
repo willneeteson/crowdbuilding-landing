@@ -366,9 +366,178 @@ async function checkMembershipStatus() {
     }
 }
 
-// Event listener for join button
+// Function to get expected button text based on membership
+function getExpectedButtonText(membership) {
+    if (membership && membership.id) {
+        if (membership.role === 'applicant') {
+            return 'Aanmelding in behandeling';
+        } else {
+            return 'Lid van project';
+        }
+    } else {
+        return 'Aanmelden interesselijst';
+    }
+}
+
+// Function to update button state based on membership
+function updateButtonState(joinButton, membership) {
+    console.log('=== UPDATING BUTTON STATE ===');
+    console.log('Membership:', membership);
+    console.log('Button before update:', {
+        text: joinButton.textContent,
+        innerHTML: joinButton.innerHTML,
+        classes: joinButton.className
+    });
+    
+    if (membership && membership.id) {
+        if (membership.role === 'applicant') {
+            joinButton.innerHTML = 'Aanmelding in behandeling';
+            joinButton.textContent = 'Aanmelding in behandeling';
+            joinButton.classList.add('joined');
+            joinButton.style.pointerEvents = 'none';
+            joinButton.style.cursor = 'not-allowed';
+            joinButton.href = 'javascript:void(0)';
+            console.log('Set to applicant state');
+        } else {
+            joinButton.innerHTML = 'Lid van project';
+            joinButton.textContent = 'Lid van project';
+            joinButton.classList.add('joined');
+            joinButton.style.pointerEvents = 'none';
+            joinButton.style.cursor = 'not-allowed';
+            joinButton.href = 'javascript:void(0)';
+            console.log('Set to member state');
+        }
+    } else {
+        joinButton.innerHTML = 'Aanmelden interesselijst';
+        joinButton.textContent = 'Aanmelden interesselijst';
+        joinButton.classList.remove('joined');
+        joinButton.style.pointerEvents = 'auto';
+        joinButton.style.cursor = 'pointer';
+        joinButton.href = '#';
+        console.log('Set to non-member state');
+    }
+    
+    console.log('Button after update:', {
+        text: joinButton.textContent,
+        innerHTML: joinButton.innerHTML,
+        classes: joinButton.className
+    });
+}
+
+// Function to update join button with membership data
+function updateJoinButton(membership) {
+    console.log('Updating join button with membership:', membership);
+    
+    // Try multiple selectors to find the button (now handles both button and a tags)
+    let joinButton = document.querySelector('.join-group-button');
+    if (!joinButton) {
+        joinButton = document.querySelector('[data-ms-content="members"] .join-group-button');
+    }
+    if (!joinButton) {
+        joinButton = document.querySelector('.group-join-section .join-group-button');
+    }
+    if (!joinButton) {
+        joinButton = document.querySelector('a.join-group-button');
+    }
+    
+    console.log('Found join button:', joinButton);
+    if (!joinButton) {
+        console.log('No join button found, trying again in 500ms...');
+        setTimeout(() => updateJoinButton(membership), 500);
+        return;
+    }
+    
+    updateButtonState(joinButton, membership);
+}
+
+// Function to set up continuous button monitoring
+function setupButtonMonitoring(membership) {
+    console.log('Setting up continuous button monitoring for membership:', membership);
+    
+    // Set up continuous checking every 500ms
+    const intervalId = setInterval(() => {
+        const joinButton = document.querySelector('.join-group-button') || 
+                          document.querySelector('[data-ms-content="members"] .join-group-button') ||
+                          document.querySelector('.group-join-section .join-group-button') ||
+                          document.querySelector('a.join-group-button');
+        
+        if (joinButton) {
+            const expectedText = getExpectedButtonText(membership);
+            const currentText = joinButton.textContent.trim();
+            
+            if (currentText !== expectedText) {
+                console.log('Button text mismatch detected:', currentText, '->', expectedText);
+                console.log('Current button state:', {
+                    text: currentText,
+                    expected: expectedText,
+                    membership: membership
+                });
+                updateButtonState(joinButton, membership);
+            }
+        }
+    }, 500);
+    
+    // Store the interval ID so we can clear it later if needed
+    window.buttonMonitoringInterval = intervalId;
+    
+    console.log('Continuous button monitoring set up');
+}
+
+// Function to get membership data from project details
+async function getProjectMembership() {
+    try {
+        const apiToken = await window.auth.getApiToken();
+        if (!apiToken) {
+            return null;
+        }
+
+        const groupId = getGroupId();
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
+        };
+
+        const response = await fetch(`${API_BASE_URL}/api/v1/groups/${groupId}`, {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Project membership data:', data.data?.membership);
+            return data.data?.membership || null;
+        }
+    } catch (error) {
+        console.error('Error fetching project membership:', error);
+    }
+    return null;
+}
+
+// Initialize button state management
+async function initializeButtonState() {
+    console.log('=== INITIALIZING BUTTON STATE ===');
+    const membership = await getProjectMembership();
+    console.log('Membership data for button:', membership);
+    
+    if (membership) {
+        updateJoinButton(membership);
+        setupButtonMonitoring(membership);
+    } else {
+        updateJoinButton(null);
+        setupButtonMonitoring(null);
+    }
+}
+
+// Call initialization when DOM is ready
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize button state management
+    await initializeButtonState();
+    
+    // Existing membership status check (keep for backward compatibility)
     await checkMembershipStatus();
+    
+    // Rest of the existing code...
     const joinButton = document.querySelector('.join-group-button');
     if (joinButton) {
         joinButton.addEventListener('click', async (e) => {
@@ -485,6 +654,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             });
                             // Submit join request
                             await joinGroup(answers);
+                            
+                            // Update button state after successful join
+                            await initializeButtonState();
                         } catch (error) {
                             console.error('Form submission error:', error);
                             showNotification('error', error.message || 'Failed to submit form');
