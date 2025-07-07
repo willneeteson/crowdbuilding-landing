@@ -24,7 +24,7 @@ class LikeButton {
     this.unlikedHeartIcon = this.button.querySelector('.project__like-heart.unliked');
     this.likedHeartIcon = this.button.querySelector('.project__like-heart.liked');
     this.counter = document.querySelector('[data-detail="member-count"]');
-    this.buttonText = document.querySelector('#btnLikeText');
+    this.buttonText = this.button.querySelector('div');
     this.isLiked = null;
     this.canFollow = false;
     this.canUnfollow = false;
