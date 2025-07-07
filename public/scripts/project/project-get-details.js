@@ -90,6 +90,8 @@ function updatePageElements(data) {
     // Update button based on membership status
     setTimeout(() => {
         updateJoinButton(data.membership);
+        // Set up persistent button monitoring
+        setupButtonMonitoring(data.membership);
     }, 1000); // Wait 1 second for other scripts to load
     
     // Update tags container
@@ -261,13 +263,16 @@ function updateTagsContainer(interests, targetAudiences) {
 function updateJoinButton(membership) {
     console.log('Updating join button with membership:', membership);
     
-    // Try multiple selectors to find the button
+    // Try multiple selectors to find the button (now handles both button and a tags)
     let joinButton = document.querySelector('.join-group-button');
     if (!joinButton) {
         joinButton = document.querySelector('[data-ms-content="members"] .join-group-button');
     }
     if (!joinButton) {
         joinButton = document.querySelector('.group-join-section .join-group-button');
+    }
+    if (!joinButton) {
+        joinButton = document.querySelector('a.join-group-button');
     }
     
     console.log('Found join button:', joinButton);
@@ -298,5 +303,68 @@ function updateJoinButton(membership) {
         joinButton.classList.remove('joined');
         joinButton.disabled = false;
         console.log('Set button to non-member state');
+    }
+}
+
+function setupButtonMonitoring(membership) {
+    const targetNode = document.querySelector('[data-ms-content="members"]') || document.querySelector('.group-join-section');
+    if (!targetNode) return;
+    
+    // Create an observer instance
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList') {
+                const joinButton = targetNode.querySelector('.join-group-button');
+                if (joinButton) {
+                    // Check if button text doesn't match expected state
+                    const expectedText = getExpectedButtonText(membership);
+                    if (joinButton.textContent.trim() !== expectedText) {
+                        console.log('Button text changed, updating to:', expectedText);
+                        updateButtonState(joinButton, membership);
+                    }
+                }
+            }
+        });
+    });
+    
+    // Start observing
+    observer.observe(targetNode, { 
+        childList: true, 
+        subtree: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    
+    console.log('Button monitoring set up');
+}
+
+function getExpectedButtonText(membership) {
+    if (membership && membership.id) {
+        if (membership.role === 'applicant') {
+            return 'Aanmelding in behandeling';
+        } else {
+            return 'Lid van project';
+        }
+    } else {
+        return 'Aanmelden interesselijst';
+    }
+}
+
+function updateButtonState(joinButton, membership) {
+    if (membership && membership.id) {
+        if (membership.role === 'applicant') {
+            joinButton.textContent = 'Aanmelding in behandeling';
+            joinButton.classList.add('joined');
+            joinButton.style.pointerEvents = 'none';
+        } else {
+            joinButton.textContent = 'Lid van project';
+            joinButton.classList.add('joined');
+            joinButton.style.pointerEvents = 'none';
+        }
+    } else {
+        joinButton.textContent = 'Aanmelden interesselijst';
+        joinButton.classList.remove('joined');
+        joinButton.style.pointerEvents = 'auto';
     }
 }
