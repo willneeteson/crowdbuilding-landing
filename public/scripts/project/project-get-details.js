@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 window.projectData = data;
                 console.log('Project data stored:', data);
                 console.log('Description data:', data.info);
+                console.log('Membership data:', data.membership);
 
                 // Update page elements with project data
                 updatePageElements(data);
@@ -256,25 +257,31 @@ function updateTagsContainer(interests, targetAudiences) {
 }
 
 function updateJoinButton(membership) {
+    console.log('Updating join button with membership:', membership);
     const joinButton = document.querySelector('.join-group-button');
+    console.log('Found join button:', joinButton);
     if (!joinButton) return;
     
     if (membership && membership.id) {
+        console.log('User has membership, role:', membership.role);
         if (membership.role === 'applicant') {
             // User has applied but is pending
             joinButton.textContent = 'Aanmelding in behandeling';
             joinButton.classList.add('joined');
             joinButton.disabled = true;
+            console.log('Set button to applicant state');
         } else {
             // User is a full member
             joinButton.textContent = 'Lid van project';
             joinButton.classList.add('joined');
             joinButton.disabled = true;
+            console.log('Set button to member state');
         }
     } else {
         // User is not a member
         joinButton.textContent = 'Aanmelden interesselijst';
         joinButton.classList.remove('joined');
         joinButton.disabled = false;
+        console.log('Set button to non-member state');
     }
 }
