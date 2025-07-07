@@ -60,7 +60,7 @@ function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
     updateElement('.project-subtitle', data.subtitle);
-    updateDataDetail('description', data.intro, true);
+    updateDataDetail('introduction', data.intro, true);
     
     // Update data-detail attributes for project characteristics
     updateDataDetail('plaats', data.location);
