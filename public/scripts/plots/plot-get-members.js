@@ -41,7 +41,21 @@ function updateMembersElements(data) {
     if (!membersContainer) return;
 
     if (data && data.length > 0) {
-        membersContainer.innerHTML = data.map(member => `
+        // Sort members from newest to oldest
+        const sortedData = [...data].sort((a, b) => {
+            // Try different possible timestamp fields
+            const aTime = a.created_at || a.joined_at || a.member_since || a.timestamp || 0;
+            const bTime = b.created_at || b.joined_at || b.member_since || b.timestamp || 0;
+            
+            // Convert to timestamps if they're strings
+            const aTimestamp = typeof aTime === 'string' ? new Date(aTime).getTime() : aTime;
+            const bTimestamp = typeof bTime === 'string' ? new Date(bTime).getTime() : bTime;
+            
+            // Sort newest first (descending order)
+            return bTimestamp - aTimestamp;
+        });
+
+        membersContainer.innerHTML = sortedData.map(member => `
             <div class="member-card">
                 <div class="member-avatar">
                     <img src="${member.avatar_url || '/images/default-avatar.png'}" alt="${member.name}">
