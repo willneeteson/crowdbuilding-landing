@@ -86,6 +86,9 @@ function updatePageElements(data) {
         updateDataDetail('description', descriptionText, true);
     }
     
+    // Update button based on membership status
+    updateJoinButton(data.membership);
+    
     // Update tags container
     updateTagsContainer(data.interests, data.target_audiences);
 
@@ -249,5 +252,29 @@ function updateTagsContainer(interests, targetAudiences) {
         if (parentCell) {
             parentCell.style.display = 'none';
         }
+    }
+}
+
+function updateJoinButton(membership) {
+    const joinButton = document.querySelector('.join-group-button');
+    if (!joinButton) return;
+    
+    if (membership && membership.id) {
+        if (membership.role === 'applicant') {
+            // User has applied but is pending
+            joinButton.textContent = 'Aanmelding in behandeling';
+            joinButton.classList.add('joined');
+            joinButton.disabled = true;
+        } else {
+            // User is a full member
+            joinButton.textContent = 'Lid van project';
+            joinButton.classList.add('joined');
+            joinButton.disabled = true;
+        }
+    } else {
+        // User is not a member
+        joinButton.textContent = 'Aanmelden interesselijst';
+        joinButton.classList.remove('joined');
+        joinButton.disabled = false;
     }
 }
