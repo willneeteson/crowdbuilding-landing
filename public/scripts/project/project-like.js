@@ -39,10 +39,10 @@ class LikeButton {
    */
   setLoadingState(isLoading) {
     if (isLoading) {
-      this.counter.style.visibility = 'hidden';
+      if (this.counter) this.counter.style.visibility = 'hidden';
       this.button.classList.add('shimmer');
     } else {
-      this.counter.style.visibility = 'visible';
+      if (this.counter) this.counter.style.visibility = 'visible';
       this.button.classList.remove('shimmer');
     }
   }
@@ -196,7 +196,9 @@ class LikeButton {
    */
   updateUI(count) {
     // Update counter
-    this.counter.textContent = count.toString();
+    if (this.counter) {
+      this.counter.textContent = count.toString();
+    }
     
     // Update like state
     if (this.isLiked) {
