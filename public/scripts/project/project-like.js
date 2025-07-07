@@ -23,7 +23,8 @@ class LikeButton {
     
     this.unlikedHeartIcon = this.button.querySelector('.project__like-heart.unliked');
     this.likedHeartIcon = this.button.querySelector('.project__like-heart.liked');
-    this.counter = this.button.querySelector('.project__like-counter');
+    this.counter = document.querySelector('[data-detail="member-count"]');
+    this.buttonText = document.querySelector('#btnLikeText');
     this.isLiked = null;
     this.canFollow = false;
     this.canUnfollow = false;
@@ -198,6 +199,11 @@ class LikeButton {
     // Update counter
     if (this.counter) {
       this.counter.textContent = count.toString();
+    }
+    
+    // Update button text
+    if (this.buttonText) {
+      this.buttonText.textContent = this.isLiked ? 'volgt' : 'Volgen';
     }
     
     // Update like state
