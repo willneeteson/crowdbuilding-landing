@@ -425,7 +425,7 @@ function updateLikeButtonVisibility(membership) {
         likeButton.style.visibility = 'hidden';
         console.log('Hiding like button - user is a member');
     } else {
-        likeButton.style.display = 'block';
+        likeButton.style.display = 'flex';
         likeButton.style.visibility = 'visible';
         console.log('Showing like button - user is not a member or is an applicant');
     }
