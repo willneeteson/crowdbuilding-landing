@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 // Store data globally
                 window.projectData = data;
                 console.log('Project data stored:', data);
+                console.log('Description data:', data.info);
 
                 // Update page elements with project data
                 updatePageElements(data);
@@ -73,6 +74,17 @@ function updatePageElements(data) {
     updateDataDetail('contact-email', data.contact_email);
     updateDataDetail('contact-name', data.contact_name);
     updateDataDetail('project-status', data.phase?.name);
+    
+    // Update description if it exists
+    if (data.info && data.info.length > 0) {
+        const descriptionText = data.info.map(desc => `
+            <div class="description-section">
+                <h3>${desc.title}</h3>
+                <div class="description-content">${desc.text}</div>
+            </div>
+        `).join('');
+        updateDataDetail('description', descriptionText, true);
+    }
     
     // Update tags container
     updateTagsContainer(data.interests, data.target_audiences);
