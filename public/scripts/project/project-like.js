@@ -206,7 +206,7 @@ class LikeButton {
     
     // Update button text
     if (this.buttonText) {
-      this.buttonText.textContent = this.isLiked ? 'Volgt' : 'Volgen';
+      this.buttonText.textContent = this.isLiked ? 'Volgend' : 'Volgen';
     }
     
     // Update like state
