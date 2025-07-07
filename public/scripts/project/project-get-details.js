@@ -88,7 +88,9 @@ function updatePageElements(data) {
     }
     
     // Update button based on membership status
-    updateJoinButton(data.membership);
+    setTimeout(() => {
+        updateJoinButton(data.membership);
+    }, 1000); // Wait 1 second for other scripts to load
     
     // Update tags container
     updateTagsContainer(data.interests, data.target_audiences);
@@ -258,9 +260,22 @@ function updateTagsContainer(interests, targetAudiences) {
 
 function updateJoinButton(membership) {
     console.log('Updating join button with membership:', membership);
-    const joinButton = document.querySelector('.join-group-button');
+    
+    // Try multiple selectors to find the button
+    let joinButton = document.querySelector('.join-group-button');
+    if (!joinButton) {
+        joinButton = document.querySelector('[data-ms-content="members"] .join-group-button');
+    }
+    if (!joinButton) {
+        joinButton = document.querySelector('.group-join-section .join-group-button');
+    }
+    
     console.log('Found join button:', joinButton);
-    if (!joinButton) return;
+    if (!joinButton) {
+        console.log('No join button found, trying again in 500ms...');
+        setTimeout(() => updateJoinButton(membership), 500);
+        return;
+    }
     
     if (membership && membership.id) {
         console.log('User has membership, role:', membership.role);
