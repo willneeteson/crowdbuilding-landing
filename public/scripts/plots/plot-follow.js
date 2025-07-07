@@ -39,7 +39,7 @@ class LikeButton {
         .project__like-btn {
           grid-column-gap: 6px;
           grid-row-gap: 6px;
-          border: 2px solid var(--color--color-neutral-black-100);
+          border: 1px solid var(--color--color-neutral-black-100);
           color: var(--color--color-neutral-black-100);
           border-radius: 99px;
           justify-content: center;

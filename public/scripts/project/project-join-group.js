@@ -406,12 +406,18 @@ function updateJoinButton(membership) {
 // Function to temporarily set button to pending state after join
 function setButtonToPending() {
     console.log('Setting button to pending state after join...');
+    
+    // Set global flag to prevent monitoring from overriding
+    window.isJoiningGroup = true;
+    
     const joinButton = document.querySelector('.join-group-button') || 
                       document.querySelector('[data-ms-content="members"] .join-group-button') ||
                       document.querySelector('.group-join-section .join-group-button') ||
                       document.querySelector('a.join-group-button');
     
     if (joinButton) {
+        // Set pending state with data attribute to make it more persistent
+        joinButton.setAttribute('data-pending-join', 'true');
         updateButtonState(joinButton, { id: 'temp', role: 'applicant' });
     }
 }
@@ -420,14 +426,31 @@ function setButtonToPending() {
 function setupButtonMonitoring(membership) {
     console.log('Setting up continuous button monitoring for membership:', membership);
     
+    // Clear any existing monitoring
+    if (window.buttonMonitoringInterval) {
+        clearInterval(window.buttonMonitoringInterval);
+    }
+    
     // Set up continuous checking every 500ms
     const intervalId = setInterval(() => {
+        // Skip monitoring if we're in the middle of a join process
+        if (window.isJoiningGroup) {
+            console.log('Skipping button monitoring during join process');
+            return;
+        }
+        
         const joinButton = document.querySelector('.join-group-button') || 
                           document.querySelector('[data-ms-content="members"] .join-group-button') ||
                           document.querySelector('.group-join-section .join-group-button') ||
                           document.querySelector('a.join-group-button');
         
         if (joinButton) {
+            // Don't override if button is in pending join state
+            if (joinButton.getAttribute('data-pending-join') === 'true') {
+                console.log('Button is in pending join state, skipping monitoring');
+                return;
+            }
+            
             const expectedText = getExpectedButtonText(membership);
             const currentText = joinButton.textContent.trim();
             
@@ -631,6 +654,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                             
                             // Update button state after successful join
                             console.log('Updating button state after join...');
+                            
+                            // Clear the joining flag and pending state
+                            window.isJoiningGroup = false;
+                            const joinButton = document.querySelector('.join-group-button') || 
+                                              document.querySelector('[data-ms-content="members"] .join-group-button') ||
+                                              document.querySelector('.group-join-section .join-group-button') ||
+                                              document.querySelector('a.join-group-button');
+                            if (joinButton) {
+                                joinButton.removeAttribute('data-pending-join');
+                            }
+                            
                             await initializeButtonState();
                         } catch (error) {
                             console.error('Form submission error:', error);
