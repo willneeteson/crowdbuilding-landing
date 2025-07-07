@@ -344,16 +344,16 @@ function updateButtonState(joinButton, membership) {
     
     if (membership && membership.id) {
         if (membership.role === 'applicant') {
-            joinButton.innerHTML = 'Aanmelding in behandeling';
-            joinButton.textContent = 'Aanmelding in behandeling';
+            joinButton.innerHTML = 'In behandeling';
+            joinButton.textContent = 'In behandeling';
             joinButton.classList.add('joined');
             joinButton.style.pointerEvents = 'none';
             joinButton.style.cursor = 'not-allowed';
             joinButton.href = 'javascript:void(0)';
             console.log('Set to applicant state');
         } else {
-            joinButton.innerHTML = 'Lid van project';
-            joinButton.textContent = 'Lid van project';
+            joinButton.innerHTML = 'Aangemeld';
+            joinButton.textContent = 'Aangemeld';
             joinButton.classList.add('joined');
             joinButton.style.pointerEvents = 'none';
             joinButton.style.cursor = 'not-allowed';
