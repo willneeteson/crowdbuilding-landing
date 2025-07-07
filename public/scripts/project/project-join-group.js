@@ -403,6 +403,19 @@ function updateJoinButton(membership) {
     updateButtonState(joinButton, membership);
 }
 
+// Function to temporarily set button to pending state after join
+function setButtonToPending() {
+    console.log('Setting button to pending state after join...');
+    const joinButton = document.querySelector('.join-group-button') || 
+                      document.querySelector('[data-ms-content="members"] .join-group-button') ||
+                      document.querySelector('.group-join-section .join-group-button') ||
+                      document.querySelector('a.join-group-button');
+    
+    if (joinButton) {
+        updateButtonState(joinButton, { id: 'temp', role: 'applicant' });
+    }
+}
+
 // Function to set up continuous button monitoring
 function setupButtonMonitoring(membership) {
     console.log('Setting up continuous button monitoring for membership:', membership);
@@ -608,7 +621,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                             // Submit join request
                             await joinGroup(answers);
                             
+                            // Immediately set button to pending state
+                            console.log('Join request successful, setting pending state...');
+                            setButtonToPending();
+                            
+                            // Wait a moment for the API to process the join request
+                            console.log('Waiting for API to update...');
+                            await new Promise(resolve => setTimeout(resolve, 2000));
+                            
                             // Update button state after successful join
+                            console.log('Updating button state after join...');
                             await initializeButtonState();
                         } catch (error) {
                             console.error('Form submission error:', error);
