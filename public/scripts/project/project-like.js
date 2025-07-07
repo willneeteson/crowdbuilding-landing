@@ -196,9 +196,12 @@ class LikeButton {
    * @param {number} count - The new follower count
    */
   updateUI(count) {
+    // Ensure count is a number and default to 0 if undefined/null
+    const displayCount = (count || 0).toString();
+    
     // Update counter
     if (this.counter) {
-      this.counter.textContent = count.toString();
+      this.counter.textContent = displayCount;
     }
     
     // Update button text

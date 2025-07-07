@@ -375,6 +375,33 @@ function updateButtonState(joinButton, membership) {
         innerHTML: joinButton.innerHTML,
         classes: joinButton.className
     });
+    
+    // Update group chat button visibility based on membership
+    updateGroupChatButtonVisibility(membership);
+}
+
+// Function to update group chat button visibility based on membership
+function updateGroupChatButtonVisibility(membership) {
+    console.log('=== UPDATING GROUP CHAT BUTTON VISIBILITY ===');
+    console.log('Membership for group chat button:', membership);
+    
+    const groupChatButton = document.querySelector('#buttonGroupChat');
+    
+    if (!groupChatButton) {
+        console.log('Group chat button (#buttonGroupChat) not found');
+        return;
+    }
+    
+    // Show button if user is a member (not just an applicant)
+    if (membership && membership.id && membership.role !== 'applicant') {
+        groupChatButton.style.display = 'block';
+        groupChatButton.style.visibility = 'visible';
+        console.log('Showing group chat button - user is a member');
+    } else {
+        groupChatButton.style.display = 'none';
+        groupChatButton.style.visibility = 'hidden';
+        console.log('Hiding group chat button - user is not a member or is an applicant');
+    }
 }
 
 // Function to update join button with membership data
@@ -401,6 +428,9 @@ function updateJoinButton(membership) {
     }
     
     updateButtonState(joinButton, membership);
+    
+    // Also update group chat button visibility directly in case join button is not found
+    updateGroupChatButtonVisibility(membership);
 }
 
 // Function to temporarily set button to pending state after join
@@ -515,6 +545,8 @@ async function initializeButtonState() {
     } else {
         updateJoinButton(null);
         setupButtonMonitoring(null);
+        // Ensure group chat button is hidden when no membership
+        updateGroupChatButtonVisibility(null);
     }
 }
 
