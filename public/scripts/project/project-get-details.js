@@ -307,36 +307,30 @@ function updateJoinButton(membership) {
 }
 
 function setupButtonMonitoring(membership) {
-    const targetNode = document.querySelector('[data-ms-content="members"]') || document.querySelector('.group-join-section');
-    if (!targetNode) return;
+    console.log('Setting up continuous button monitoring for membership:', membership);
     
-    // Create an observer instance
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'childList') {
-                const joinButton = targetNode.querySelector('.join-group-button');
-                if (joinButton) {
-                    // Check if button text doesn't match expected state
-                    const expectedText = getExpectedButtonText(membership);
-                    if (joinButton.textContent.trim() !== expectedText) {
-                        console.log('Button text changed, updating to:', expectedText);
-                        updateButtonState(joinButton, membership);
-                    }
-                }
+    // Set up continuous checking every 500ms
+    const intervalId = setInterval(() => {
+        const joinButton = document.querySelector('.join-group-button') || 
+                          document.querySelector('[data-ms-content="members"] .join-group-button') ||
+                          document.querySelector('.group-join-section .join-group-button') ||
+                          document.querySelector('a.join-group-button');
+        
+        if (joinButton) {
+            const expectedText = getExpectedButtonText(membership);
+            const currentText = joinButton.textContent.trim();
+            
+            if (currentText !== expectedText) {
+                console.log('Button text mismatch detected:', currentText, '->', expectedText);
+                updateButtonState(joinButton, membership);
             }
-        });
-    });
+        }
+    }, 500);
     
-    // Start observing
-    observer.observe(targetNode, { 
-        childList: true, 
-        subtree: true,
-        characterData: true,
-        attributes: true,
-        attributeFilter: ['class']
-    });
+    // Store the interval ID so we can clear it later if needed
+    window.buttonMonitoringInterval = intervalId;
     
-    console.log('Button monitoring set up');
+    console.log('Continuous button monitoring set up');
 }
 
 function getExpectedButtonText(membership) {
@@ -352,19 +346,32 @@ function getExpectedButtonText(membership) {
 }
 
 function updateButtonState(joinButton, membership) {
+    console.log('Updating button state for membership:', membership);
+    
     if (membership && membership.id) {
         if (membership.role === 'applicant') {
+            joinButton.innerHTML = 'Aanmelding in behandeling';
             joinButton.textContent = 'Aanmelding in behandeling';
             joinButton.classList.add('joined');
             joinButton.style.pointerEvents = 'none';
+            joinButton.style.cursor = 'not-allowed';
+            joinButton.href = 'javascript:void(0)';
         } else {
+            joinButton.innerHTML = 'Lid van project';
             joinButton.textContent = 'Lid van project';
             joinButton.classList.add('joined');
             joinButton.style.pointerEvents = 'none';
+            joinButton.style.cursor = 'not-allowed';
+            joinButton.href = 'javascript:void(0)';
         }
     } else {
+        joinButton.innerHTML = 'Aanmelden interesselijst';
         joinButton.textContent = 'Aanmelden interesselijst';
         joinButton.classList.remove('joined');
         joinButton.style.pointerEvents = 'auto';
+        joinButton.style.cursor = 'pointer';
+        joinButton.href = '#';
     }
+    
+    console.log('Button updated to:', joinButton.textContent);
 }
