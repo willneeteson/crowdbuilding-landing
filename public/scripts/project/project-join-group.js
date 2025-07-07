@@ -323,9 +323,9 @@ async function checkMembershipStatus() {
 function getExpectedButtonText(membership) {
     if (membership && membership.id) {
         if (membership.role === 'applicant') {
-            return 'Aanmelding in behandeling';
+            return 'In behandeling';
         } else {
-            return 'Lid van project';
+            return 'Aangemeld';
         }
     } else {
         return 'Aanmelden interesselijst';
