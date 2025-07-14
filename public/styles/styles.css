@@ -565,8 +565,6 @@ button.splide__arrow.splide__arrow {
 .gobal-nav__flyout {
   display: block;
   position: absolute;
-  top: 100%;
-  left: 0;
   width: 100%;
   z-index: 999;
   opacity: 0;
