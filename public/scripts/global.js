@@ -588,17 +588,43 @@
 
             // If there's already an active flyout, smoothly transition to the new one
             if (this.state.currentFlyout) {
-                // Use a small delay to allow the transition to complete smoothly
+                // Animate the current flyout groups out
+                const currentGroups = this.state.currentFlyout.querySelectorAll('.global-nav__flyout-group');
+                currentGroups.forEach(group => {
+                    group.classList.add('fade-out');
+                });
+
+                // After fade out, switch to new flyout
                 setTimeout(() => {
                     this.state.currentFlyout.classList.remove('active');
                     target.classList.add('active');
                     this.state.currentFlyout = target;
-                }, 50); // Small delay for smoother transition
+
+                    // Animate the new flyout groups in
+                    const newGroups = target.querySelectorAll('.global-nav__flyout-group');
+                    newGroups.forEach(group => {
+                        group.classList.add('fade-in');
+                        // Remove fade-in class after animation completes
+                        setTimeout(() => {
+                            group.classList.remove('fade-in');
+                        }, 200);
+                    });
+                }, 200); // Match the CSS transition duration
             } else {
                 // No current flyout, just show the target
                 this.elements.flyouts.forEach(f => f.classList.remove('active'));
                 target.classList.add('active');
                 this.state.currentFlyout = target;
+
+                // Animate the new flyout groups in
+                const newGroups = target.querySelectorAll('.global-nav__flyout-group');
+                newGroups.forEach(group => {
+                    group.classList.add('fade-in');
+                    // Remove fade-in class after animation completes
+                    setTimeout(() => {
+                        group.classList.remove('fade-in');
+                    }, 200);
+                });
             }
             
             console.log('Flyout shown:', target);
@@ -610,7 +636,15 @@
         hideAllFlyouts() {
             console.log('hideAllFlyouts called');
             
-            this.elements.flyouts.forEach(f => f.classList.remove('active'));
+            // Remove all animation classes and active states
+            this.elements.flyouts.forEach(f => {
+                f.classList.remove('active');
+                const groups = f.querySelectorAll('.global-nav__flyout-group');
+                groups.forEach(group => {
+                    group.classList.remove('fade-out', 'fade-in');
+                });
+            });
+            
             this.state.currentFlyout = null;
             
             console.log('All flyouts hidden');
