@@ -571,6 +571,7 @@
         state: {
             currentFlyout: null,
             hideTimeout: null,
+            transitionTimeout: null,
             isTouchDevice: window.matchMedia('(pointer: coarse)').matches
         },
 
@@ -586,29 +587,48 @@
                 return;
             }
 
+            // Clear any existing timeouts
+            if (this.state.transitionTimeout) {
+                clearTimeout(this.state.transitionTimeout);
+            }
+
             // If there's already an active flyout, smoothly transition to the new one
             if (this.state.currentFlyout) {
+                // First, ensure the new flyout is prepared but hidden
+                target.classList.add('active');
+                
                 // Animate the current flyout groups out
                 const currentGroups = this.state.currentFlyout.querySelectorAll('.global-nav__flyout-group');
                 currentGroups.forEach(group => {
                     group.classList.add('fade-out');
                 });
 
-                // After fade out, switch to new flyout
-                setTimeout(() => {
+                // After fade out, switch to new flyout and animate groups in
+                this.state.transitionTimeout = setTimeout(() => {
+                    // Remove old flyout
                     this.state.currentFlyout.classList.remove('active');
-                    target.classList.add('active');
+                    currentGroups.forEach(group => {
+                        group.classList.remove('fade-out');
+                    });
+                    
+                    // Update current flyout reference
                     this.state.currentFlyout = target;
 
-                    // Animate the new flyout groups in
+                    // Ensure new groups are visible and animate them in
                     const newGroups = target.querySelectorAll('.global-nav__flyout-group');
                     newGroups.forEach(group => {
+                        // Remove any existing animation classes
+                        group.classList.remove('fade-out', 'fade-in');
+                        // Add fade-in class
                         group.classList.add('fade-in');
-                        // Remove fade-in class after animation completes
-                        setTimeout(() => {
-                            group.classList.remove('fade-in');
-                        }, 200);
                     });
+
+                    // Remove fade-in classes after animation completes
+                    setTimeout(() => {
+                        newGroups.forEach(group => {
+                            group.classList.remove('fade-in');
+                        });
+                    }, 200);
                 }, 200); // Match the CSS transition duration
             } else {
                 // No current flyout, just show the target
@@ -619,6 +639,7 @@
                 // Animate the new flyout groups in
                 const newGroups = target.querySelectorAll('.global-nav__flyout-group');
                 newGroups.forEach(group => {
+                    group.classList.remove('fade-out', 'fade-in');
                     group.classList.add('fade-in');
                     // Remove fade-in class after animation completes
                     setTimeout(() => {
@@ -635,6 +656,12 @@
          */
         hideAllFlyouts() {
             console.log('hideAllFlyouts called');
+            
+            // Clear any pending transitions
+            if (this.state.transitionTimeout) {
+                clearTimeout(this.state.transitionTimeout);
+                this.state.transitionTimeout = null;
+            }
             
             // Remove all animation classes and active states
             this.elements.flyouts.forEach(f => {
