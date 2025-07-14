@@ -556,11 +556,6 @@ button.splide__arrow.splide__arrow {
    Mega Menu Styles
    ===================== */
 
-/* Main navigation container */
-.global-nav__container {
-  position: relative;
-}
-
 /* Flyout container */
 .gobal-nav__flyout {
   display: none;
@@ -586,27 +581,6 @@ button.splide__arrow.splide__arrow {
 
 .gobal-nav__flyout:not(.active) {
   visibility: hidden;
-}
-
-/* Wrapper for consistent positioning */
-.global-nav__wrapper {
-  display: block;
-  position: relative;
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 900px) {
-  
-
-  
-  .global-nav__text.hide-mobile {
-    display: none;
-  }
-  
-  .global-nav__flyout-group.hide-mobile {
-    display: none;
-  }
 }
 
 
