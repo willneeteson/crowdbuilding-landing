@@ -477,3 +477,29 @@ button.splide__arrow.splide__arrow {
     opacity: 1 !important;
     visibility: visible !important;
 }
+
+
+
+/* megamenu */ 
+
+.gobal-nav__flyout {
+  display: block;
+  position: absolute;
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(-30px);
+  pointer-events: none;
+  transition:
+    opacity 400ms cubic-bezier(0.25, 0.8, 0.25, 1),
+    transform 400ms cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.gobal-nav__flyout.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.global-nav__wrapper {
+display: block;
+}
