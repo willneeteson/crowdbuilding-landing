@@ -556,36 +556,6 @@
         }
     };
 
-    // Initialize all functionality
-    async function init() {
-        try {
-            initAnimations();
-            AuthModal.init();
-            Tooltips.init();
-            MegaMenu.init();
-            
-            // Wait for auth module to be available before initializing notifications
-            if (typeof window.auth !== 'undefined') {
-                await Notifications.init();
-            } else {
-                // If auth module isn't loaded yet, wait for it
-                const checkAuth = setInterval(() => {
-                    if (typeof window.auth !== 'undefined') {
-                        clearInterval(checkAuth);
-                        Notifications.init();
-                    }
-                }, 100);
-            }
-        } catch (error) {
-            console.error('Error initializing global functionality:', error);
-        }
-    }
-
-    // Start the application
-    init();
-})();
-
-
     /**
      * Mega Menu Module
      * Handles navigation flyout menus for desktop and mobile
@@ -720,3 +690,32 @@
             this.handleNavButtons();
         }
     };
+
+    // Initialize all functionality
+    async function init() {
+        try {
+            initAnimations();
+            AuthModal.init();
+            Tooltips.init();
+            MegaMenu.init();
+            
+            // Wait for auth module to be available before initializing notifications
+            if (typeof window.auth !== 'undefined') {
+                await Notifications.init();
+            } else {
+                // If auth module isn't loaded yet, wait for it
+                const checkAuth = setInterval(() => {
+                    if (typeof window.auth !== 'undefined') {
+                        clearInterval(checkAuth);
+                        Notifications.init();
+                    }
+                }, 100);
+            }
+        } catch (error) {
+            console.error('Error initializing global functionality:', error);
+        }
+    }
+
+    // Start the application
+    init();
+})();
