@@ -588,11 +588,12 @@
 
             // If there's already an active flyout, smoothly transition to the new one
             if (this.state.currentFlyout) {
-                // Remove active class from current flyout
-                this.state.currentFlyout.classList.remove('active');
-                // Immediately show the new flyout without hiding all first
-                target.classList.add('active');
-                this.state.currentFlyout = target;
+                // Use a small delay to allow the transition to complete smoothly
+                setTimeout(() => {
+                    this.state.currentFlyout.classList.remove('active');
+                    target.classList.add('active');
+                    this.state.currentFlyout = target;
+                }, 50); // Small delay for smoother transition
             } else {
                 // No current flyout, just show the target
                 this.elements.flyouts.forEach(f => f.classList.remove('active'));
