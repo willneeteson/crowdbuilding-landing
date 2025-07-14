@@ -579,19 +579,30 @@
          * @param {HTMLElement} target - The flyout element to show
          */
         showFlyout(target) {
-            if (this.state.currentFlyout === target) return;
+            console.log('showFlyout called with:', target);
+            
+            if (this.state.currentFlyout === target) {
+                console.log('Flyout already active, returning');
+                return;
+            }
 
             this.elements.flyouts.forEach(f => f.classList.remove('active'));
             target.classList.add('active');
             this.state.currentFlyout = target;
+            
+            console.log('Flyout shown:', target);
         },
 
         /**
          * Hide all flyout menus
          */
         hideAllFlyouts() {
+            console.log('hideAllFlyouts called');
+            
             this.elements.flyouts.forEach(f => f.classList.remove('active'));
             this.state.currentFlyout = null;
+            
+            console.log('All flyouts hidden');
         },
 
         /**
@@ -601,6 +612,7 @@
          */
         handleTouchInteraction(link, flyout) {
             link.addEventListener('click', (e) => {
+                console.log('Touch interaction - link clicked:', link);
                 e.preventDefault();
 
                 if (this.state.currentFlyout === flyout) {
@@ -618,21 +630,25 @@
          */
         handleDesktopInteraction(link, flyout) {
             link.addEventListener('mouseenter', () => {
+                console.log('Desktop interaction - mouseenter on link:', link);
                 clearTimeout(this.state.hideTimeout);
                 this.showFlyout(flyout);
             });
 
             link.addEventListener('mouseleave', () => {
+                console.log('Desktop interaction - mouseleave on link:', link);
                 this.state.hideTimeout = setTimeout(() => {
                     this.hideAllFlyouts();
                 }, 300);
             });
 
             flyout.addEventListener('mouseenter', () => {
+                console.log('Desktop interaction - mouseenter on flyout:', flyout);
                 clearTimeout(this.state.hideTimeout);
             });
 
             flyout.addEventListener('mouseleave', () => {
+                console.log('Desktop interaction - mouseleave on flyout:', flyout);
                 this.state.hideTimeout = setTimeout(() => {
                     this.hideAllFlyouts();
                 }, 300);
@@ -663,16 +679,30 @@
          * Initialize mega menu functionality
          */
         init() {
+            console.log('Initializing MegaMenu...');
+            
             // Cache DOM elements
             this.elements.navLinks = document.querySelectorAll('[data-flyout]');
             this.elements.flyouts = document.querySelectorAll('.gobal-nav__flyout');
             this.elements.globalNav = document.querySelector('.global-nav');
             this.elements.navButtons = document.querySelectorAll('[data-nav-btn]');
 
+            console.log('Found elements:', {
+                navLinks: this.elements.navLinks.length,
+                flyouts: this.elements.flyouts.length,
+                globalNav: !!this.elements.globalNav,
+                navButtons: this.elements.navButtons.length
+            });
+
             // Set up navigation link interactions
             this.elements.navLinks.forEach(link => {
                 const flyoutId = link.dataset.flyout;
                 const flyout = document.querySelector(`.gobal-nav__flyout[data-flyout-id="${flyoutId}"]`);
+
+                console.log(`Setting up link for flyout "${flyoutId}":`, {
+                    link: link,
+                    flyout: flyout
+                });
 
                 if (!flyout) {
                     console.warn(`Flyout with ID "${flyoutId}" not found`);
@@ -688,6 +718,8 @@
 
             // Set up navigation buttons
             this.handleNavButtons();
+            
+            console.log('MegaMenu initialization complete');
         }
     };
 
