@@ -580,22 +580,73 @@
         showFlyout(target) {
             if (this.state.currentFlyout === target) return;
 
-            // Hide current flyout if exists
+            // If switching between flyouts, animate content only
             if (this.state.currentFlyout) {
-                this.state.currentFlyout.classList.remove('active');
+                this.switchFlyoutContent(target);
+            } else {
+                // First time opening - animate the container
+                this.elements.flyouts.forEach(f => f.classList.remove('active'));
+                target.classList.add('active');
+                this.state.currentFlyout = target;
             }
+        },
 
-            // Show new flyout
-            this.elements.flyouts.forEach(f => f.classList.remove('active'));
-            target.classList.add('active');
-            this.state.currentFlyout = target;
+        /**
+         * Switch between flyout contents with smooth transitions
+         */
+        switchFlyoutContent(newFlyout) {
+            const currentFlyout = this.state.currentFlyout;
+            
+            // Mark as switching to disable container animations
+            currentFlyout.classList.add('switching');
+            newFlyout.classList.add('switching');
+            
+            // Fade out current groups
+            const currentGroups = currentFlyout.querySelectorAll('.global-nav__flyout-group');
+            currentGroups.forEach(group => {
+                group.classList.add('fade-out');
+            });
+
+            // After fade out, switch flyouts
+            setTimeout(() => {
+                // Remove old flyout
+                currentFlyout.classList.remove('active', 'switching');
+                currentGroups.forEach(group => {
+                    group.classList.remove('fade-out');
+                });
+                
+                // Show new flyout
+                newFlyout.classList.add('active');
+                this.state.currentFlyout = newFlyout;
+
+                // Fade in new groups
+                const newGroups = newFlyout.querySelectorAll('.global-nav__flyout-group');
+                newGroups.forEach(group => {
+                    group.classList.remove('fade-out', 'fade-in');
+                    group.classList.add('fade-in');
+                });
+
+                // Clean up after animation
+                setTimeout(() => {
+                    newFlyout.classList.remove('switching');
+                    newGroups.forEach(group => {
+                        group.classList.remove('fade-in');
+                    });
+                }, 400);
+            }, 400);
         },
 
         /**
          * Hide all flyout menus
          */
         hideAllFlyouts() {
-            this.elements.flyouts.forEach(f => f.classList.remove('active'));
+            this.elements.flyouts.forEach(f => {
+                f.classList.remove('active', 'switching');
+                const groups = f.querySelectorAll('.global-nav__flyout-group');
+                groups.forEach(group => {
+                    group.classList.remove('fade-out', 'fade-in');
+                });
+            });
             this.state.currentFlyout = null;
         },
 
