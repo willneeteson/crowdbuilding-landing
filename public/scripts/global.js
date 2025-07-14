@@ -607,7 +607,7 @@
                 group.classList.add('fade-out');
             });
 
-            // After fade out, switch flyouts
+            // After fade out, switch flyouts (reduced delay)
             setTimeout(() => {
                 // Remove old flyout
                 currentFlyout.classList.remove('active', 'switching');
@@ -626,14 +626,14 @@
                     group.classList.add('fade-in');
                 });
 
-                // Clean up after animation
+                // Clean up after animation (reduced delay)
                 setTimeout(() => {
                     newFlyout.classList.remove('switching');
                     newGroups.forEach(group => {
                         group.classList.remove('fade-in');
                     });
-                }, 400);
-            }, 400);
+                }, 300);
+            }, 300);
         },
 
         /**
