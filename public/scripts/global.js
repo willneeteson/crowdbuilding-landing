@@ -562,6 +562,7 @@
             initAnimations();
             AuthModal.init();
             Tooltips.init();
+            MegaMenu.init();
             
             // Wait for auth module to be available before initializing notifications
             if (typeof window.auth !== 'undefined') {
@@ -583,3 +584,139 @@
     // Start the application
     init();
 })();
+
+
+    /**
+     * Mega Menu Module
+     * Handles navigation flyout menus for desktop and mobile
+     */
+    const MegaMenu = {
+        elements: {
+            navLinks: null,
+            flyouts: null,
+            globalNav: null,
+            navButtons: null
+        },
+
+        state: {
+            currentFlyout: null,
+            hideTimeout: null,
+            isTouchDevice: window.matchMedia('(pointer: coarse)').matches
+        },
+
+        /**
+         * Show a specific flyout menu
+         * @param {HTMLElement} target - The flyout element to show
+         */
+        showFlyout(target) {
+            if (this.state.currentFlyout === target) return;
+
+            this.elements.flyouts.forEach(f => f.classList.remove('active'));
+            target.classList.add('active');
+            this.state.currentFlyout = target;
+        },
+
+        /**
+         * Hide all flyout menus
+         */
+        hideAllFlyouts() {
+            this.elements.flyouts.forEach(f => f.classList.remove('active'));
+            this.state.currentFlyout = null;
+        },
+
+        /**
+         * Handle touch device interactions (mobile)
+         * @param {HTMLElement} link - The navigation link element
+         * @param {HTMLElement} flyout - The corresponding flyout element
+         */
+        handleTouchInteraction(link, flyout) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                if (this.state.currentFlyout === flyout) {
+                    this.hideAllFlyouts();
+                } else {
+                    this.showFlyout(flyout);
+                }
+            });
+        },
+
+        /**
+         * Handle desktop hover interactions
+         * @param {HTMLElement} link - The navigation link element
+         * @param {HTMLElement} flyout - The corresponding flyout element
+         */
+        handleDesktopInteraction(link, flyout) {
+            link.addEventListener('mouseenter', () => {
+                clearTimeout(this.state.hideTimeout);
+                this.showFlyout(flyout);
+            });
+
+            link.addEventListener('mouseleave', () => {
+                this.state.hideTimeout = setTimeout(() => {
+                    this.hideAllFlyouts();
+                }, 300);
+            });
+
+            flyout.addEventListener('mouseenter', () => {
+                clearTimeout(this.state.hideTimeout);
+            });
+
+            flyout.addEventListener('mouseleave', () => {
+                this.state.hideTimeout = setTimeout(() => {
+                    this.hideAllFlyouts();
+                }, 300);
+            });
+        },
+
+        /**
+         * Handle navigation button clicks (close/back)
+         */
+        handleNavButtons() {
+            this.elements.navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const action = button.dataset.navBtn;
+
+                    if (action === 'close') {
+                        this.hideAllFlyouts();
+                        this.elements.globalNav?.classList.remove('open');
+                    }
+
+                    if (action === 'back') {
+                        this.hideAllFlyouts();
+                    }
+                });
+            });
+        },
+
+        /**
+         * Initialize mega menu functionality
+         */
+        init() {
+            // Cache DOM elements
+            this.elements.navLinks = document.querySelectorAll('[data-flyout]');
+            this.elements.flyouts = document.querySelectorAll('.gobal-nav__flyout');
+            this.elements.globalNav = document.querySelector('.global-nav');
+            this.elements.navButtons = document.querySelectorAll('[data-nav-btn]');
+
+            // Set up navigation link interactions
+            this.elements.navLinks.forEach(link => {
+                const flyoutId = link.dataset.flyout;
+                const flyout = document.querySelector(`.gobal-nav__flyout[data-flyout-id="${flyoutId}"]`);
+
+                if (!flyout) {
+                    console.warn(`Flyout with ID "${flyoutId}" not found`);
+                    return;
+                }
+
+                if (this.state.isTouchDevice) {
+                    this.handleTouchInteraction(link, flyout);
+                } else {
+                    this.handleDesktopInteraction(link, flyout);
+                }
+            });
+
+            // Set up navigation buttons
+            this.handleNavButtons();
+        }
+    };
