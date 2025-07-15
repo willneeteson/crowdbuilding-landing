@@ -572,24 +572,36 @@
         state: {
             currentFlyout: null,
             hideTimeout: null,
-            isTouchDevice: window.matchMedia('(pointer: coarse)').matches
+            isTouchDevice: window.matchMedia('(pointer: coarse)').matches,
+            flyoutStack: [] // For mobile overlay stack
         },
 
         /**
          * Show a specific flyout menu
          */
         showFlyout(target) {
-            if (this.state.currentFlyout === target) return;
-            this.elements.globalNavWrapper.classList.add('active'); // <-- add this
-
-            // If switching between flyouts, animate content only
-            if (this.state.currentFlyout) {
-                this.switchFlyoutContent(target);
-            } else {
-                // First time opening - animate the container
-                this.elements.flyouts.forEach(f => f.classList.remove('active'));
+            const isMobile = window.matchMedia('(max-width: 991px)').matches;
+            if (isMobile) {
+                // On mobile, stack flyouts
+                if (this.state.flyoutStack.length > 0 && this.state.flyoutStack[this.state.flyoutStack.length - 1] === target) {
+                    return;
+                }
+                this.elements.globalNavWrapper.classList.add('active');
                 target.classList.add('active');
+                this.state.flyoutStack.push(target);
                 this.state.currentFlyout = target;
+            } else {
+                // Desktop: replace flyout
+                if (this.state.currentFlyout === target) return;
+                this.elements.globalNavWrapper.classList.add('active');
+                if (this.state.currentFlyout) {
+                    this.switchFlyoutContent(target);
+                } else {
+                    this.elements.flyouts.forEach(f => f.classList.remove('active'));
+                    target.classList.add('active');
+                    this.state.currentFlyout = target;
+                }
+                this.state.flyoutStack = [target];
             }
         },
 
@@ -639,6 +651,20 @@
         },
 
         /**
+         * Hide the topmost flyout (for back button on mobile)
+         */
+        hideTopFlyout() {
+            const isMobile = window.matchMedia('(max-width: 991px)').matches;
+            if (isMobile && this.state.flyoutStack.length > 1) {
+                const topFlyout = this.state.flyoutStack.pop();
+                if (topFlyout) topFlyout.classList.remove('active');
+                this.state.currentFlyout = this.state.flyoutStack[this.state.flyoutStack.length - 1];
+            } else {
+                this.hideAllFlyouts();
+            }
+        },
+
+        /**
          * Hide all flyout menus
          */
         hideAllFlyouts() {
@@ -650,7 +676,8 @@
                 });
             });
             this.state.currentFlyout = null;
-            this.elements.globalNavWrapper.classList.remove('active'); // <-- add this
+            this.state.flyoutStack = [];
+            this.elements.globalNavWrapper.classList.remove('active');
         },
 
         /**
@@ -700,11 +727,11 @@
             this.elements.navButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     const action = button.dataset.navBtn;
-                    if (action === 'close' || action === 'back') {
+                    if (action === 'close') {
                         this.hideAllFlyouts();
-                        if (action === 'close') {
-                            this.elements.globalNav?.classList.remove('open');
-                        }
+                        this.elements.globalNav?.classList.remove('open');
+                    } else if (action === 'back') {
+                        this.hideTopFlyout();
                     }
                 });
             });
