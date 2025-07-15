@@ -243,3 +243,8 @@ button.splide__arrow.splide__arrow {
   transform: translateY(0);
   pointer-events: auto;
 }
+
+
+.global-nav__button w-inline-block:hover .global-nav__link.heavy{
+    text-decoration: underline;
+}
