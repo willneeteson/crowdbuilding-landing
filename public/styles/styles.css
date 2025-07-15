@@ -558,9 +558,6 @@ button.splide__arrow.splide__arrow {
 
 /* Flyout container */
 .gobal-nav__flyout {
-  display: block;
-  position: absolute;
-  width: 100%;
   z-index: 999;
   opacity: 0;
   transform: translateY(-20px);
@@ -602,11 +599,6 @@ button.splide__arrow.splide__arrow {
   visibility: hidden;
 }
 
-/* The wrapper should always be visible */
-.global-nav__wrapper {
-  display: block; /* or flex, or whatever your layout needs */
-}
-
 /* Remove any unwanted background or box-shadow if you see a white ghost */
 .gobal-nav__flyout {
   background: transparent;
@@ -640,7 +632,6 @@ button.splide__arrow.splide__arrow {
   opacity: 0;
   transform: translateY(8px);
 }
-
 
 /* Hide/show utilities */
 .hide {
