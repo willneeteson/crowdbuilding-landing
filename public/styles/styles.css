@@ -587,8 +587,30 @@ button.splide__arrow.splide__arrow {
 .gobal-nav__flyout.switching {
   transition: none !important;
   transform: none !important;
-  left: 0 !important;
-  top: 100% !important;
+}
+
+/* Ensure the flyout is positioned relative to its parent */
+.gobal-nav__flyout {
+  left: 0;
+  top: 100%;
+}
+
+/* Only hide the flyout, not the wrapper */
+.gobal-nav__flyout:not(.active) {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* The wrapper should always be visible */
+.global-nav__wrapper {
+  display: block; /* or flex, or whatever your layout needs */
+}
+
+/* Remove any unwanted background or box-shadow if you see a white ghost */
+.gobal-nav__flyout {
+  background: transparent;
+  box-shadow: none;
 }
 
 /* Flyout group animations - Apple-style smooth transitions */
