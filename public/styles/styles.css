@@ -583,10 +583,12 @@ button.splide__arrow.splide__arrow {
     visibility 0ms 0ms;
 }
 
-/* When switching between groups, completely disable container animations */
+/* When switching between groups, completely disable container animations and movement */
 .gobal-nav__flyout.switching {
   transition: none !important;
-  transform: translateY(0) !important;
+  transform: none !important;
+  left: 0 !important;
+  top: 100% !important;
 }
 
 /* Flyout group animations - Apple-style smooth transitions */
