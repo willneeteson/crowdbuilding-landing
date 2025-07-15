@@ -58,6 +58,19 @@ function updateDescriptions(descriptions) {
     }
 }
 
+function hideEmptyMemberDetailsWrapper() {
+    const wrapper = document.querySelector('[data-detail-wrapper="member-details"]');
+    if (wrapper) {
+        // Check if the wrapper is empty, null, or only whitespace
+        const content = wrapper.innerHTML.trim();
+        if (!content) {
+            wrapper.style.display = 'none';
+        } else {
+            wrapper.style.display = '';
+        }
+    }
+}
+
 function updatePageElements(data) {
     // Update basic elements
     updateElement('.project-title', data.title);
@@ -117,6 +130,8 @@ function updatePageElements(data) {
                 .join('');
         }
     }
+    // Hide member-details wrapper if empty/null
+    hideEmptyMemberDetailsWrapper();
 }
 
 function updateElement(selector, value, isHTML = false) {
