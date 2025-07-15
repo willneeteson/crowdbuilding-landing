@@ -560,7 +560,7 @@ button.splide__arrow.splide__arrow {
 .gobal-nav__flyout {
   z-index: 999;
   opacity: 0;
-  transform: translateY(-20px);
+  transform: translateY(-8px); /* was -20px, reduced for less movement */
   pointer-events: none;
   visibility: hidden;
   transition:
@@ -611,7 +611,7 @@ button.splide__arrow.splide__arrow {
 
 .global-nav__flyout-group.fade-out {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(4px); /* was 8px, reduced for less movement */
   pointer-events: none;
 }
 
@@ -624,7 +624,7 @@ button.splide__arrow.splide__arrow {
 /* Ensure smooth initial load */
 .gobal-nav__flyout:not(.active) .global-nav__flyout-group {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(4px); /* was 8px, reduced for less movement */
 }
 
 /* Hide/show utilities */
