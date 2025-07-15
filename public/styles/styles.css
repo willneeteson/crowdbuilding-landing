@@ -586,12 +586,6 @@ button.splide__arrow.splide__arrow {
   transform: none !important;
 }
 
-/* Ensure the flyout is positioned relative to its parent */
-.gobal-nav__flyout {
-  left: 0;
-  top: 100%;
-}
-
 /* Only hide the flyout, not the wrapper */
 .gobal-nav__flyout:not(.active) {
   opacity: 0;
