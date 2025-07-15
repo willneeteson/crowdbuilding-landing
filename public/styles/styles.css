@@ -272,6 +272,8 @@ button.splide__arrow.splide__arrow {
     pointer-events: auto;
     visibility: visible;
     background: #fff;
+    width: 80%;
+    max-width: 400px;
   }
   .gobal-nav__flyout.switching {
     transition: none !important;
