@@ -274,6 +274,7 @@ button.splide__arrow.splide__arrow {
     background: #fff;
     width: 80%;
     max-width: 400px;
+    padding-top: 100px;
   }
   .gobal-nav__flyout.switching {
     transition: none !important;
