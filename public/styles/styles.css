@@ -244,7 +244,7 @@ button.splide__arrow.splide__arrow {
   pointer-events: auto;
 }
 
-
-.global-nav__button w-inline-block:hover .global-nav__link.heavy{
+.global-nav__button .global-nav__link.heavy {
     text-decoration: underline;
 }
+
