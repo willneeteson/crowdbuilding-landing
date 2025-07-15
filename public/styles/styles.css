@@ -254,8 +254,6 @@ button.splide__arrow.splide__arrow {
     top: 0;
     left: auto;
     right: 0;
-    width: 80vw;
-    max-width: 400px;
     height: 100vh;
     min-height: 0;
     position: fixed;
