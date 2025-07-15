@@ -370,11 +370,7 @@ function renderPosts(posts, append = false) {
 
     // Show message if there are no posts
     if (!posts || posts.length === 0) {
-        container.innerHTML = `
-            <div class="post-item empty">
-                <p>Nog geen berichten</p>
-            </div>
-        `;
+        container.innerHTML = '';
         return;
     }
 
