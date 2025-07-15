@@ -767,6 +767,40 @@
         }
     };
 
+    // Patch: Keep Webflow menu open when Mega Menu flyout is open on mobile
+    function keepWebflowMenuOpen(shouldOpen) {
+        var navMenu = document.querySelector('.w-nav-menu');
+        var navButton = document.querySelector('.w-nav-button');
+        if (!navMenu || !navButton) return;
+        if (shouldOpen) {
+            navMenu.classList.add('w--open');
+            navButton.classList.add('w--open');
+            navButton.setAttribute('aria-expanded', 'true');
+        } else {
+            navMenu.classList.remove('w--open');
+            navButton.classList.remove('w--open');
+            navButton.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    // Patch MegaMenu to keep Webflow menu open on mobile
+    const originalShowFlyout = MegaMenu.showFlyout.bind(MegaMenu);
+    MegaMenu.showFlyout = function(target) {
+        const isMobile = window.matchMedia('(max-width: 991px)').matches;
+        if (isMobile) {
+            keepWebflowMenuOpen(true);
+        }
+        return originalShowFlyout(target);
+    };
+    const originalHideAllFlyouts = MegaMenu.hideAllFlyouts.bind(MegaMenu);
+    MegaMenu.hideAllFlyouts = function() {
+        const isMobile = window.matchMedia('(max-width: 991px)').matches;
+        if (isMobile) {
+            keepWebflowMenuOpen(false);
+        }
+        return originalHideAllFlyouts();
+    };
+
     // Initialize all functionality
     async function init() {
         try {
