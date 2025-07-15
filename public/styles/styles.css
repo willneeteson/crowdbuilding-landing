@@ -641,3 +641,12 @@ button.splide__arrow.splide__arrow {
 .hidden {
   display: none !important;
 }
+
+/* Hide the mega menu wrapper by default */
+.global-nav__wrapper {
+  display: none;
+}
+/* Show the wrapper when active */
+.global-nav__wrapper.active {
+  display: block;
+}

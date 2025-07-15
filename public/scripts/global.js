@@ -565,7 +565,8 @@
             navLinks: null,
             flyouts: null,
             globalNav: null,
-            navButtons: null
+            navButtons: null,
+            globalNavWrapper: null // <-- add this
         },
 
         state: {
@@ -579,6 +580,7 @@
          */
         showFlyout(target) {
             if (this.state.currentFlyout === target) return;
+            this.elements.globalNavWrapper.classList.add('active'); // <-- add this
 
             // If switching between flyouts, animate content only
             if (this.state.currentFlyout) {
@@ -648,6 +650,7 @@
                 });
             });
             this.state.currentFlyout = null;
+            this.elements.globalNavWrapper.classList.remove('active'); // <-- add this
         },
 
         /**
@@ -716,6 +719,7 @@
             this.elements.flyouts = document.querySelectorAll('.gobal-nav__flyout');
             this.elements.globalNav = document.querySelector('.global-nav');
             this.elements.navButtons = document.querySelectorAll('[data-nav-btn]');
+            this.elements.globalNavWrapper = document.querySelector('.global-nav__wrapper'); // <-- add this
 
             // Set up navigation link interactions
             this.elements.navLinks.forEach(link => {
