@@ -265,12 +265,6 @@ class PlotDetailsManager {
 
     generateDocumentElement(doc) {
         const fileIcon = this.getFileIcon(doc.mime_type);
-        const fileDate = new Date(doc.created_at).toLocaleDateString('nl-NL', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-
         return `
             <div class="document-item">
                 <a href="${doc.original_url}" target="_blank" class="document-link">
@@ -279,10 +273,6 @@ class PlotDetailsManager {
                     </div>
                     <div class="document-info">
                         <div class="document-name">${doc.name}</div>
-                        <div class="document-meta">
-                            <span class="document-date">${fileDate}</span>
-                            <span class="document-type">${this.getFileExtension(doc.file_name)}</span>
-                        </div>
                     </div>
                 </a>
             </div>
