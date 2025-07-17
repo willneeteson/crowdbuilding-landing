@@ -206,7 +206,8 @@ function updateArrayElementAndParent(selector, array, property, parentSelector) 
 function updateDataDetail(detailName, value, isHTML = false) {
     const elements = document.querySelectorAll(`[data-detail="${detailName}"]`);
     elements.forEach(element => {
-        if (element && value) {
+        // Only hide if value is null or undefined, not 0 or '0'
+        if (element && value !== null && value !== undefined) {
             if (isHTML) {
                 element.innerHTML = value;
             } else {
