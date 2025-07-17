@@ -197,11 +197,16 @@ class LikeButton {
    */
   updateUI(count) {
     // Ensure count is a number and default to 0 if undefined/null
-    const displayCount = (count || 0).toString();
-    
+    const displayCount = (count || 0);
+    let label = '';
+    if (displayCount === 1) {
+      label = ' volger';
+    } else if (displayCount >= 2) {
+      label = ' volgers';
+    }
     // Update counter
     if (this.counter) {
-      this.counter.textContent = displayCount;
+      this.counter.textContent = displayCount.toString() + label;
     }
     
     // Update button text
